@@ -21,7 +21,7 @@ then
 else
     cd $startdir
     echo -e "\n** error: obsid $obsid does not contain ODF directory"
-    echo -e "error in script: $0\n"
+    echo -e "*** error in script: $0\n"
     exit 1
 fi
 
