@@ -30,6 +30,7 @@ cd ../
 if [[ ! -e analysis ]]
 then
     mkdir analysis
+    echo "${dir}/analysis ${dir}/odf" > analysis/obsid-list.txt
 fi
 
 cd $here

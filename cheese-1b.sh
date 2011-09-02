@@ -18,16 +18,12 @@ cd $dir
 # detection settings
 
 # defaults:
-# prefixm='1S003 2S004'        # mos eventlists
-# prefixp="'S005'"             # pn eventlists
 # elow=400                     # detection band minimum [eV]
 # ehigh=10000                  # detection band maximum [eV]
 # scale=0.5                    # source flux extraction fraction
 # rate=1.0                     # ps extraction flux threshold [1e14 cgs]
 # dist=40.0                    # minimal distance for neighbour ps
 
-prefixm="'1S003 2S004'"      # mos eventlists
-prefixp="'S005'"             # pn eventlists
 elow=400                     # detection band minimum [eV]
 ehigh=10000                  # detection band maximum [eV]
 scale=0.5                    # source flux extraction fraction
@@ -38,7 +34,7 @@ dist=40.0                    # minimal distance for neighbour ps
 ######################################################################
 # cheese using single band detection
 
-cheese prefixm=$prefixm prefixp=$prefixp \
+cheese prefixm="$MOS_EV_PREFIX_LIST" prefixp="$PN_EV_PREFIX_LIST" \
 scale=$scale \
 rate=$rate \
 dist=$dist \

@@ -1,0 +1,62 @@
+Fri Sep  2 16:46:50 2011
+
+
+Simple region:
+
+
+######################################################################
+create region:
+
+cd 0097820101/analysis
+xmmselect table=pnS005-clean.fits &
+
+select DETX DETY
+click image
+click run
+create region
+click 2D region
+copy to pn-reg.txt
+prepend &&
+e.g.:
+
+&&((DETX,DETY) IN circle(69.7556,-86.7555,600))
+
+
+
+######################################################################
+Better solution:
+cd 0097820101/analysis
+
+ds9 pnS005-clean.fits
+create region, save in wcs as .reg and as .fits
+obj.wcs.reg obj.wcs.fits
+
+write obsid-list.txt:
+
+/home/rsuhada/data1/sbox/esas/0097820101/analysis   /home/rsuhada/data1/sbox/esas/0097820101/odf
+
+run:
+
+conv-region obsidlist=obsid-list.txt targfile=object.wcs.fits
+
+- not working... need to check
+- region is not a fits file...
+
+
+######################################################################
+cd 0097820101/analysis
+
+make wcs region file:
+
+# Region file format: DS9 version 4.1
+# Filename: pnS005-obj-im.fits
+global color=green dashlist=8 3 width=1 font="helvetica 10 normal" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1
+fk5
+circle(207.22025,26.590618,30")
+
+ecoordconv imageset=pnS005-im-det.fits   x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv imageset=mos1S003-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv imageset=mos2S004-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
+
+
+!!!! check

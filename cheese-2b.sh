@@ -18,8 +18,6 @@ cd $dir
 # detection settings
 
 # defaults:
-# prefixm="'1S003 2S004'"      # mos eventlists
-# prefixp="'S005'"             # pn eventlists
 # elowlist='400 2000'        # detection bands minima [eV]
 # ehighlist='1250 7200'      # detection bands maxima [eV]
 # scale=0.5                  # source flux extraction fraction
@@ -27,10 +25,7 @@ cd $dir
 # rates=1.0                  # ps extraction soft flux threshold [1e14 cgs]
 # rateh=1.0                  # ps extraction hard flux threshold [1e14 cgs]
 # dist=40.0                  # minimal distance for neighbour ps
-# verb=4                     # sas verbosity
 
-prefixm="'1S003 2S004'"      # mos eventlists
-prefixp="'S005'"             # pn eventlists
 elowlist='400 2000'        # detection bands minima [eV]
 ehighlist='1250 7200'      # detection bands maxima [eV]
 scale=0.5                  # source flux extraction fraction
@@ -38,19 +33,22 @@ ratet=1.0                  # ps extraction total flux threshold [1e14 cgs]
 rates=1.0                  # ps extraction soft flux threshold [1e14 cgs]
 rateh=1.0                  # ps extraction hard flux threshold [1e14 cgs]
 dist=40.0                  # minimal distance for neighbour ps
-verb=4                     # sas verbosity
 
 
 ######################################################################
 # cheese using single band detection
 
-cheese prefixm=$prefixm prefixp=$prefixp \
+cheese-bands prefixm="$MOS_EV_PREFIX_LIST" prefixp="$PN_EV_PREFIX_LIST" \
+elowlist=$elowlist \
+ehighlist=$ehighlist \
 scale=$scale \
-rate=$rate \
-dist=$dist \
-elow=$elow \
-ehigh=$ehigh \
+ratet=$ratet \
+rates=$rates \
+rateh=$rateh \
+dist=$dist   \
+verb=4       \
 clobber=1
+
 
 if [[ $? -ne 0 ]]
 then

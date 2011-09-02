@@ -24,16 +24,61 @@ starttime=`date`
 
 
 ######################################################################
-# modules and options
+# options
 
 export ON_LAPTOP=0
+
+export PN_EV_PREFIX_LIST='S005'                # pn eventlists
+export M1_EV_PREFIX_LIST='1S003'               # pn eventlists
+export M2_EV_PREFIX_LIST='2S004'               # pn eventlists
+export MOS_EV_PREFIX_LIST='1S003 2S004'        # all mos eventlists
+
+export PN_SRC_REGFILE=pn-reg.txt               # source regfile in pn [detector coords]
+export M1_SRC_REGFILE=m1-reg.txt               # source regfile in mos [detector coords]
+export M2_SRC_REGFILE=m2-reg.txt               # source regfile in mos [detector coords]
+
+export ANALYSIS_ID='full'      # default: full
+export GRPMIN=100              # esas default: 100
+
+export PN_QUAD1=1                              # use this pn quadrant
+export PN_QUAD2=1                              # use this pn quadrant
+export PN_QUAD3=1                              # use this pn quadrant
+export PN_QUAD4=1                              # use this pn quadrant
+
+export M1_CCD1=1
+export M1_CCD2=1
+export M1_CCD3=1
+export M1_CCD4=1
+export M1_CCD5=0
+export M1_CCD6=1
+export M1_CCD7=1
+
+export M2_CCD1=1
+export M2_CCD2=1
+export M2_CCD3=1
+export M2_CCD4=1
+export M2_CCD5=1
+export M2_CCD6=1
+export M2_CCD7=1
+
+
+######################################################################
+# modules
 
 export PREP_ODF_DIR=0
 export MAKE_CCF_ODF=0
 export RUN_EV_CHAINS=0
 export RUN_FILTERS=0
-export CHEESE_1B=1
-export CHEESE_2B=0
+export CHEESE_1B=0
+export CHEESE_2B=0                              # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_PN=0
+export EXTRACT_SPEC_ESAS_M1=1
+export EXTRACT_SPEC_ESAS_M2=1
+export EXTRACT_BACK_ESAS_PN=1
+export EXTRACT_BACK_ESAS_M1=1
+export EXTRACT_BACK_ESAS_M2=1
+export RENAME_SPEC_PRODUCTS=0
+export GROUP_SPEC=0
 
 
 ######################################################################
@@ -43,7 +88,7 @@ export obsid=$1
 export startdir=`pwd`
 # export codedir="/Users/rsuhada/data1/lab/esas/code"
 export codedir="/home/rsuhada/data1/sbox/esas/code"
-export esas_caldb="/XMM/sas/CCF/esas"
+export esas_caldb="/home/rsuhada/data1/sbox/esas/esas_caldb"
 export workdir=${startdir}/${obsid}/analysis
 
 
@@ -205,11 +250,99 @@ then
 fi
 
 
+######################################################################
+# run spectrum/image extraction
+
+if [[ $EXTRACT_SPEC_ESAS_PN -eq 1 ]]
+then
+    ${codedir}/extract-spec-esas-pn.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run spectrum/image extraction
+
+if [[ $EXTRACT_SPEC_ESAS_M1 -eq 1 ]]
+then
+    ${codedir}/extract-spec-esas-m1.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run spectrum/image extraction
+
+if [[ $EXTRACT_SPEC_ESAS_M2 -eq 1 ]]
+then
+    ${codedir}/extract-spec-esas-m2.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run background/image extraction
+
+if [[ $EXTRACT_BACK_ESAS_PN -eq 1 ]]
+then
+    ${codedir}/extract-back-esas-pn.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run background/image extraction
+
+if [[ $EXTRACT_BACK_ESAS_M1 -eq 1 ]]
+then
+    ${codedir}/extract-back-esas-m1.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run background/image extraction
+
+if [[ $EXTRACT_BACK_ESAS_M2 -eq 1 ]]
+then
+    ${codedir}/extract-back-esas-m2.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
 
 ######################################################################
 # write finish message
 
 cd $startdir
+
+
+echo -e "\nAnalysis done. You have been using:\n"
+sasversion
+
 
 endtime=`date`
 t="$(($(date +%s)-t))"
