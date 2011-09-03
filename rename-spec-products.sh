@@ -8,6 +8,13 @@ cd $dir
 
 analysis_id=$ANALYSIS_ID
 
+# FIXME: what is passed is potentially a list - should loop through files
+
+M1_EV_PREFIX=$M1_EV_PREFIX_LIST
+M2_EV_PREFIX=$M2_EV_PREFIX_LIST
+PN_EV_PREFIX=$PN_EV_PREFIX_LIST
+
+
 mv mos${M1_EV_PREFIX}-obj.pi mos${M1_EV_PREFIX}-obj-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}.rmf mos${M1_EV_PREFIX}-${analysis_id}.rmf
 mv mos${M1_EV_PREFIX}.arf mos${M1_EV_PREFIX}-${analysis_id}.arf

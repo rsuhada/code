@@ -1,5 +1,12 @@
 #!/bin/bash
 
+###########################################################
+# XMM-Newton analysis pipeline                            #
+# pipeline based on the Snowden & Kuntz analysis method   #
+# builds the infrastructure around the runit-image script #
+###########################################################
+
+
 ######################################################################
 # help
 
@@ -33,9 +40,9 @@ export M1_EV_PREFIX_LIST='1S003'               # pn eventlists
 export M2_EV_PREFIX_LIST='2S004'               # pn eventlists
 export MOS_EV_PREFIX_LIST='1S003 2S004'        # all mos eventlists
 
-export PN_SRC_REGFILE=pn-reg.txt               # source regfile in pn [detector coords]
-export M1_SRC_REGFILE=m1-reg.txt               # source regfile in mos [detector coords]
-export M2_SRC_REGFILE=m2-reg.txt               # source regfile in mos [detector coords]
+export PN_SRC_REGFILE=reg-pn.txt               # source regfile in pn [detector coords]
+export M1_SRC_REGFILE=reg-m1.txt               # source regfile in mos [detector coords]
+export M2_SRC_REGFILE=reg-m2.txt               # source regfile in mos [detector coords]
 
 export ANALYSIS_ID='full'      # default: full
 export GRPMIN=100              # esas default: 100
@@ -72,13 +79,13 @@ export RUN_FILTERS=0
 export CHEESE_1B=0
 export CHEESE_2B=0                              # !!!! not tested yet
 export EXTRACT_SPEC_ESAS_PN=0
-export EXTRACT_SPEC_ESAS_M1=1
-export EXTRACT_SPEC_ESAS_M2=1
-export EXTRACT_BACK_ESAS_PN=1
-export EXTRACT_BACK_ESAS_M1=1
-export EXTRACT_BACK_ESAS_M2=1
-export RENAME_SPEC_PRODUCTS=0
-export GROUP_SPEC=0
+export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
+export RENAME_SPEC_PRODUCTS=0                   # !!!! not tested yet
+export GROUP_SPEC=1
 
 
 ######################################################################
@@ -86,8 +93,8 @@ export GROUP_SPEC=0
 
 export obsid=$1
 export startdir=`pwd`
-# export codedir="/Users/rsuhada/data1/lab/esas/code"
-export codedir="/home/rsuhada/data1/sbox/esas/code"
+export codedir="/Users/rsuhada/data1/lab/esas/code"
+# export codedir="/home/rsuhada/data1/sbox/esas/code"
 export esas_caldb="/home/rsuhada/data1/sbox/esas/esas_caldb"
 export workdir=${startdir}/${obsid}/analysis
 
@@ -326,6 +333,34 @@ fi
 if [[ $EXTRACT_BACK_ESAS_M2 -eq 1 ]]
 then
     ${codedir}/extract-back-esas-m2.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+######################################################################
+# run product renamig
+
+if [[ $RENAME_SPEC_PRODUCTS -eq 1 ]]
+then
+    ${codedir}/rename-spec-products.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+
+######################################################################
+# group spectra
+
+if [[ $GROUP_SPEC -eq 1 ]]
+then
+    ${codedir}/group-spec.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
