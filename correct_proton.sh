@@ -35,20 +35,49 @@ proton_scale caldb=${esas_caldb} mode=1 detector=3 maskfile=pn${PN_EV_PREFIX}-sp
 # proton uses the fitted soft proton parameters to create images of
 # the soft proton contamination in detector coordinates.
 
-# FIXME: ccd passing
-# Sun Sep  4 09:41:45 2011
+######################################################################
+# m1
 
-proton prefix=${M1_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 ccd5=1 ccd6=1 ccd7=1 elow=400 ehigh=1250 spectrumcontrol=1 pindex=0.972080 pnorm=0.131099
+ccd1=$M1_CCD1
+ccd2=$M1_CCD2
+ccd3=$M1_CCD3
+ccd4=$M1_CCD4
+ccd5=$M1_CCD5
+ccd6=$M1_CCD6
+ccd7=$M1_CCD7
 
-proton prefix=${M1_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 ccd5=1 ccd6=1 ccd7=1 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=0.972080 pnorm=0.131099
+proton prefix=${M1_EV_PREFIX} caldb=${esas_caldb} ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7 elow=400 ehigh=1250 spectrumcontrol=1 pindex=0.972080 pnorm=0.131099
 
-proton prefix=${M2_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 ccd5=1 ccd6=1 ccd7=1 elow=400 ehigh=1250 spectrumcontrol=1 pindex=0.972080 pnorm=0.128477
+proton prefix=${M1_EV_PREFIX} caldb=${esas_caldb} ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=0.972080 pnorm=0.131099
 
-proton prefix=${M2_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 ccd5=1 ccd6=1 ccd7=1 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=0.972080 pnorm=0.128477
 
-proton prefix=${PN_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 elow=400 ehigh=1250 spectrumcontrol=1 pindex=1.53003 pnorm=0.361532
+######################################################################
+# m2
 
-proton prefix=${PN_EV_PREFIX} caldb=${esas_caldb} ccd1=1 ccd2=1 ccd3=1 ccd4=1 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=1.53003 pnorm=0.361532
+ccd1=$M2_CCD1
+ccd2=$M2_CCD2
+ccd3=$M2_CCD3
+ccd4=$M2_CCD4
+ccd5=$M2_CCD5
+ccd6=$M2_CCD6
+ccd7=$M2_CCD7
+
+proton prefix=${M2_EV_PREFIX} caldb=${esas_caldb} ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7 elow=400 ehigh=1250 spectrumcontrol=1 pindex=0.972080 pnorm=0.128477
+
+proton prefix=${M2_EV_PREFIX} caldb=${esas_caldb} ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=0.972080 pnorm=0.128477
+
+
+######################################################################
+# pn
+
+quad1=$PN_QUAD1
+quad2=$PN_QUAD2
+quad3=$PN_QUAD3
+quad4=$PN_QUAD4
+
+proton prefix=${PN_EV_PREFIX} caldb=${esas_caldb} ccd1=$quad1 ccd2=$quad2 ccd3=$quad3 ccd4=$quad4 elow=400 ehigh=1250 spectrumcontrol=1 pindex=1.53003 pnorm=0.361532
+
+proton prefix=${PN_EV_PREFIX} caldb=${esas_caldb} ccd1=$quad1 ccd2=$quad2 ccd3=$quad3 ccd4=$quad4 elow=2000 ehigh=7200 spectrumcontrol=1 pindex=1.53003 pnorm=0.361532
 
 
 ######################################################################
