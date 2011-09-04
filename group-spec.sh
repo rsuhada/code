@@ -1,5 +1,5 @@
 ######################################################################
-# rename extracted products with their analysis_id
+# group extraceted spectra for fitting
 
 dir=$1
 here=`pwd`
