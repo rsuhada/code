@@ -85,7 +85,9 @@ export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
 export RENAME_SPEC_PRODUCTS=0                   # !!!! not tested yet
-export GROUP_SPEC=1
+export GROUP_SPEC=0
+export CORRECT_PROTON=0         # !!!! not tested yet
+export COMBINE_SMOOTH=0         # !!!! not tested yet
 
 
 ######################################################################
@@ -361,6 +363,34 @@ fi
 if [[ $GROUP_SPEC -eq 1 ]]
 then
     ${codedir}/group-spec.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# group spectra
+
+if [[ $CORRECT_PROTON -eq 1 ]]
+then
+    ${codedir}/correct-proton.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# combine and smooth images
+
+if [[ $COMBINE_SMOOTH -eq 1 ]]
+then
+    ${codedir}/combine-smooth.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
