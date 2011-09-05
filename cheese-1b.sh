@@ -40,7 +40,7 @@ rate=$rate \
 dist=$dist \
 elow=$elow \
 ehigh=$ehigh \
-clobber=1
+clobber=$CHEESE_CLOBBER
 
 if [[ $? -ne 0 ]]
 then

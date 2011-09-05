@@ -47,7 +47,7 @@ rates=$rates \
 rateh=$rateh \
 dist=$dist   \
 verb=4       \
-clobber=1
+clobber=$CHEESE_CLOBBER
 
 
 if [[ $? -ne 0 ]]

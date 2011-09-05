@@ -44,7 +44,10 @@ export PN_SRC_REGFILE=reg-pn.txt               # source regfile in pn [detector 
 export M1_SRC_REGFILE=reg-m1.txt               # source regfile in mos [detector coords]
 export M2_SRC_REGFILE=reg-m2.txt               # source regfile in mos [detector coords]
 
-export ANALYSIS_ID='full'      # default: full
+export CHEESE_CLOBBER=0         # re-create exposure maps during cheese? [1 - yes, 0 -no]
+
+# export ANALYSIS_ID='full'      # default: full
+export ANALYSIS_ID='core'      # default: full
 export GRPMIN=100              # esas default: 100
 
 export PN_QUAD1=1                              # use this pn quadrant
@@ -76,18 +79,34 @@ export PREP_ODF_DIR=0
 export MAKE_CCF_ODF=0
 export RUN_EV_CHAINS=0
 export RUN_FILTERS=0
+
+# MANUAL STEP: inspect light curves
+# MANUAL STEP: select eventlist prefixes
+
 export CHEESE_1B=0
 export CHEESE_2B=0                              # !!!! not tested yet
-export EXTRACT_SPEC_ESAS_PN=0
-export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
-export RENAME_SPEC_PRODUCTS=0                   # !!!! not tested yet
+
+# MANUAL STEP: select OK chips/quadrats: ds9 *soft* &
+# MANUAL STEP: inspect point source removal, might need updating: ds9 *cheese* & (see notes)
+
+export REMASK=0
+
+# MANUAL STEP: define spectroscopy region in detectro coords - set region names
+
+export EXTRACT_SPEC_ESAS_PN=1
+export EXTRACT_SPEC_ESAS_M1=1                   # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_M2=1                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_PN=1                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M1=1                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M2=1                   # !!!! not tested yet
+export RENAME_SPEC_PRODUCTS=0
 export GROUP_SPEC=0
-export CORRECT_PROTON=0         # !!!! not tested yet
-export COMBINE_SMOOTH=0         # !!!! not tested yet
+
+# MANUAL STEP: create RASS bg spectrum (see notes)
+# MANUAL STEP: spectral fitting: savexspec-${analysis_id}-pow-swcx.xcm
+
+export CORRECT_PROTON=0            # !!!! not finished/tested yet
+export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
 
 
 ######################################################################
@@ -95,8 +114,8 @@ export COMBINE_SMOOTH=0         # !!!! not tested yet
 
 export obsid=$1
 export startdir=`pwd`
-export codedir="/Users/rsuhada/data1/lab/esas/code"
-# export codedir="/home/rsuhada/data1/sbox/esas/code"
+# export codedir="/Users/rsuhada/data1/lab/esas/code"
+export codedir="/home/rsuhada/data1/sbox/esas/code"
 export esas_caldb="/home/rsuhada/data1/sbox/esas/esas_caldb"
 export workdir=${startdir}/${obsid}/analysis
 
@@ -251,6 +270,20 @@ fi
 if [[ $CHEESE_2B -eq 1 ]]
 then
     ${codedir}/cheese-2b.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# recreate cheese masks after visual inspection
+
+if [[ $REMASK -eq 1 ]]
+then
+    ${codedir}/remask.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

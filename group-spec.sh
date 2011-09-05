@@ -18,15 +18,25 @@ PN_EV_PREFIX=$PN_EV_PREFIX_LIST
 
 
 (
-echo "grppha mos${M1_EV_PREFIX}-obj-${analysis_id}.pi mos1S003-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos1S003-back-${analysis_id}.pi & chkey RESPFILE mos1S003-${analysis_id}.rmf & chkey ANCRFILE mos1S003-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha mos${M1_EV_PREFIX}-obj-${analysis_id}.pi !mos1S003-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos1S003-back-${analysis_id}.pi & chkey RESPFILE mos1S003-${analysis_id}.rmf & chkey ANCRFILE mos1S003-${analysis_id}.arf & group min $grp & exit'"
 echo
-echo "grppha mos${M2_EV_PREFIX}-obj-${analysis_id}.pi mos2S004-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos2S004-back-${analysis_id}.pi & chkey RESPFILE mos2S004-${analysis_id}.rmf & chkey ANCRFILE mos2S004-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha mos${M2_EV_PREFIX}-obj-${analysis_id}.pi !mos2S004-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos2S004-back-${analysis_id}.pi & chkey RESPFILE mos2S004-${analysis_id}.rmf & chkey ANCRFILE mos2S004-${analysis_id}.arf & group min $grp & exit'"
 echo
-echo "grppha pn${PN_EV_PREFIX}-obj-os-${analysis_id}.pi pnS005-obj-os-${analysis_id}-grp.pi 'chkey BACKFILE pnS005-back-${analysis_id}.pi & chkey RESPFILE pnS005-${analysis_id}.rmf & chkey ANCRFILE pnS005-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha pn${PN_EV_PREFIX}-obj-os-${analysis_id}.pi !pnS005-obj-os-${analysis_id}-grp.pi 'chkey BACKFILE pnS005-back-${analysis_id}.pi & chkey RESPFILE pnS005-${analysis_id}.rmf & chkey ANCRFILE pnS005-${analysis_id}.arf & group min $grp & exit'"
 ) > $grp_script
 
 chmod 744 $grp_script
-# ./$grp_script
+./$grp_script
+
+
+if [[ $? -ne 0 ]]
+then
+    echo -e "\n** error: spectrum grouping failed!"
+    echo -e "*** error in script: $0\n"
+    cd $here
+    exit 1
+fi
+
 
 
 ######################################################################

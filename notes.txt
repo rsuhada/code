@@ -54,9 +54,104 @@ global color=green dashlist=8 3 width=1 font="helvetica 10 normal" select=1 high
 fk5
 circle(207.22025,26.590618,30")
 
-ecoordconv imageset=pnS005-im-det.fits   x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv imageset=pnS005-obj-im.fits   x=207.22025 y=26.590618 coordtype=EQPOS
 ecoordconv imageset=mos1S003-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
 ecoordconv imageset=mos2S004-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
 
+~/data1/sbox/esas/0097820101/analysis> ecoordconv imageset=pnS005-obj-im.fits   x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv:- Executing (routine): ecoordconv imageset=pnS005-obj-im.fits srcexp='' x=207.22025 y=26.590618 coordtype=EQPOS withcoords=yes  -V 4
+ecoordconv:- ecoordconv (especget-1.31.2)  [xmmsas_20110223_1801-11.0.0] started:  2011-09-05T16:09:16.000
+ecoordconv:-  Region Centre:
+ Theta: Phi: 65.8815 3.53639
+ X: Y: 26421 27821
+ DETX: DETY: 67.2793 -123.994
+ RA: DEC: 207.22 26.5906
+ RAWX: RAWY: 38 189
+ CCD(s):  4 centred on CCD: 4
+
+ecoordconv:- ecoordconv (especget-1.31.2)  [xmmsas_20110223_1801-11.0.0] ended:    2011-09-05T16:09:17.000
+[4]+  Done                    ds9 mos2S004-im-det.fits pnS005-im-det.fits
+~/data1/sbox/esas/0097820101/analysis> ecoordconv imageset=mos1S003-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv:- Executing (routine): ecoordconv imageset=mos1S003-obj-im.fits srcexp='' x=207.22025 y=26.590618 coordtype=EQPOS withcoords=yes  -V 4
+ecoordconv:- ecoordconv (especget-1.31.2)  [xmmsas_20110223_1801-11.0.0] started:  2011-09-05T16:09:35.000
+ecoordconv:-  Region Centre:
+ Theta: Phi: 5.59933 4.38992
+ X: Y: 26421 27821
+ DETX: DETY: 205.322 -244.603
+ RA: DEC: 207.22 26.5906
+ RAWX: RAWY: 310 289
+ CCD(s):  1 centred on CCD: 1
+
+ecoordconv:- ecoordconv (especget-1.31.2)  [xmmsas_20110223_1801-11.0.0] ended:    2011-09-05T16:09:35.000
+~/data1/sbox/esas/0097820101/analysis> ecoordconv imageset=mos2S004-obj-im.fits x=207.22025 y=26.590618 coordtype=EQPOS
+ecoordconv:- Executing (routine): ecoordconv imageset=mos2S004-obj-im.fits srcexp='' x=207.22025 y=26.590618 coordtype=EQPOS withcoords=yes  -V 4
+ecoordconv:- ecoordconv (especget-1.31.2)  [xmmsas_20110223_1801-11.0.0] started:  2011-09-05T16:09:45.000
+ecoordconv:-  Region Centre:
+ Theta: Phi: 66.8417 5.07716
+ X: Y: 26421 27821
+ DETX: DETY: 62.5219 -16.9727
+ RA: DEC: 207.22 26.5906
+ RAWX: RAWY: 303 300
+ CCD(s):  1 centred on CCD: 1
+
+
+
+- dmmakereg in ciao might be relevant
 
 !!!! check
+
+
+######################################################################
+# point source removal
+
+
+this is how cheese calls it:
+
+region eventset=pnS005-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 40.0)&&(FLUX >= 1e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)' bkgregionset=pnS005-bkg_region-det.fits energyfraction=0.5 radiusstyle=enfrac outunit=detxy verbosity=1
+
+region eventset=pnS005-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 40.0)&&(FLUX >= 1e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)' bkgregionset=pnS005-bkg_region-sky.fits radiusstyle=contour bkgratestyle=col nosrcellipse=yes bkgfraction=0.5 outunit=xy verbosity=1
+
+make_mask inimage=pnS005-obj-im.fits inmask=pnS005-mask-im.fits outmask=pnS005-cheese.fits reglist=pnS005-bkg_region-sky.fits
+
+
+- region is undocumented
+- region has a expression - can take emlldetect output and post-select
+-> this will be clearly useful later
+
+- note the radiusstyle differes, is this significant or bug?
+
+
+
+######################################################################
+# check files:
+
+
+mv mos1S003-obj.pi mos1S003-obj-full.pi
+mv mos1S003.rmf mos1S003-full.rmf
+mv mos1S003.arf mos1S003-full.arf
+mv mos1S003-back.pi mos1S003-back-full.pi
+mv mos1S003-obj-im-sp-det.fits mos1S003-sp-full.fits
+mv mos2S004-obj.pi mos2S004-obj-full.pi
+mv mos2S004.rmf mos2S004-full.rmf
+mv mos2S004.arf mos2S004-full.arf
+mv mos2S004-back.pi mos2S004-back-full.pi
+mv mos2S004-obj-im-sp-det.fits mos2S004-sp-full.fits
+mv pnS005-obj-os.pi pnS005-obj-os-full.pi
+mv pnS005-obj.pi pnS005-obj-full.pi
+mv pnS005-obj-oot.pi pnS005-obj-oot-full.pi
+mv pnS005.rmf pnS005-full.rmf
+mv pnS005.arf pnS005-full.arf
+mv pnS005-back.pi pnS005-back-full.pi
+mv pnS005-obj-im-sp-det.fits pnS005-sp-full.fits
+
+
+######################################################################
+# rass background spectrum - CLOSED
+
+go here:
+http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xraybg/xraybg.pl
+
+1. put in source coords
+2. region annulus: inner 1 deg, outer 2 deg
+3. save spectrum as rass.pi and response as pspcc.rsp in analysis/
+
