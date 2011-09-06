@@ -1,11 +1,22 @@
 Fri Sep  2 16:46:50 2011
 
 
-Simple region:
+######################################################################
+# TODO
+
+- do the actual fitting
+- annulus support for converter
+- qdp plotter on all stages
+- finalize/test proton
+- finalize/test combine-smooth.sh
+- dedicated source detection module
+- add stuff for standard bands
+- add stuff for dcp bands (?)
+
 
 
 ######################################################################
-create region:
+# create region - manual solution - CLOSED
 
 cd 0097820101/analysis
 xmmselect table=pnS005-clean.fits &
@@ -22,28 +33,17 @@ e.g.:
 &&((DETX,DETY) IN circle(69.7556,-86.7555,600))
 
 
-
 ######################################################################
-Better solution:
-cd 0097820101/analysis
+# solution for region files - CLOSED (add annulus support)
 
-ds9 pnS005-clean.fits
-create region, save in wcs as .reg and as .fits
-obj.wcs.reg obj.wcs.fits
+- look into /code/convert-reg-wcs-to-det.sh
 
-write obsid-list.txt:
-
-/home/rsuhada/data1/sbox/esas/0097820101/analysis   /home/rsuhada/data1/sbox/esas/0097820101/odf
-
-run:
-
-conv-region obsidlist=obsid-list.txt targfile=object.wcs.fits
-
-- not working... need to check
-- region is not a fits file...
+- standard regions (circular) can be created in ds9 in wcs and
+automatically converted with: /code/convert-reg-wcs-to-det.sh
 
 
-######################################################################
+- manual handling:
+
 cd 0097820101/analysis
 
 make wcs region file:
@@ -98,14 +98,28 @@ ecoordconv:-  Region Centre:
 
 - dmmakereg in ciao might be relevant
 
-!!!! check
 
 
 ######################################################################
-# point source removal
+# point source removal - CLOSED
+
+ds9 *cheese*
+
+compare this to image - if removal is insufficient:
+fcat2reg.sh emllist.fits 10.0 ML_ID_SOURCE
+
+fv emllist.fits &
+
+find the ML_ID_SOURCE you want to keep and edit it DIST_NN so that it
+is > 40 (possibly but unlikely also edit other columns so that it
+makes the cut of the region task, see below)
+
+- save the change in the fits file
+- run the remask.sh task
+- check everything again
 
 
-this is how cheese calls it:
+this is how cheese calls region/make mask it:
 
 region eventset=pnS005-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 40.0)&&(FLUX >= 1e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)' bkgregionset=pnS005-bkg_region-det.fits energyfraction=0.5 radiusstyle=enfrac outunit=detxy verbosity=1
 
@@ -123,29 +137,6 @@ make_mask inimage=pnS005-obj-im.fits inmask=pnS005-mask-im.fits outmask=pnS005-c
 
 
 ######################################################################
-# check files:
-
-
-mv mos1S003-obj.pi mos1S003-obj-full.pi
-mv mos1S003.rmf mos1S003-full.rmf
-mv mos1S003.arf mos1S003-full.arf
-mv mos1S003-back.pi mos1S003-back-full.pi
-mv mos1S003-obj-im-sp-det.fits mos1S003-sp-full.fits
-mv mos2S004-obj.pi mos2S004-obj-full.pi
-mv mos2S004.rmf mos2S004-full.rmf
-mv mos2S004.arf mos2S004-full.arf
-mv mos2S004-back.pi mos2S004-back-full.pi
-mv mos2S004-obj-im-sp-det.fits mos2S004-sp-full.fits
-mv pnS005-obj-os.pi pnS005-obj-os-full.pi
-mv pnS005-obj.pi pnS005-obj-full.pi
-mv pnS005-obj-oot.pi pnS005-obj-oot-full.pi
-mv pnS005.rmf pnS005-full.rmf
-mv pnS005.arf pnS005-full.arf
-mv pnS005-back.pi pnS005-back-full.pi
-mv pnS005-obj-im-sp-det.fits pnS005-sp-full.fits
-
-
-######################################################################
 # rass background spectrum - CLOSED
 
 go here:
@@ -154,4 +145,5 @@ http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xraybg/xraybg.pl
 1. put in source coords
 2. region annulus: inner 1 deg, outer 2 deg
 3. save spectrum as rass.pi and response as pspcc.rsp in analysis/
+
 

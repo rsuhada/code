@@ -91,16 +91,17 @@ export CHEESE_2B=0                              # !!!! not tested yet
 
 export REMASK=0
 
-# MANUAL STEP: define spectroscopy region in detectro coords - set region names
+# MANUAL STEP: define spectroscopy region in detectro coords - set region names in the option part
+# regions (circular) can be created in ds9 in wcs and automatically converted with: /code/convert-reg-wcs-to-det.sh
 
-export EXTRACT_SPEC_ESAS_PN=1
-export EXTRACT_SPEC_ESAS_M1=1                   # !!!! not tested yet
-export EXTRACT_SPEC_ESAS_M2=1                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_PN=1                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M1=1                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M2=1                   # !!!! not tested yet
-export RENAME_SPEC_PRODUCTS=0
-export GROUP_SPEC=0
+export EXTRACT_SPEC_ESAS_PN=0
+export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
+export RENAME_SPEC_PRODUCTS=1
+export GROUP_SPEC=1
 
 # MANUAL STEP: create RASS bg spectrum (see notes)
 # MANUAL STEP: spectral fitting: savexspec-${analysis_id}-pow-swcx.xcm
