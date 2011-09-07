@@ -4,21 +4,24 @@
 # XMM-Newton analysis pipeline                            #
 # pipeline based on the Snowden & Kuntz analysis method   #
 # builds the infrastructure around the runit-image script #
+# plus a few utility scripts                              #
 ###########################################################
 
 
 ######################################################################
 # help
 
-if [[ $# -lt 1 ]]
+if [[ $# -lt 3 ]]
 then
 	echo "Runs a esas analysis"
 	echo
     echo "Parameters:"
     echo "1. obsid"
+    echo "2. config file"
+    echo "3. module list file"
     echo ""
     echo "Syntax:"
-	echo "run-esas.sh obsid"
+	echo "run-esas.sh 0097820101 0097820101.conf 0097820101.modules"
     echo
     exit 1
 fi
@@ -31,92 +34,15 @@ starttime=`date`
 
 
 ######################################################################
-# options
-
-export ON_LAPTOP=0
-
-export PN_EV_PREFIX_LIST='S005'                # pn eventlists
-export M1_EV_PREFIX_LIST='1S003'               # pn eventlists
-export M2_EV_PREFIX_LIST='2S004'               # pn eventlists
-export MOS_EV_PREFIX_LIST='1S003 2S004'        # all mos eventlists
-
-export PN_SRC_REGFILE=reg-pn.txt               # source regfile in pn [detector coords]
-export M1_SRC_REGFILE=reg-m1.txt               # source regfile in mos [detector coords]
-export M2_SRC_REGFILE=reg-m2.txt               # source regfile in mos [detector coords]
-
-export CHEESE_CLOBBER=0         # re-create exposure maps during cheese? [1 - yes, 0 -no]
-
-# export ANALYSIS_ID='full'      # default: full
-export ANALYSIS_ID='core'      # default: full
-export GRPMIN=100              # esas default: 100
-
-export PN_QUAD1=1                              # use this pn quadrant
-export PN_QUAD2=1                              # use this pn quadrant
-export PN_QUAD3=1                              # use this pn quadrant
-export PN_QUAD4=1                              # use this pn quadrant
-
-export M1_CCD1=1
-export M1_CCD2=1
-export M1_CCD3=1
-export M1_CCD4=1
-export M1_CCD5=0
-export M1_CCD6=1
-export M1_CCD7=1
-
-export M2_CCD1=1
-export M2_CCD2=1
-export M2_CCD3=1
-export M2_CCD4=1
-export M2_CCD5=1
-export M2_CCD6=1
-export M2_CCD7=1
-
-
-######################################################################
-# modules
-
-export PREP_ODF_DIR=0
-export MAKE_CCF_ODF=0
-export RUN_EV_CHAINS=0
-export RUN_FILTERS=0
-
-# MANUAL STEP: inspect light curves
-# MANUAL STEP: select eventlist prefixes
-
-export CHEESE_1B=0
-export CHEESE_2B=0                              # !!!! not tested yet
-
-# MANUAL STEP: select OK chips/quadrats: ds9 *soft* &
-# MANUAL STEP: inspect point source removal, might need updating: ds9 *cheese* & (see notes)
-
-export REMASK=0
-
-# MANUAL STEP: define spectroscopy region in detectro coords - set region names in the option part
-# regions (circular) can be created in ds9 in wcs and automatically converted with: /code/convert-reg-wcs-to-det.sh
-
-export EXTRACT_SPEC_ESAS_PN=0
-export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
-export RENAME_SPEC_PRODUCTS=1
-export GROUP_SPEC=1
-
-# MANUAL STEP: create RASS bg spectrum (see notes)
-# MANUAL STEP: spectral fitting: savexspec-${analysis_id}-pow-swcx.xcm
-
-export CORRECT_PROTON=0            # !!!! not finished/tested yet
-export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
-
-
-######################################################################
 # setup
 
 export obsid=$1
+export config_file=$2
+export module_list=$3
+
 export startdir=`pwd`
-# export codedir="/Users/rsuhada/data1/lab/esas/code"
-export codedir="/home/rsuhada/data1/sbox/esas/code"
+export codedir="/Users/rsuhada/data1/lab/esas/code"
+# export codedir="/home/rsuhada/data1/sbox/esas/code"
 export esas_caldb="/home/rsuhada/data1/sbox/esas/esas_caldb"
 export workdir=${startdir}/${obsid}/analysis
 
@@ -128,22 +54,40 @@ echo -e "\n############################################################"
 echo -e "start time :: " $starttime
 echo -e "directory :: " $startdir
 echo -e "obsid :: " $obsid
+echo -e "config :: " $config_file
+echo -e "modules :: " $module_list
 echo -e "code :: " $codedir
 echo -e "############################################################\n"
 
 
 ######################################################################
-# catch missing directory
+# catch missing inputs
 
 if [[ ! -e $obsid ]]
 then
-
     echo -e "\n** error: obsid $obsid does not exists here: "
     echo -e "*** $startdir\n"
     cd $startdir
     exit 1
-
 fi
+
+if [[ ! -e $config_file ]]
+then
+    echo -e "\n** error: config file $config_file does not exists here: "
+    echo -e "*** $startdir\n"
+    cd $startdir
+    exit 1
+fi
+source $config_file
+
+if [[ ! -e $module_list ]]
+then
+    echo -e "\n** error: module list $module_list does not exists here: "
+    echo -e "*** $startdir\n"
+    cd $startdir
+    exit 1
+fi
+source $module_list
 
 
 ######################################################################
@@ -434,6 +378,22 @@ fi
 
 
 ######################################################################
+# utilities
+
+if [[ $PIPE_TEST -eq 1 ]]
+then
+    ${codedir}/pipe-test.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+
+
+######################################################################
 # write finish message
 
 cd $startdir
@@ -448,6 +408,8 @@ t="$(($(date +%s)-t))"
 
 echo -e "\n############################################################"
 echo -e "obsid      :: " $obsid
+echo -e "config :: " $config_file
+echo -e "modules :: " $module_list
 echo -e "start time :: " $starttime
 echo -e "end time   :: " $endtime
 printf  "runtime    ::  %02dd:%02dh:%02dm:%02ds\n" "$((t/86400))" "$((t/3600%24))" "$((t/60%60))" "$((t%60))"
