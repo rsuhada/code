@@ -40,3 +40,5 @@ export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
 # utilities
 
 export PIPE_TEST=1
+export PLT_LC_HIST=1
+export PLT_DIAGNOSTICS=1

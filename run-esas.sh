@@ -390,6 +390,26 @@ then
     fi
 fi
 
+if [[ $PLT_LC_HIST -eq 1 ]]
+then
+    ${codedir}/plt-lc-hist.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+if [[ $PLT_DIAGNOSTICS -eq 1 ]]
+then
+    ${codedir}/plt-diagnostics.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
 
 
 

@@ -6,12 +6,14 @@ Fri Sep  2 16:46:50 2011
 
 - do the actual fitting
 - annulus support for converter
-- qdp plotter on all stages
 - finalize/test proton
 - finalize/test combine-smooth.sh
 - dedicated source detection module
 - add stuff for standard bands
 - add stuff for dcp bands (?)
+
+
+- DONE: qdp plotter on all stages
 
 
 
