@@ -60,6 +60,13 @@ ${codedir}/plt-lc-hist.sh .
 
 
 ######################################################################
+# write a reminder
+
+echo "REMINDER: inspect light curves"
+echo "REMINDER: select proper eventlist prefixes"
+
+
+######################################################################
 # exit
 
 cd $here

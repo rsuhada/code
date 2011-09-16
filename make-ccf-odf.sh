@@ -22,7 +22,15 @@ then
 fi
 
 echo -e "\nCCF file : "
-ls ${SAS_CCF}/ccf.cif
+ls ${SAS_CCF}
+
+if [[ $? -ne 0 ]]
+then
+    echo -e "\n** error: missing ccf: ${SAS_CCF} !"
+    echo -e "*** error in script: $0\n"
+    cd $startdir
+    exit 1
+fi
 
 
 ######################################################################

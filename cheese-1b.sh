@@ -27,8 +27,8 @@ cd $dir
 elow=400                     # detection band minimum [eV]
 ehigh=10000                  # detection band maximum [eV]
 scale=0.5                    # source flux extraction fraction
-rate=1.0                     # ps extraction flux threshold [1e14 cgs]
-dist=40.0                    # minimal distance for neighbour ps
+rate=0.5                     # ps extraction flux threshold [1e14 cgs]
+dist=15.0                    # minimal distance for neighbour ps
 
 
 ######################################################################

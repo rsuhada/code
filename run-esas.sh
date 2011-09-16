@@ -26,6 +26,7 @@ then
     exit 1
 fi
 
+
 ######################################################################
 # timing
 
@@ -34,30 +35,11 @@ starttime=`date`
 
 
 ######################################################################
-# setup
+# read in arguments
 
 export obsid=$1
 export config_file=$2
 export module_list=$3
-
-export startdir=`pwd`
-export codedir="/Users/rsuhada/data1/lab/esas/code"
-# export codedir="/home/rsuhada/data1/sbox/esas/code"
-export esas_caldb="/home/rsuhada/data1/sbox/esas/esas_caldb"
-export workdir=${startdir}/${obsid}/analysis
-
-
-######################################################################
-# write start message
-
-echo -e "\n############################################################"
-echo -e "start time :: " $starttime
-echo -e "directory :: " $startdir
-echo -e "obsid :: " $obsid
-echo -e "config :: " $config_file
-echo -e "modules :: " $module_list
-echo -e "code :: " $codedir
-echo -e "############################################################\n"
 
 
 ######################################################################
@@ -91,6 +73,65 @@ source $module_list
 
 
 ######################################################################
+# setup
+
+export startdir=`pwd`
+export workdir=${startdir}/${obsid}/analysis
+
+
+######################################################################
+# sas setup
+
+if [[ $ON_LAPTOP -eq 1 ]]
+then
+
+    export codedir="/Users/rs/data1/sw/esaspi/"
+    export esas_caldb="/Users/rs/calib/esas/"
+
+    export SAS_DIR="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
+    export SAS_PATH="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
+    export SAS_CCFPATH="/Users/rs/calib/xmm/ccf/"
+    export SAS_MEMORY_MODEL=high
+    export SAS_VERBOSITY=4
+
+    export SAS_ODF=${startdir}/${obsid}/odf
+    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
+
+else
+
+    # FIXME
+    export codedir="/Users/rs/data1/sw/esaspi/"
+    export esas_caldb="/Users/rs/calib/esas/"
+
+    # export SAS_DIR="/utils/xmmsas_11.0.1"
+    # export SAS_PATH="/utils/xmmsas_11.0.1"
+    # export SAS_CCFPATH="/xmm/ccf/public"
+    # export SAS_MEMORY_MODEL=high
+    # export SAS_VERBOSITY=4
+
+    export SAS_ODF=${startdir}/${obsid}/odf
+    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
+
+fi
+
+
+######################################################################
+# write start message
+
+echo -e "\n############################################################"
+echo -e "start time :: " $starttime
+echo -e "directory  :: " $startdir
+echo -e "obsid      :: " $obsid
+echo -e "config     :: " $config_file
+echo -e "modules    :: " $module_list
+echo -e "code       :: " $codedir
+echo -e "############################################################\n"
+
+echo -e "\nInitial SAS setup : \n"
+sasversion
+
+
+######################################################################
 # move to obsid directory
 
 cd $obsid
@@ -110,39 +151,6 @@ then
         exit 1
     fi
 fi
-
-
-######################################################################
-# sas setup
-
-if [[ $ON_LAPTOP -eq 1 ]]
-then
-
-    export SAS_DIR="/Users/rsuhada/data1/sw/sas.11.0.0/xmmsas_20110223_1803"
-    export SAS_PATH="/Users/rsuhada/data1/sw/sas.11.0.0/xmmsas_20110223_1803"
-    export SAS_CCFPATH="/xmm/ccf/"
-    export SAS_MEMORY_MODEL=high
-    export SAS_VERBOSITY=4
-
-    export SAS_ODF=${startdir}/${obsid}/odf
-    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
-
-else
-
-    # export SAS_DIR="/utils/xmmsas_11.0.1"
-    # export SAS_PATH="/utils/xmmsas_11.0.1"
-    # export SAS_CCFPATH="/xmm/ccf/public"
-    # export SAS_MEMORY_MODEL=high
-    # export SAS_VERBOSITY=4
-
-    export SAS_ODF=${startdir}/${obsid}/odf
-    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
-
-fi
-
-
-echo -e "\n Initial SAS setup : \n"
-sasversion
 
 
 ######################################################################
@@ -428,8 +436,8 @@ t="$(($(date +%s)-t))"
 
 echo -e "\n############################################################"
 echo -e "obsid      :: " $obsid
-echo -e "config :: " $config_file
-echo -e "modules :: " $module_list
+echo -e "config     :: " $config_file
+echo -e "modules    :: " $module_list
 echo -e "start time :: " $starttime
 echo -e "end time   :: " $endtime
 printf  "runtime    ::  %02dd:%02dh:%02dm:%02ds\n" "$((t/86400))" "$((t/3600%24))" "$((t/60%60))" "$((t%60))"

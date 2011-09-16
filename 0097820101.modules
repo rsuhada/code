@@ -13,7 +13,7 @@ export CHEESE_1B=0
 export CHEESE_2B=0                              # !!!! not tested yet
 
 # MANUAL STEP: select OK chips/quadrats: ds9 *soft* &
-# MANUAL STEP: inspect point source removal, might need updating: ds9 *cheese* & (see notes)
+# MANUAL STEP: inspect point source removal, might need updating: ds9 *cheese* & (see notes) - after done and change is required run REMASK
 
 export REMASK=0
 

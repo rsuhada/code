@@ -108,13 +108,20 @@ ecoordconv:-  Region Centre:
 ds9 *cheese*
 
 compare this to image - if removal is insufficient:
-fcat2reg.sh emllist.fits 10.0 ML_ID_SOURCE
+fcat2reg.sh emllist.fits 10.0 ML_ID_SRC
 
 fv emllist.fits &
 
 find the ML_ID_SOURCE you want to keep and edit it DIST_NN so that it
 is > 40 (possibly but unlikely also edit other columns so that it
 makes the cut of the region task, see below)
+columns to change:
+
+DET_ML
+FLUX
+DIST_NN
+
+cuts depending on what is in remask.sh
 
 - save the change in the fits file
 - run the remask.sh task
