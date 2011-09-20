@@ -29,9 +29,39 @@ comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0 n
 
 
 ######################################################################
+# manual ps removal solution sketch
+
+# esas defaults
+thresh1=0.05
+thresh2=5.0
+
+emask expimageset=comb-exp-im-400-1250.fits detmaskset=man-mask.fits.cheese   threshold1=$thresh1 threshold2=$thresh2 regionset=manual-cheese-template.fits
+
+image=comb-back-im-sky-400-1250.fits
+farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+mv farith.tmp.fits $image
+
+image=comb-exp-im-400-1250.fits
+farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+mv farith.tmp.fits $image
+
+image=comb-obj-im-400-1250.fits
+farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+mv farith.tmp.fits $image
+
+image=comb-prot-im-sky-400-1250.fits
+farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+mv farith.tmp.fits $image
+
+
+######################################################################
 # adapt-900 adaptively smooths the images.
 
-adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=2 elow=$ehigh ehigh=$elow withmaskcontrol=no withpartcontrol=yes withsoftcontrol=yes withswcxcontrol=0
+# adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=2 elow=$ehigh ehigh=$elow withmaskcontrol=no withpartcontrol=yes withsoftcontrol=yes withswcxcontrol=0
+
+# adapt_900 smoothingcounts=10 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=no withsoftcontrol=no withswcxcontrol=0
+
+adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0
 
 
 ######################################################################
@@ -51,7 +81,7 @@ comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0 n
 ######################################################################
 # adapt-900 adaptively smooths the images.
 
-adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=2 elow=$ehigh ehigh=$elow withmaskcontrol=no withpartcontrol=yes withsoftcontrol=yes withswcxcontrol=0
+# adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=2 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=yes withsoftcontrol=yes withswcxcontrol=0
 
 
 ######################################################################

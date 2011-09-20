@@ -420,6 +420,17 @@ then
 fi
 
 
+if [[ $RELINK_SPEC_PRODUCTS -eq 1 ]]
+then
+    ${codedir}/relink-spec-products.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
 
 ######################################################################
 # write finish message

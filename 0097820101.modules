@@ -27,7 +27,7 @@ export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
 export RENAME_SPEC_PRODUCTS=0
-export GROUP_SPEC=0
+export GROUP_SPEC=0                             # FIXME - prefixes
 
 # MANUAL STEP: create RASS bg spectrum (see notes)
 # MANUAL STEP: spectral fitting: savexspec-${analysis_id}-pow-swcx.xcm
@@ -39,6 +39,7 @@ export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
 ######################################################################
 # utilities
 
-export PIPE_TEST=1
-export PLT_LC_HIST=1
-export PLT_DIAGNOSTICS=1
+export PIPE_TEST=0
+export PLT_LC_HIST=0
+export PLT_DIAGNOSTICS=0
+export RELINK_SPEC_PRODUCTS=0

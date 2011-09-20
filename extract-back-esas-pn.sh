@@ -3,15 +3,20 @@
 #
 # Snowden & Kuntz, 2011:
 #
-# pn-spectra and pn-spectra processes the filtered event files to
-# produce background spectra for the entire energy range and selected
-# region and background images for the selected region and selected
-# band for the individual ccds.  The region selection expression is in
-# an input file and should be in detector coordinates.  If the input
-# file does not exist, reg.txt in this case, the default is to process
-# the entire FOV.  The input energies are in eV.  Change the caldb
-# directory string to whatever is appropriate.  In this step the
-# processing is to create images in two bands for the instruments.
+# mos-back and pn-back take the individual ccd or quadrant spectra and
+# images and combines them into complete spectra and images for the
+# selected region.  The resultant image is in detector coordinates.
+# mos-back creates a QDP plot file which shows the source and model
+# background spectra for the observation.  Any discrepancies at higher
+# energies probably indicate residual soft proton contamination,
+# unless there are really hard and bright sources in the field.  In
+# the case of this observation the discrepancy at high energies is
+# consistent with soft protons as a residual contamination was already
+# expected from the light curve histogram.  The QDP files have names
+# like: mos1S003-spec.qdp
+# rot-im-det-sky uses information in a previously created count image
+# in sky coordinates to rotate the detector coordinate background
+# images into images in sky coordinates.
 
 
 dir=$1
@@ -43,6 +48,11 @@ fi
 
 
 ######################################################################
+# rotate background to sky position
+
+rot-im-det-sky prefix="$prefix" mask=0 elow=$elow ehigh=$ehigh mode=1
+
+######################################################################
 # extract pn spectra - soft band
 
 prefix=$PN_EV_PREFIX_LIST
@@ -63,6 +73,12 @@ then
     cd $startdir
     exit 1
 fi
+
+
+######################################################################
+# rotate background to sky position
+
+rot-im-det-sky prefix="$prefix" mask=0 elow=$elow ehigh=$ehigh mode=1
 
 
 ######################################################################
