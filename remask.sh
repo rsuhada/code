@@ -15,7 +15,7 @@ echo "** warning: check point source removal condition - currently using esas de
 
 export prefix=$M1_EV_PREFIX_LIST
 
-region eventset=mos${prefix}-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 15.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)' bkgregionset=mos${prefix}-bkg_region-det.fits energyfraction=0.5 radiusstyle=enfrac outunit=detxy verbosity=1
+region eventset=mos${prefix}-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 15.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)&!region(manual-cheese-template.fits)' bkgregionset=mos${prefix}-bkg_region-det.fits energyfraction=0.5 radiusstyle=enfrac outunit=detxy verbosity=1
 
 region eventset=mos${prefix}-clean.fits operationstyle=global srclisttab=emllist.fits:SRCLIST expression='(DIST_NN >= 15.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)' bkgregionset=mos${prefix}-bkg_region-sky.fits radiusstyle=contour bkgratestyle=col nosrcellipse=yes bkgfraction=0.5 outunit=xy verbosity=1
 

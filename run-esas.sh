@@ -232,7 +232,7 @@ fi
 
 
 ######################################################################
-# recreate cheese masks after visual inspection
+# recreate cheese masks after visual inspection - use emllist
 
 if [[ $REMASK -eq 1 ]]
 then
@@ -243,6 +243,21 @@ then
         exit 1
     fi
 fi
+
+
+######################################################################
+# recreate cheese masks after visual inspection - additional src file
+
+if [[ $REMASK_MANUAL_MASK -eq 1 ]]
+then
+    ${codedir}/remask-manual-mask.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
 
 
 ######################################################################
@@ -423,6 +438,18 @@ fi
 if [[ $RELINK_SPEC_PRODUCTS -eq 1 ]]
 then
     ${codedir}/relink-spec-products.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+
+if [[ $QUICK_SPEC_LOCBG -eq 1 ]]
+then
+    ${codedir}/quick-spec-locbg.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
