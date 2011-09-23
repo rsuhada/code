@@ -149,7 +149,7 @@ log ${cluster}-${fitid}-err.log
  error 1.0 5
  error 1.0 7
 log none
-log ${cluster}-${fitid}-gofs.log
+log ${cluster}-${fitid}-gof.log
 goodness ${nsim} nosim
 goodness ${nsim} sim
 log none

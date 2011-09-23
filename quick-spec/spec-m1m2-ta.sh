@@ -31,18 +31,15 @@ spectrumid=${cluster}-${fitid}
 # background spectra
 grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=pn-${bgid}.pha outfile=pn-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${bgid}.rmf & chkey ANCRFILE pn-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
 grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
 
 echo -e "
-data 1:1 pn.grp.pha
-data 2:2 m1.grp.pha
-data 3:3 m2.grp.pha
+data 1:1 m1.grp.pha
+data 2:2 m2.grp.pha
 
 query yes
 abund angr
@@ -53,8 +50,6 @@ ignore 1:1 0.-0.4
 ignore 1:1 10.-**
 ignore 2:2 0.-0.4
 ignore 2:2 10.-**
-ignore 3:3 0.-0.4
-ignore 3:3 10.-**
 ignore bad
 
 model wabs(mekal)
@@ -72,18 +67,11 @@ $redshift
 =5
 =6
 =7
-=1
-=2
-=3
-=4
-=5
-=6
-=7
 freeze 1
 freeze 3
 freeze 4
 freeze 2
-untie 14 21
+untie 14
 
 # cpd /xw
 setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
@@ -123,6 +111,9 @@ fit 100000000
 fit 100000000
 fit 100000000
 thaw 7
+fit 100000000
+fit 100000000
+fit 100000000
 fit 100000000
 fit 100000000
 fit 100000000
@@ -284,4 +275,3 @@ asig=`~/data1/sw/calc/calc-src.txt ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc-src.txt ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
-

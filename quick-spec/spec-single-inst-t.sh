@@ -30,19 +30,13 @@ spectrumid=${cluster}-${fitid}
 
 # background spectra
 grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=pn-${bgid}.pha outfile=pn-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${bgid}.rmf & chkey ANCRFILE pn-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
 
 
 echo -e "
-data 1:1 pn.grp.pha
-data 2:2 m1.grp.pha
-data 3:3 m2.grp.pha
+data 1:1 ${single_inst}.grp.pha
 
 query yes
 abund angr
@@ -51,10 +45,6 @@ setp e
 
 ignore 1:1 0.-0.4
 ignore 1:1 10.-**
-ignore 2:2 0.-0.4
-ignore 2:2 10.-**
-ignore 3:3 0.-0.4
-ignore 3:3 10.-**
 ignore bad
 
 model wabs(mekal)
@@ -65,25 +55,10 @@ $gal_nh
 $redshift
 1
 0.01
-=1
-=2
-=3
-=4
-=5
-=6
-=7
-=1
-=2
-=3
-=4
-=5
-=6
-=7
 freeze 1
 freeze 3
 freeze 4
 freeze 2
-untie 14 21
 
 # cpd /xw
 setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
@@ -126,7 +101,9 @@ thaw 7
 fit 100000000
 fit 100000000
 fit 100000000
-thaw 4
+fit 100000000
+fit 100000000
+fit 100000000
 fit 100000000
 fit 100000000
 fit 100000000
@@ -246,8 +223,11 @@ normalisation_fit=`cat ${spectrumid}-session.log | grep "7    2   mekal      nor
 kt_err_d=`cat   ${spectrumid}-err.log | grep " 2 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
 kt_err_u=`cat  ${spectrumid}-err.log | grep " 2 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
 
-abundance_err_d=`cat  ${spectrumid}-err.log | grep " 4 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
-abundance_err_u=`cat ${spectrumid}-err.log | grep " 4 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
+# abundance_err_d=`cat  ${spectrumid}-err.log | grep " 4 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
+# abundance_err_u=`cat ${spectrumid}-err.log | grep " 4 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
+
+abundance_err_d=NaN
+abundance_err_u=NaN
 
 # redshift_err_d=`cat   ${spectrumid}-err.log | grep " 5 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
 # redshift_err_u=`cat  ${spectrumid}-err.log | grep " 5 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
@@ -284,4 +264,3 @@ asig=`~/data1/sw/calc/calc-src.txt ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc-src.txt ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
-

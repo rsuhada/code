@@ -85,8 +85,8 @@ export workdir=${startdir}/${obsid}/analysis
 if [[ $ON_LAPTOP -eq 1 ]]
 then
 
-    export codedir="/Users/rs/data1/sw/esaspi/"
-    export esas_caldb="/Users/rs/calib/esas/"
+    export codedir="/Users/rs/data1/sw/esaspi"
+    export esas_caldb="/Users/rs/calib/esas"
 
     export SAS_DIR="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
     export SAS_PATH="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
@@ -100,8 +100,8 @@ then
 else
 
     # FIXME
-    export codedir="/Users/rs/data1/sw/esaspi/"
-    export esas_caldb="/Users/rs/calib/esas/"
+    export codedir="/Users/rs/data1/sw/esaspi"
+    export esas_caldb="/Users/rs/calib/esas"
 
     # export SAS_DIR="/utils/xmmsas_11.0.1"
     # export SAS_PATH="/utils/xmmsas_11.0.1"
