@@ -2,10 +2,11 @@
 # preliminary script for extraction of files for spectral analysis
 # uses very standard and simple local bg approach
 # requires double cleaned eventlist and defined extraction regions
+# run it from /analysis and requires $ra and $de as input
 
 dir=$1
 here=`pwd`
-cd $dir
+cd $dir/analysis
 
 specdir=../spec
 

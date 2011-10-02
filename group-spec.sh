@@ -16,14 +16,30 @@ M1_EV_PREFIX=$M1_EV_PREFIX_LIST
 M2_EV_PREFIX=$M2_EV_PREFIX_LIST
 PN_EV_PREFIX=$PN_EV_PREFIX_LIST
 
+# verion that uses the analysis id: currently deprecated
+
+# (
+# echo "grppha mos${M1_EV_PREFIX}-obj-${analysis_id}.pi !mos${M1_EV_PREFIX}-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos${M1_EV_PREFIX}-back-${analysis_id}.pi & chkey RESPFILE mos${M1_EV_PREFIX}-${analysis_id}.rmf & chkey ANCRFILE mos${M1_EV_PREFIX}-${analysis_id}.arf & group min $grp & exit'"
+# echo
+# echo "grppha mos${M2_EV_PREFIX}-obj-${analysis_id}.pi !mos${M2_EV_PREFIX}-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos${M2_EV_PREFIX}-back-${analysis_id}.pi & chkey RESPFILE mos${M2_EV_PREFIX}-${analysis_id}.rmf & chkey ANCRFILE mos${M2_EV_PREFIX}-${analysis_id}.arf & group min $grp & exit'"
+# echo
+# echo "grppha pn${PN_EV_PREFIX}-obj-os-${analysis_id}.pi !pn${PN_EV_PREFIX}-obj-os-${analysis_id}-grp.pi 'chkey BACKFILE pn${PN_EV_PREFIX}-back-${analysis_id}.pi & chkey RESPFILE pn${PN_EV_PREFIX}-${analysis_id}.rmf & chkey ANCRFILE pn${PN_EV_PREFIX}-${analysis_id}.arf & group min $grp & exit'"
+# ) > $grp_script
+
+
+
 
 (
-echo "grppha mos${M1_EV_PREFIX}-obj-${analysis_id}.pi !mos1S003-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos1S003-back-${analysis_id}.pi & chkey RESPFILE mos1S003-${analysis_id}.rmf & chkey ANCRFILE mos1S003-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha mos${M1_EV_PREFIX}-obj.pi !mos${M1_EV_PREFIX}-obj-grp.pi 'chkey BACKFILE mos${M1_EV_PREFIX}-back.pi & chkey RESPFILE mos${M1_EV_PREFIX}.rmf & chkey ANCRFILE mos${M1_EV_PREFIX}.arf & group min $grp & exit'"
 echo
-echo "grppha mos${M2_EV_PREFIX}-obj-${analysis_id}.pi !mos2S004-obj-${analysis_id}-grp.pi 'chkey BACKFILE mos2S004-back-${analysis_id}.pi & chkey RESPFILE mos2S004-${analysis_id}.rmf & chkey ANCRFILE mos2S004-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha mos${M2_EV_PREFIX}-obj.pi !mos${M2_EV_PREFIX}-obj-grp.pi 'chkey BACKFILE mos${M2_EV_PREFIX}-back.pi & chkey RESPFILE mos${M2_EV_PREFIX}.rmf & chkey ANCRFILE mos${M2_EV_PREFIX}.arf & group min $grp & exit'"
 echo
-echo "grppha pn${PN_EV_PREFIX}-obj-os-${analysis_id}.pi !pnS005-obj-os-${analysis_id}-grp.pi 'chkey BACKFILE pnS005-back-${analysis_id}.pi & chkey RESPFILE pnS005-${analysis_id}.rmf & chkey ANCRFILE pnS005-${analysis_id}.arf & group min $grp & exit'"
+echo "grppha pn${PN_EV_PREFIX}-obj-os.pi !pn${PN_EV_PREFIX}-obj-os-grp.pi 'chkey BACKFILE pn${PN_EV_PREFIX}-back.pi & chkey RESPFILE pn${PN_EV_PREFIX}.rmf & chkey ANCRFILE pn${PN_EV_PREFIX}.arf & group min $grp & exit'"
 ) > $grp_script
+
+
+
+
 
 chmod 744 $grp_script
 ./$grp_script

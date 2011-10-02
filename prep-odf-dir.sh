@@ -33,6 +33,22 @@ then
     echo "${dir}/analysis ${dir}/odf" > analysis/obsid-list.txt
 fi
 
+
+if [[ ! -e spec ]]
+then
+    mkdir spec
+fi
+
+
+######################################################################
+# copy over the diagonal response matrices needed for spectral fitting
+
+cp ${esas_caldb}/mos1-diag.rsp.gz .
+cp ${esas_caldb}/mos2-diag.rsp.gz .
+cp ${esas_caldb}/pn-diag.rsp.gz .
+
+
+
 cd $here
 echo -e "\nodf directory prepared"
 exit 0

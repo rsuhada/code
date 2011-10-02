@@ -20,6 +20,7 @@ export REMASK=0
 # MANUAL STEP: define spectroscopy region in detectro coords - set region names in the option part
 # regions (circular) can be created in ds9 in wcs and automatically converted with: /code/convert-reg-wcs-to-det.sh
 
+export DO_EVIGWEIGHT=0
 export EXTRACT_SPEC_ESAS_PN=0
 export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
 export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet

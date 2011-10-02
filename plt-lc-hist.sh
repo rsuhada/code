@@ -14,7 +14,7 @@ fi
 ######################################################################
 # pn
 
-for i in pnS*-hist.qdp
+for i in pn*-hist.qdp
 do
 prefix=${i:2:4}
 echo $prefix
@@ -36,7 +36,7 @@ done
 ######################################################################
 # mos1
 
-for i in mos1S*-hist.qdp
+for i in mos1*-hist.qdp
 do
 prefix=${i:4:4}
 echo $prefix
@@ -58,7 +58,7 @@ done
 ######################################################################
 # m2
 
-for i in mos2S*-hist.qdp
+for i in mos2*-hist.qdp
 do
 prefix=${i:4:4}
 echo $prefix

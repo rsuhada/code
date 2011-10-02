@@ -246,6 +246,20 @@ fi
 
 
 ######################################################################
+# evigweight the eventlists
+
+if [[ $DO_EVIGWEIGHT -eq 1 ]]
+then
+    ${codedir}/do-evigweight.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
 # recreate cheese masks after visual inspection - additional src file
 
 if [[ $REMASK_MANUAL_MASK -eq 1 ]]
@@ -449,7 +463,7 @@ fi
 
 if [[ $QUICK_SPEC_LOCBG -eq 1 ]]
 then
-    ${codedir}/quick-spec-locbg.sh ${workdir}
+    ${codedir}/quick-spec-locbg.sh ${workdir} $RA $DE
     if [[ $? -ne 0 ]]
     then
         cd $startdir

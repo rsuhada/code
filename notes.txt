@@ -108,6 +108,7 @@ ecoordconv:-  Region Centre:
 ds9 *cheese*
 
 compare this to image - if removal is insufficient:
+
 fcat2reg.sh emllist.fits 10.0 ML_ID_SRC
 
 fv emllist.fits &
@@ -127,6 +128,12 @@ cuts depending on what is in remask.sh
 - run the remask.sh task
 - check everything again
 
+Further trick:
+
+ds *cheese* &
+
+create contours, 2 levels 0/1, lowest smoothness and save this way
+you'll see which of the all emldetect sources get actually masked out
 
 this is how cheese calls region/make mask it:
 
@@ -138,7 +145,7 @@ make_mask inimage=pnS005-obj-im.fits inmask=pnS005-mask-im.fits outmask=pnS005-c
 
 
 - region is undocumented
-- region has a expression - can take emlldetect output and post-select
+- region has a expression - can take emldetect output and post-select
 -> this will be clearly useful later
 
 - note the radiusstyle differes, is this significant or bug?
@@ -168,3 +175,7 @@ regions confined to the spectroscopic regions - in order not to have
 too many regions which conflicts with SAS tasks
 
 4. save the regions in wcs and phys
+
+5. manually adjust quick-spec-locbg.sh
+
+6. from /analysis run quick-spec-locbg.sh $ra $de

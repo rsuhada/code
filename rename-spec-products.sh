@@ -1,7 +1,6 @@
 ######################################################################
 # rename extracted products with their analysis_id
 
-
 dir=$1
 here=`pwd`
 cd $dir
@@ -82,6 +81,7 @@ mv pn${PN_EV_PREFIX}-4ff.pi pn${PN_EV_PREFIX}-4ff-${analysis_id}.pi
 mv pn${PN_EV_PREFIX}-4ff-oot.pi pn${PN_EV_PREFIX}-4ff-oot-${analysis_id}.pi
 mv pn${PN_EV_PREFIX}-im4-2000-7200.fits pn${PN_EV_PREFIX}-im4-2000-7200-${analysis_id}.fits
 mv pn${PN_EV_PREFIX}-im4-2000-7200-oot.fits pn${PN_EV_PREFIX}-im4-2000-7200-oot-${analysis_id}.fits
+
 mv mos${M1_EV_PREFIX}-obj-im-400-1250.fits mos${M1_EV_PREFIX}-obj-im-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-mask-im-400-1250.fits mos${M1_EV_PREFIX}-mask-im-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-exp-im-400-1250.fits mos${M1_EV_PREFIX}-exp-im-400-1250-${analysis_id}.fits
@@ -92,8 +92,10 @@ mv mos${M1_EV_PREFIX}-im1-400-1250.fits mos${M1_EV_PREFIX}-im1-400-1250-${analys
 mv mos${M1_EV_PREFIX}-im2-400-1250.fits mos${M1_EV_PREFIX}-im2-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-im3-400-1250.fits mos${M1_EV_PREFIX}-im3-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-im4-400-1250.fits mos${M1_EV_PREFIX}-im4-400-1250-${analysis_id}.fits
+mv mos${M1_EV_PREFIX}-im5-400-1250.fits mos${M1_EV_PREFIX}-im5-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-im6-400-1250.fits mos${M1_EV_PREFIX}-im6-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-im7-400-1250.fits mos${M1_EV_PREFIX}-im7-400-1250-${analysis_id}.fits
+
 mv mos${M1_EV_PREFIX}-obj-im-2000-7200.fits mos${M1_EV_PREFIX}-obj-im-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-mask-im-2000-7200.fits mos${M1_EV_PREFIX}-mask-im-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-exp-im-2000-7200.fits mos${M1_EV_PREFIX}-exp-im-2000-7200-${analysis_id}.fits
@@ -101,6 +103,7 @@ mv mos${M1_EV_PREFIX}-1ff.pi mos${M1_EV_PREFIX}-1ff-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-obj-im-2000-7200-ccd1.fits mos${M1_EV_PREFIX}-obj-im-2000-7200-ccd1-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-mask-im-2000-7200-ccd1.fits mos${M1_EV_PREFIX}-mask-im-2000-7200-ccd1-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-exp-im-2000-7200-ccd1.fits mos${M1_EV_PREFIX}-exp-im-2000-7200-ccd1-${analysis_id}.fits
+
 mv mos${M1_EV_PREFIX}-im1-2000-7200.fits mos${M1_EV_PREFIX}-im1-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-1obj.pi mos${M1_EV_PREFIX}-1obj-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-2obj.pi mos${M1_EV_PREFIX}-2obj-${analysis_id}.pi
@@ -112,18 +115,23 @@ mv mos${M1_EV_PREFIX}-im3-2000-7200.fits mos${M1_EV_PREFIX}-im3-2000-7200-${anal
 mv mos${M1_EV_PREFIX}-4obj.pi mos${M1_EV_PREFIX}-4obj-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-4ff.pi mos${M1_EV_PREFIX}-4ff-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-im4-2000-7200.fits mos${M1_EV_PREFIX}-im4-2000-7200-${analysis_id}.fits
+mv mos${M1_EV_PREFIX}-5obj.pi mos${M1_EV_PREFIX}-5obj-${analysis_id}.pi
+mv mos${M1_EV_PREFIX}-5ff.pi mos${M1_EV_PREFIX}-5ff-${analysis_id}.pi
+mv mos${M1_EV_PREFIX}-im5-5000-7200.fits mos${M1_EV_PREFIX}-im5-5000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-6obj.pi mos${M1_EV_PREFIX}-6obj-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-6ff.pi mos${M1_EV_PREFIX}-6ff-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-im6-2000-7200.fits mos${M1_EV_PREFIX}-im6-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-7obj.pi mos${M1_EV_PREFIX}-7obj-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-7ff.pi mos${M1_EV_PREFIX}-7ff-${analysis_id}.pi
 mv mos${M1_EV_PREFIX}-im7-2000-7200.fits mos${M1_EV_PREFIX}-im7-2000-7200-${analysis_id}.fits
+
 mv mos${M2_EV_PREFIX}-obj-im-400-1250.fits mos${M2_EV_PREFIX}-obj-im-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-exp-im-400-1250.fits mos${M2_EV_PREFIX}-exp-im-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-mask-im-400-1250.fits mos${M2_EV_PREFIX}-mask-im-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-obj-im-400-1250-ccd1.fits mos${M2_EV_PREFIX}-obj-im-400-1250-ccd1-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-mask-im-400-1250-ccd1.fits mos${M2_EV_PREFIX}-mask-im-400-1250-ccd1-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-exp-im-400-1250-ccd1.fits mos${M2_EV_PREFIX}-exp-im-400-1250-ccd1-${analysis_id}.fits
+
 mv mos${M2_EV_PREFIX}-im1-400-1250.fits mos${M2_EV_PREFIX}-im1-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-im2-400-1250.fits mos${M2_EV_PREFIX}-im2-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-im3-400-1250.fits mos${M2_EV_PREFIX}-im3-400-1250-${analysis_id}.fits
@@ -131,6 +139,7 @@ mv mos${M2_EV_PREFIX}-im4-400-1250.fits mos${M2_EV_PREFIX}-im4-400-1250-${analys
 mv mos${M2_EV_PREFIX}-im5-400-1250.fits mos${M2_EV_PREFIX}-im5-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-im6-400-1250.fits mos${M2_EV_PREFIX}-im6-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-im7-400-1250.fits mos${M2_EV_PREFIX}-im7-400-1250-${analysis_id}.fits
+
 mv mos${M2_EV_PREFIX}-obj-im-2000-7200.fits mos${M2_EV_PREFIX}-obj-im-2000-7200-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-mask-im-2000-7200.fits mos${M2_EV_PREFIX}-mask-im-2000-7200-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-exp-im-2000-7200.fits mos${M2_EV_PREFIX}-exp-im-2000-7200-${analysis_id}.fits
@@ -138,6 +147,7 @@ mv mos${M2_EV_PREFIX}-1ff.pi mos${M2_EV_PREFIX}-1ff-${analysis_id}.pi
 mv mos${M2_EV_PREFIX}-obj-im-2000-7200-ccd1.fits mos${M2_EV_PREFIX}-obj-im-2000-7200-ccd1-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-mask-im-2000-7200-ccd1.fits mos${M2_EV_PREFIX}-mask-im-2000-7200-ccd1-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-exp-im-2000-7200-ccd1.fits mos${M2_EV_PREFIX}-exp-im-2000-7200-ccd1-${analysis_id}.fits
+
 mv mos${M2_EV_PREFIX}-im1-2000-7200.fits mos${M2_EV_PREFIX}-im1-2000-7200-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-1obj.pi mos${M2_EV_PREFIX}-1obj-${analysis_id}.pi
 mv mos${M2_EV_PREFIX}-2obj.pi mos${M2_EV_PREFIX}-2obj-${analysis_id}.pi
@@ -158,7 +168,9 @@ mv mos${M2_EV_PREFIX}-im6-2000-7200.fits mos${M2_EV_PREFIX}-im6-2000-7200-${anal
 mv mos${M2_EV_PREFIX}-7obj.pi mos${M2_EV_PREFIX}-7obj-${analysis_id}.pi
 mv mos${M2_EV_PREFIX}-7ff.pi mos${M2_EV_PREFIX}-7ff-${analysis_id}.pi
 mv mos${M2_EV_PREFIX}-im7-2000-7200.fits mos${M2_EV_PREFIX}-im7-2000-7200-${analysis_id}.fits
+
 mv filtered.fits filtered-${analysis_id}.fits
+
 mv pn${PN_EV_PREFIX}-back-im-det-400-1250.fits pn${PN_EV_PREFIX}-back-im-det-400-1250-${analysis_id}.fits
 mv pn${PN_EV_PREFIX}-spec.qdp pn${PN_EV_PREFIX}-spec-${analysis_id}.qdp
 mv pn${PN_EV_PREFIX}-back-im-det-2000-7200.fits pn${PN_EV_PREFIX}-back-im-det-2000-7200-${analysis_id}.fits
@@ -166,12 +178,14 @@ mv pn${PN_EV_PREFIX}-aug-spec.qdp pn${PN_EV_PREFIX}-aug-spec-${analysis_id}.qdp
 mv pn${PN_EV_PREFIX}-aug-rev-rate.qdp pn${PN_EV_PREFIX}-aug-rev-rate-${analysis_id}.qdp
 mv pn${PN_EV_PREFIX}-aug-rev-hard.qdp pn${PN_EV_PREFIX}-aug-rev-hard-${analysis_id}.qdp
 mv pn${PN_EV_PREFIX}-aug.qdp pn${PN_EV_PREFIX}-aug-${analysis_id}.qdp
+
 mv mos${M1_EV_PREFIX}-back-im-sky-400-1250.fits mos${M1_EV_PREFIX}-back-im-sky-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-back-im-det-400-1250.fits mos${M1_EV_PREFIX}-back-im-det-400-1250-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-spec.qdp mos${M1_EV_PREFIX}-spec-${analysis_id}.qdp
 mv mos${M1_EV_PREFIX}-back-im-sky-2000-7200.fits mos${M1_EV_PREFIX}-back-im-sky-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-back-im-det-2000-7200.fits mos${M1_EV_PREFIX}-back-im-det-2000-7200-${analysis_id}.fits
 mv mos${M1_EV_PREFIX}-aug.qdp mos${M1_EV_PREFIX}-aug-${analysis_id}.qdp
+
 mv mos${M2_EV_PREFIX}-back-im-det-400-1250.fits mos${M2_EV_PREFIX}-back-im-det-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-back-im-sky-400-1250.fits mos${M2_EV_PREFIX}-back-im-sky-400-1250-${analysis_id}.fits
 mv mos${M2_EV_PREFIX}-spec.qdp mos${M2_EV_PREFIX}-spec-${analysis_id}.qdp
@@ -181,13 +195,17 @@ mv mos${M2_EV_PREFIX}-aug.qdp mos${M2_EV_PREFIX}-aug-${analysis_id}.qdp
 mv command.csh command-${analysis_id}.csh
 
 
-
 ######################################################################
-# copy over the diagonal response matrices needed for spectral fitting
+# preliminary outputs from combination and smoothing
 
-cp ${esas_caldb}/mos1-diag.rsp.gz .
-cp ${esas_caldb}/mos2-diag.rsp.gz .
-cp ${esas_caldb}/pn-diag.rsp.gz .
+mv comb-obj-im-400-1250.fits         comb-obj-im-400-1250-${analysis_id}.fits
+mv comb-exp-im-400-1250.fits         comb-exp-im-400-1250-${analysis_id}.fits
+mv comb-back-im-sky-400-1250.fits    comb-back-im-sky-400-1250-${analysis_id}.fits
+mv comb-obj-im-2000-7200.fits        comb-obj-im-2000-7200-${analysis_id}.fits
+mv comb-exp-im-2000-7200.fits        comb-exp-im-2000-7200-${analysis_id}.fits
+mv comb-back-im-sky-2000-7200.fits   comb-back-im-sky-2000-7200-${analysis_id}.fits
+mv adapt-400-1250.fits               adapt-400-1250-${analysis_id}.fits
+
 
 
 

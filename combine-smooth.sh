@@ -25,33 +25,33 @@ ehigh='1250'          # detection bands maxima [eV]
 # use comb once more to combine exposures, this time with point
 # sources masked using the cheese images.
 
-comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
+comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
 
 
-######################################################################
-# manual ps removal solution sketch
+# ######################################################################
+# # manual ps removal solution sketch
 
-# esas defaults
-thresh1=0.05
-thresh2=5.0
+# # esas defaults
+# thresh1=0.05
+# thresh2=5.0
 
-emask expimageset=comb-exp-im-400-1250.fits detmaskset=man-mask.fits.cheese   threshold1=$thresh1 threshold2=$thresh2 regionset=manual-cheese-template.fits
+# emask expimageset=comb-exp-im-400-1250.fits detmaskset=man-mask.fits.cheese   threshold1=$thresh1 threshold2=$thresh2 regionset=manual-cheese-template.fits
 
-image=comb-back-im-sky-400-1250.fits
-farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
-mv farith.tmp.fits $image
+# image=comb-back-im-sky-400-1250.fits
+# farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+# mv farith.tmp.fits $image
 
-image=comb-exp-im-400-1250.fits
-farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
-mv farith.tmp.fits $image
+# image=comb-exp-im-400-1250.fits
+# farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+# mv farith.tmp.fits $image
 
-image=comb-obj-im-400-1250.fits
-farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
-mv farith.tmp.fits $image
+# image=comb-obj-im-400-1250.fits
+# farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+# mv farith.tmp.fits $image
 
-image=comb-prot-im-sky-400-1250.fits
-farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
-mv farith.tmp.fits $image
+# image=comb-prot-im-sky-400-1250.fits
+# farith $image 'man-mask.fits.cheese[MASK]' farith.tmp.fits MUL copyprime=yes clobber=yes
+# mv farith.tmp.fits $image
 
 
 ######################################################################
@@ -61,7 +61,7 @@ mv farith.tmp.fits $image
 
 # adapt_900 smoothingcounts=10 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=no withsoftcontrol=no withswcxcontrol=0
 
-adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0
+adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
 
 
 ######################################################################
@@ -75,7 +75,7 @@ ehigh='7200'          # detection bands maxima [eV]
 # use comb once more to combine exposures, this time with point
 # sources masked using the cheese images.
 
-comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=1 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
+comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
 
 
 ######################################################################

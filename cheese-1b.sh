@@ -28,7 +28,7 @@ elow=400                     # detection band minimum [eV]
 ehigh=10000                  # detection band maximum [eV]
 scale=0.5                    # source flux extraction fraction
 rate=0.5                     # ps extraction flux threshold [1e14 cgs]
-dist=15.0                    # minimal distance for neighbour ps
+dist=20.0                    # minimal distance for neighbour ps
 
 
 ######################################################################
@@ -49,6 +49,19 @@ then
     cd $startdir
     exit 1
 fi
+
+cp emllist.fits emllist-default.fits
+
+######################################################################
+# create a reg file if you can
+
+scriptdir=~/data1/sw/scripts/
+
+if [[ -e ${scriptdir}/fcat2reg.sh  ]]
+then
+    fcat2reg.sh emllist.fits 10.0 ML_ID_SRC
+fi
+
 
 
 ######################################################################
