@@ -460,10 +460,20 @@ then
 fi
 
 
-
 if [[ $QUICK_SPEC_LOCBG -eq 1 ]]
 then
     ${codedir}/quick-spec-locbg.sh ${workdir} $RA $DE
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+if [[ $MAKE_QUICK_VIEW_IMS -eq 1 ]]
+then
+    ${codedir}/make-quick-view-ims.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

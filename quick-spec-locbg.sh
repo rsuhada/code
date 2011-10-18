@@ -6,10 +6,9 @@
 
 dir=$1
 here=`pwd`
-cd $dir/analysis
+cd $dir
 
 specdir=../spec
-
 
 ######################################################################
 # settings
@@ -26,7 +25,20 @@ MAKE_BACKSCALE=1
 
 SRC_REGION=cluster-man.phy.reg
 BG_REGION=bg-ann-01.phy.reg
-PS_REGION=ps.phy.reg
+PS_REGION=ps-man.phy.reg
+
+
+######################################################################
+# create the spectroscopy dir if not existis
+
+if [[ ! -e $specdir ]]
+then
+    mkdir ${specdir}
+    mkdir ${specdir}/conf
+    cp ${codedir}/template-par-qspec-001.conf ${specdir}/conf/
+    cp ${codedir}/template-par-qspec-001.results ${specdir}/conf/
+fi
+
 
 
 ######################################################################

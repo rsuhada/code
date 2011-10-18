@@ -35,9 +35,6 @@ rm ${region_file}.m2-reg.txt
 # prepare detector coordiante region file
 regheader="# Region file format: DS9 version 4.1\n# Filename: pnS005-obj-im-det-2000-7200.fits\nglobal color=green dashlist=8 3 width=1 font=\"helvetica 10 normal\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\nphysical"
 
-# echo $regheader
-# sleep 5
-
 pn_det_reg=`basename ${region_file} .reg`-det-pn.reg
 m1_det_reg=`basename ${region_file} .reg`-det-m1.reg
 m2_det_reg=`basename ${region_file} .reg`-det-m2.reg
@@ -153,3 +150,5 @@ echo
 
 echo -e "\n$0 in $obsid done!"
 exit 0
+
+

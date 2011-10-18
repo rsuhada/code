@@ -18,6 +18,8 @@ if [[ -e odf ]]
 then
     cd odf
     gunzip *.gz
+    tar -xvvf *.tar
+    tar -xvvf *.TAR
 else
     cd $startdir
     echo -e "\n** error: obsid $obsid does not contain ODF directory"
@@ -43,9 +45,9 @@ fi
 ######################################################################
 # copy over the diagonal response matrices needed for spectral fitting
 
-cp ${esas_caldb}/mos1-diag.rsp.gz .
-cp ${esas_caldb}/mos2-diag.rsp.gz .
-cp ${esas_caldb}/pn-diag.rsp.gz .
+cp ${esas_caldb}/mos1-diag.rsp.gz ./analysis/
+cp ${esas_caldb}/mos2-diag.rsp.gz ./analysis/
+cp ${esas_caldb}/pn-diag.rsp.gz ./analysis/
 
 
 

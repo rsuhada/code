@@ -1,7 +1,7 @@
 ######################################################################
 # modules
 
-export PREP_ODF_DIR=0
+export PREP_ODF_DIR=1
 export MAKE_CCF_ODF=0
 export RUN_EV_CHAINS=0
 export RUN_FILTERS=0
@@ -16,6 +16,7 @@ export CHEESE_2B=0                              # !!!! not tested yet
 # MANUAL STEP: inspect point source removal, might need updating: ds9 *cheese* & (see notes) - after done and change is required run REMASK
 
 export REMASK=0
+export REMASK_MANUAL_MASK=0
 
 # MANUAL STEP: define spectroscopy region in detectro coords - set region names in the option part
 # regions (circular) can be created in ds9 in wcs and automatically converted with: /code/convert-reg-wcs-to-det.sh
@@ -27,7 +28,6 @@ export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
 export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
-export RENAME_SPEC_PRODUCTS=0
 export GROUP_SPEC=0                             # FIXME - prefixes
 
 # MANUAL STEP: create RASS bg spectrum (see notes)
@@ -35,6 +35,7 @@ export GROUP_SPEC=0                             # FIXME - prefixes
 
 export CORRECT_PROTON=0            # !!!! not finished/tested yet
 export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
+export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
 
 
 ######################################################################
@@ -44,3 +45,5 @@ export PIPE_TEST=0
 export PLT_LC_HIST=0
 export PLT_DIAGNOSTICS=0
 export RELINK_SPEC_PRODUCTS=0
+export QUICK_SPEC_LOCBG=0
+export MAKE_QUICK_VIEW_IMS=0
