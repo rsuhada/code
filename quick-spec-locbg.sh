@@ -2,7 +2,6 @@
 # preliminary script for extraction of files for spectral analysis
 # uses very standard and simple local bg approach
 # requires double cleaned eventlist and defined extraction regions
-# run it from /analysis and requires $ra and $de as input
 
 dir=$1
 here=`pwd`
@@ -13,7 +12,7 @@ specdir=../spec
 ######################################################################
 # settings
 
-ra=$2                           # until I am keeping it on github...
+ra=$2
 de=$3
 
 EXTRACT_SRC=1
@@ -38,7 +37,6 @@ then
     cp ${codedir}/template-par-qspec-001.conf ${specdir}/conf/
     cp ${codedir}/template-par-qspec-001.results ${specdir}/conf/
 fi
-
 
 
 ######################################################################

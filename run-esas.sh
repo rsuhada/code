@@ -11,17 +11,16 @@
 ######################################################################
 # help
 
-if [[ $# -lt 3 ]]
+if [[ $# -lt 2 ]]
 then
 	echo "Runs a esas analysis"
 	echo
     echo "Parameters:"
-    echo "1. obsid"
-    echo "2. config file"
-    echo "3. module list file"
+    echo "1. config file"
+    echo "2. module list file"
     echo ""
     echo "Syntax:"
-	echo "run-esas.sh 0097820101 0097820101.conf 0097820101.modules"
+	echo "run-esas.sh 0097820101.conf 0097820101.modules"
     echo
     exit 1
 fi
@@ -37,21 +36,12 @@ starttime=`date`
 ######################################################################
 # read in arguments
 
-export obsid=$1
-export config_file=$2
-export module_list=$3
+export config_file=$1
+export module_list=$2
 
 
 ######################################################################
 # catch missing inputs
-
-if [[ ! -e $obsid ]]
-then
-    echo -e "\n** error: obsid $obsid does not exists here: "
-    echo -e "*** $startdir\n"
-    cd $startdir
-    exit 1
-fi
 
 if [[ ! -e $config_file ]]
 then
@@ -75,8 +65,21 @@ source $module_list
 ######################################################################
 # setup
 
+export obsid=$OBSID             # FIXME: refactor it
 export startdir=`pwd`
 export workdir=${startdir}/${obsid}/analysis
+
+
+######################################################################
+# check whether observation is present
+
+if [[ ! -e $obsid ]]
+then
+    echo -e "\n** error: obsid $obsid does not exists here: "
+    echo -e "*** $startdir\n"
+    cd $startdir
+    exit 1
+fi
 
 
 ######################################################################

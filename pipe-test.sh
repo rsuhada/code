@@ -5,9 +5,14 @@ dir=$1
 here=`pwd`
 cd $dir
 
-if [[ -e pipe_test.log ]]
+######################################################################
+# run the test
+
+testlogfile=pipe_test.log
+
+if [[ -e $testlogfile ]]
 then
-    rm pipe_test.log
+    rm $testlogfile
 fi
 
 
@@ -65,12 +70,30 @@ echo COMBINE_SMOOTH $COMBINE_SMOOTH
 echo PIPE_TEST $PIPE_TEST
 
 
-) > pipe_test.log
+) > $testlogfile
 
 
 ######################################################################
 # exit
 
 cd $here
+
+if [[ ! -e ${dir}/$testlogfile ]]
+then
+    echo -e "\n** error: ${dir}/$testlogfile was not created!"
+    echo -e "*** error in $0\n"
+    cd $startdir
+    exit 1
+else
+    echo
+    echo "Pipeline test succesful!"
+    echo "Log file: ${dir}/$testlogfile"
+    echo
+    cat ${dir}/$testlogfile
+    echo
+fi
+
+
+
 echo -e "\n$0 in $obsid done!"
 exit 0
