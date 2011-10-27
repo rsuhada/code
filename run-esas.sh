@@ -68,6 +68,8 @@ source $module_list
 export obsid=$OBSID             # FIXME: refactor it
 export startdir=`pwd`
 export workdir=${startdir}/${obsid}/analysis
+export NOTESDIR=${startdir}/notes
+export NOTESFILE=${NOTESDIR}/analysis-${CLNAME}.txt
 
 
 ######################################################################

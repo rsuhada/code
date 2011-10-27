@@ -35,11 +35,12 @@ then
     echo "${dir}/analysis ${dir}/odf" > analysis/obsid-list.txt
 fi
 
-
-if [[ ! -e spec ]]
+if [[ ! -e $NOTESFILE ]]
 then
-    mkdir spec
+    cp ${codedir}/analysis-template.txt $NOTESFILE
 fi
+
+
 
 
 ######################################################################

@@ -171,11 +171,27 @@ http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xraybg/xraybg.pl
 2. open e.g. pnS003-obj-im-400-1250.fits
 
 3. adjust regions to needs, define core and bgann - keep the ps
-regions confined to the spectroscopic regions - in order not to have
-too many regions which conflicts with SAS tasks
+regions roughly confined to the spectroscopic regions - in order not
+to have too many regions which conflicts with SAS tasks (still so with
+SASv11?). For ps you can load in the *bkg_region.fits to ds9. The
+exclusion red bar can be set in the "properties" menu
 
-4. save the regions in wcs and phys
+4. save the regions in wcs and phys, standard naming:
+SRC_REGION=cluster-man-01.phy.reg
+BG_REGION=bg-ann-01.phy.reg
+PS_REGION=ps-man.phy.reg
 
-5. manually adjust quick-spec-locbg.sh
+5. manually adjust quick-spec-locbg.sh if needed
 
-6. from /analysis run quick-spec-locbg.sh $ra $de
+6. run quick-spec-locbg.sh via run-esaspi.sh (set it in the modules)
+
+
+######################################################################
+# analysis-template.txt
+
+- the filename can be set in run-esas.sh
+- some scripts can use it to load in parameters automatically
+- for a given parameter the *first upper case* instance is read in
+  automatically
+- i.e. alternative parameters are supported, and this is the mechanism
+  to load them in

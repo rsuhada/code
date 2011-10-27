@@ -9,35 +9,83 @@ cd $dir
 
 specdir=../spec
 
+function get_cluster_pars {
+
+    ######################################################################
+    # looks through an analysis notebook file returning the requested
+    # parameters. Input is an array, e.g.  pars=(RA DE RA60
+    # DE60 X_IM Y_IM X_PHY Y_PHY NH REDSHIFT), output is a string
+
+    if [[ -e $NOTESFILE ]]
+    then
+
+        pars=$1
+        declare -a values
+
+        for i in ${!pars[@]}
+        do
+            val=`grep ${pars[i]} $NOTESFILE | head -1 | awk '{print $2}'`
+            values=( "${values[@]}" "$val" )
+            # echo ${pars[i]} ${values[i]}
+        done
+
+        # this is the output
+        echo ${values[@]}
+
+    else
+        echo "$NOTESFILE does not exist, not returning parameters!"
+    fi
+}
+
+
 ######################################################################
 # settings
 
 ra=$2
 de=$3
 
-EXTRACT_SRC=1
-EXTRACT_BG=1
+EXTRACT_SRC=0
+EXTRACT_BG=0
 
-MAKE_RMF=1
-MAKE_ARF=1
-MAKE_BACKSCALE=1
+MAKE_RMF=0
+MAKE_ARF=0
+CALCULATE_BACKSCALE=0
 
-SRC_REGION=cluster-man.phy.reg
+SRC_REGION=cluster-man-01.phy.reg
 BG_REGION=bg-ann-01.phy.reg
 PS_REGION=ps-man.phy.reg
 
 
 ######################################################################
-# create the spectroscopy dir if not existis
+# create the spectroscopy dir if it does not exists
 
-if [[ ! -e $specdir ]]
+mkdir -p ${specdir}/conf 2> /dev/null
+
+config_file=${specdir}/conf/${CLNAME}-par-qspec-001.conf
+
+if [[ ! -e $config_file ]]
 then
-    mkdir ${specdir}
-    mkdir ${specdir}/conf
-    cp ${codedir}/template-par-qspec-001.conf ${specdir}/conf/
-    cp ${codedir}/template-par-qspec-001.results ${specdir}/conf/
+    cp ${codedir}/template-par-qspec-001.conf $config_file
+
+    if [[ -e $NOTESFILE ]]
+    then
+
+        pars=(REDSHIFT NH)
+        out=`get_cluster_pars $pars`
+        tmp_redshift=`echo $out | awk '{print $1}'`
+        tmp_nh=`echo $out | awk '{print $2}'`
+
+        sed -i .sed.bk "s/PLACEHOLDER_REDSHIFT/${tmp_redshift}/g" $config_file
+        sed -i .sed.bk "s/PLACEHOLDER_NH/${tmp_nh}/g" $config_file
+        rm ${config_file}.sed.bk
+
+    fi
 fi
 
+if [[ ! -e ${specdir}/conf/${CLNAME}-par-qspec-001.results ]]
+then
+    cp ${codedir}/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
+fi
 
 ######################################################################
 # check existence of region files
@@ -274,7 +322,7 @@ fi
 ######################################################################
 # backscale
 
-if [[ $MAKE_BACKSCALE -ne 0 ]]
+if [[ $CALCULATE_BACKSCALE -ne 0 ]]
 then
 
     if [[ $EXTRACT_SRC -ne 0 ]]
