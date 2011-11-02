@@ -9,6 +9,7 @@ cd $dir
 
 specdir=../spec
 
+# FIXME: available in a standalone script - this function is redundant
 function get_cluster_pars {
 
     ######################################################################
@@ -44,12 +45,12 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=0
-EXTRACT_BG=0
+EXTRACT_SRC=1
+EXTRACT_BG=1
 
-MAKE_RMF=0
-MAKE_ARF=0
-CALCULATE_BACKSCALE=0
+MAKE_RMF=1
+MAKE_ARF=1
+CALCULATE_BACKSCALE=1
 
 SRC_REGION=cluster-man-01.phy.reg
 BG_REGION=bg-ann-01.phy.reg
@@ -65,7 +66,7 @@ config_file=${specdir}/conf/${CLNAME}-par-qspec-001.conf
 
 if [[ ! -e $config_file ]]
 then
-    cp ${codedir}/template-par-qspec-001.conf $config_file
+    cp ${codedir}/templates/template-par-qspec-001.conf $config_file
 
     if [[ -e $NOTESFILE ]]
     then
@@ -84,7 +85,7 @@ fi
 
 if [[ ! -e ${specdir}/conf/${CLNAME}-par-qspec-001.results ]]
 then
-    cp ${codedir}/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
+    cp ${codedir}/templates/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
 fi
 
 ######################################################################

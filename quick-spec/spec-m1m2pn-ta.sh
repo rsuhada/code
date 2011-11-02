@@ -40,7 +40,7 @@ grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} 
 
 
 echo -e "
-Data 1:1 pn.grp.pha
+data 1:1 pn.grp.pha
 data 2:2 m1.grp.pha
 data 3:3 m2.grp.pha
 

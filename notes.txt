@@ -166,7 +166,7 @@ http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xraybg/xraybg.pl
 ######################################################################
 # quick spectroscopy
 
-1. run esaspi in astandard manner, until the end
+1. run esaspi in a standard manner, until the end
 
 2. open e.g. pnS003-obj-im-400-1250.fits
 
@@ -195,3 +195,60 @@ PS_REGION=ps-man.phy.reg
   automatically
 - i.e. alternative parameters are supported, and this is the mechanism
   to load them in
+
+
+######################################################################
+# xspec sas11 conflict
+
+xspec opened in a shell with sourced SAS will quickly crash with bus
+error.
+
+Reason likely is library conflict:
+
+original heainit (xspec works):
+
+DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
+after sourcing sas11 (xspec crashes):
+
+DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
+fix it:
+before running xspec reset to:
+
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
+######################################################################
+# timing
+
+export EXTRACT_SPEC_ESAS_PN=0
+export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
+export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
+export GROUP_SPEC=0                             # FIXME - prefixes the
+# EXTRACT_* block takes about 5-6 hours - if ran on FoV: quite
+# demanding - run only during night and close unecessary windows (can
+# lead to kernel panic if overload)
+
+export QUICK_SPEC_LOCBG=1
+# roughly 20 mins if extracting both source and background, armf, rmf
+# and backscale
+
+export PREP_ODF_DIR=0
+export MAKE_CCF_ODF=0
+export RUN_EV_CHAINS=0
+export RUN_FILTERS=0
+export CHEESE_1B=0
+export CHEESE_2B=0                              # !!!! not tested yet
+export REMASK=0
+export REMASK_MANUAL_MASK=0
+export CORRECT_PROTON=0            # !!!! not finished/tested yet
+export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
+export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
+export PIPE_TEST=0
+export PLT_LC_HIST=0
+export PLT_DIAGNOSTICS=0
+export RELINK_SPEC_PRODUCTS=0
+export MAKE_QUICK_VIEW_IMS=0

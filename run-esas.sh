@@ -486,7 +486,15 @@ then
     fi
 fi
 
-
+if [[ $ITER_SPEC -eq 1 ]]
+then
+    ${codedir}/iter-spec/iter-spec-driver.sh ${workdir} $RA $DE
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
 
 ######################################################################
 # write finish message

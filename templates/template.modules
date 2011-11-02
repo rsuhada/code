@@ -51,3 +51,9 @@ export PLT_DIAGNOSTICS=0
 export RELINK_SPEC_PRODUCTS=0
 export QUICK_SPEC_LOCBG=0
 export MAKE_QUICK_VIEW_IMS=0
+
+
+######################################################################
+# in development
+
+ITER_SPEC=0

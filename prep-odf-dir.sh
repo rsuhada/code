@@ -37,7 +37,7 @@ fi
 
 if [[ ! -e $NOTESFILE ]]
 then
-    cp ${codedir}/analysis-template.txt $NOTESFILE
+    cp ${codedir}/templates/analysis-template.txt $NOTESFILE
 fi
 
 
