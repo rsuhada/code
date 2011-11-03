@@ -122,6 +122,7 @@ bgid=`echo $BG_REGION | sed 's/\..*//g'`
 # parse the region files, second parameter equals 0 means region file
 # will be removed
 
+# FIXME: available as a util function
 parse-spec-reg.sh $SRC_REGION 1
 parse-spec-reg.sh $BG_REGION 1
 parse-spec-reg.sh $PS_REGION 0
