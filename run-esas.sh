@@ -488,7 +488,7 @@ fi
 
 if [[ $ITER_SPEC -eq 1 ]]
 then
-    ${codedir}/iter-spec/iter-spec-driver.sh ${workdir} $RA $DE
+    ${codedir}/iter-spec/iter-spec-driver.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

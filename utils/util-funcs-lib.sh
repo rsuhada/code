@@ -107,16 +107,15 @@ function ds9reg_to_sasdesc {
 
     if [[ $# != 2 ]]
     then
-        echo "\nmissing second parameter! 1 = this should be an active region, 0 = remove these regions"
+        echo "missing second parameter! 1 = this should be an active region, 0 = remove these regions"
         exit 1
     fi
 
-    if [[ -e ${inreg}.desc ]]
-    then
-        echo "backuping region file ${inreg}.desc"
-        mv ${inreg}.desc ${inreg}.desc.bk
-    fi
-
+    # if [[ -e ${inreg}.desc ]]
+    # then
+    #     echo "backuping region file ${inreg}.desc"
+    #     mv ${inreg}.desc ${inreg}.desc.bk
+    # fi
 
     if [[ $remove -eq 0 ]]
     then
