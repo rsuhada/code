@@ -15,7 +15,7 @@ dir=$1
 # settings
 
 export instruments=(pn m1 m2)
-export fitpars="taz"                     # options: t, ta, taz, tz
+export fitpars="ta"                    # options: t, ta, taz, tz
 export fitid="001"
 export group_min=1
 
@@ -26,8 +26,12 @@ export r_init=37.1325                  # [arcsec]   test: 37.1325
 export max_iter=1                      # maximum number of iterations
 export r_tolerance=4.0                 # [arcsec]
 
-export EXTRACT_SRC=0
+export EXTRACT_SRC_SPEC=0
 export CALCULATE_BACKSCALE=0
+
+# FIXME: needs to be implemented
+export EXCLUDE_CORE=0                  # exclude the central part from spectroscopy
+export core_frac=0.15                  # what fraction of core to exclude
 
 export MAKE_RMF=0
 export MAKE_ARF=0
@@ -178,7 +182,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     ######################################################################
     # do the extraction of spectra
 
-    if [[ $EXTRACT_SRC -eq 1 ]]
+    if [[ $EXTRACT_SRC_SPEC -eq 1 ]]
     then
         for instrument in ${instruments[@]}
         do
@@ -301,26 +305,38 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
                 echo "Running spectroscopy script :: "
                 echo ${codedir}/iter-spec/$specscript $clname $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
                 ${codedir}/iter-spec/$specscript $clname $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
+                ${codedir}/quick-spec/gather-quickspec-results.sh run-${fitid}-${spectrumid}
                 ;;
             *)
                 echo "Problem with instruments?"
         esac
 
-        cd $dir
-        pwd
+
     fi
 
     ######################################################################
     # update the radius
 
     r_old=$r
-    r=$(echo "scale=6;$r*1.2" | bc)
+    # r=$(echo "scale=6;$r*1.2" | bc) # dummy for debug
+
+    pwd
+    # r=`${codedir}/py/t_to_r.py run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.result`
+    ${codedir}/py/t_to_r.py run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.result | tee run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper
+
+    r=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     r_phy=$(echo "scale=6;$r*20.0" | bc)
 
     ######################################################################
     # finished iteration step
 
+    cd $dir
+    pwd
+
     iter=$((iter + 1))
+
+    echo "Done:"
+    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r
     echo "######################################################################"
     echo
 

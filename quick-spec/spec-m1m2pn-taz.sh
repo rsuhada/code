@@ -268,10 +268,10 @@ normalisation_err_u=`cat  ${spectrumid}-err.log | grep " 7 " | grep "(" | awk '{
 
 echo
 echo
-echo "normalisation = "${normalisation_fit} ${normalisation_err_d} "+"${normalisation_err_u} | tee -a ${spectrumid}.result
-echo "temperature = "${kt_fit} ${kt_err_d} "+"${kt_err_u} | tee ${spectrumid}.result
+echo "normalisation = "${normalisation_fit} ${normalisation_err_d} "+"${normalisation_err_u} | tee ${spectrumid}.result
+echo "temperature = "${kt_fit} ${kt_err_d} "+"${kt_err_u} | tee -a ${spectrumid}.result
 echo "redshift = "${redshift_fit} ${redshift_err_d} "+"${redshift_err_u} | tee -a ${spectrumid}.result
-echo "Fe abundance = "${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee -a ${spectrumid}.result
+echo "abundance = "${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee -a ${spectrumid}.result
 echo
 echo
 

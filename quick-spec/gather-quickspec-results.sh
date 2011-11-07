@@ -14,6 +14,7 @@ then
     mv *-gof.log       ${dir}/
     mv *-err.log       ${dir}/
     mv *-contour.ps    ${dir}/
+    mv *-fx-lx.log     ${dir}/
 
     echo
     echo "Results gathered in: " $dir
