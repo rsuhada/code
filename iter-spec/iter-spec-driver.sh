@@ -17,26 +17,23 @@ dir=$1
 export instruments=(pn m1 m2)
 export fitpars="ta"                    # options: t, ta, taz, tz
 export fitid="001"
-export group_min=1
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
+export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-fit-${fitid}-iter-master.tab"
 
 export r_init=37.1325                  # [arcsec]   test: 37.1325
-export max_iter=1                      # maximum number of iterations
+export max_iter=10                     # maximum number of iterations
 export r_tolerance=4.0                 # [arcsec]
 
-export EXTRACT_SRC_SPEC=0
-export CALCULATE_BACKSCALE=0
-
-# FIXME: needs to be implemented
-export EXCLUDE_CORE=0                  # exclude the central part from spectroscopy
-export core_frac=0.15                  # what fraction of core to exclude
+export EXTRACT_SRC_SPEC=1
+export CALCULATE_BACKSCALE=1
 
 export MAKE_RMF=0
 export MAKE_ARF=0
 
 export DO_SPECTROSCOPY=1
+export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
 export BG_REGION_ID=bg-ann-01
@@ -45,7 +42,11 @@ export LINK_BG=0                       # soft link bg annulus
 
 export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
 export PS_REGION=${specdir}/${PS_REGION_ID}.phy.reg
-export parfile=${clname}-par-qspec-001.conf
+export parfile=${CLNAME}-par-qspec-001.conf
+
+export EXCLUDE_CORE=1                  # exclude the central part from spectroscopy
+export core_frac=0.15                  # what fraction of core to exclude
+export CORE_REGION_ID=cluster-iter-rcore-r
 
 ######################################################################
 # prepare paths
@@ -54,6 +55,21 @@ here=`pwd`
 cd $dir
 
 mkdir -p ${specdir}/conf 2> /dev/null
+
+
+######################################################################
+# check whether we have a non-conflicting run
+
+if [[ -e $LOG_MASTER_FILE ]]
+then
+    echo -e "\n** error: $LOG_MASTER_FILE exists here!"
+    echo -e "*** error: Consider changing fitid: $fitid, or delete the master to force overwrite"
+    echo -e "*** error: in $0\n"
+    cd $startdir
+    exit 1
+fi
+
+
 
 ######################################################################
 # create config files if necessary
@@ -99,14 +115,14 @@ out=`get_cluster_pars $pars`
 
 export redshift=`echo $out | awk '{print $1}'`
 export nh=`echo $out | awk '{print $2}'`
-export clname=`echo $out | awk '{print $3}'`
+export CLNAME=`echo $out | awk '{print $3}'`
 export ra=`echo $out | awk '{print $4}'`
 export de=`echo $out | awk '{print $5}'`
 export x_phy=`echo $out | awk '{print $6}'`
 export y_phy=`echo $out | awk '{print $7}'`
 
 echo
-echo $clname
+echo $CLNAME
 echo "redshift :: " $redshift
 echo "nH ::       " $nh
 echo $ra $de
@@ -144,29 +160,34 @@ fi
 ######################################################################
 # initialize iterations
 
-export r=$r_init
 export iter=1
 export r_old=10000.0
 export reached_r_tolerance=0
 
+export r=$r_init
 export r_phy=$(echo "scale=6;$r*20.0" | bc)
+
+export rcore=$(echo "scale=6;$core_frac*$r" | bc)
+export rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)
+
+echo $rcore $rcore_phy
+
+echo  "# fitid iter r_fit r_500 r_diff norm norm_err_n norm_err_n t t_err_n t_err_p z z_err_p z_err_n abund abund_err_n abund_err_p m500 m500_err r500 r500_ang rcore_ang" > $LOG_MASTER_FILE
+
 
 ######################################################################
 # iterator
 
 while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
 
-    r_diff=$(echo "scale=6;$r-$r_old" | bc)
-    r_diff=`echo ${r_diff#-}`   # get the absolute value
-    reached_r_tolerance=`echo "if($r_diff <= $r_tolerance) 1" | bc`
-
     echo "######################################################################"
     echo "iteration :: " $iter "current val :: " $r " old val :: " $r_old "diff :: " $r_diff, "tolerance reached :: " $reached_r_tolerance
 
     ######################################################################
-    # write region file
+    # write region files
 
     shape="circle"
+
     rpad=$(echo $r | bc -l | xargs printf "%1.0f") # round
     rpad=`printf "%03d" $rpad`                     # zero pad
     spectrumid="iter-r-$rpad"                      # identifier for spectral products
@@ -178,6 +199,16 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     coordsystem="physical"
     regname=${specdir}/${SRC_REGION_ID}-${rpad}.phy.reg
     make_src_reg_file $shape $regname $coordsystem $x_phy $y_phy $r_phy
+    SRC_REGION=$regname
+
+    coordsystem="wcs"
+    regname=${specdir}/${CORE_REGION_ID}-${rpad}.wcs.reg
+    make_src_reg_file $shape $regname $coordsystem $ra $de $rcore
+
+    coordsystem="physical"
+    regname=${specdir}/${CORE_REGION_ID}-${rpad}.phy.reg
+    make_src_reg_file $shape $regname $coordsystem $x_phy $y_phy $rcore_phy
+    CORE_REGION=$regname
 
     ######################################################################
     # do the extraction of spectra
@@ -187,8 +218,17 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
         for instrument in ${instruments[@]}
         do
             echo "extracting spectra: "
-            echo ${codedir}/extract-source-spec.sh $instrument $regname $spectrumid $specdir $PS_REGION
-            ${codedir}/extract-source-spec.sh $instrument $regname $spectrumid $specdir $PS_REGION
+
+            if [[ $EXCLUDE_CORE -eq 0 ]]
+            then
+                echo "Not excising the core:"
+                echo ${codedir}/extract-source-spec.sh $instrument $SRC_REGION $spectrumid $specdir $PS_REGION
+                ${codedir}/extract-source-spec.sh $instrument $SRC_REGION $spectrumid $specdir $PS_REGION
+            else
+                echo "Excising the core:"
+                echo ${codedir}/extract-source-spec.sh $instrument $SRC_REGION $spectrumid $specdir $PS_REGION $CORE_REGION
+                ${codedir}/extract-source-spec.sh $instrument $SRC_REGION $spectrumid $specdir $PS_REGION $CORE_REGION
+            fi
         done
     fi
 
@@ -303,9 +343,9 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
                 specscript=spec-iter-pnm1m2-${fitpars}.sh
 
                 echo "Running spectroscopy script :: "
-                echo ${codedir}/iter-spec/$specscript $clname $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
-                ${codedir}/iter-spec/$specscript $clname $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
-                ${codedir}/quick-spec/gather-quickspec-results.sh run-${fitid}-${spectrumid}
+                echo ${codedir}/iter-spec/$specscript $CLNAME $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
+                ${codedir}/iter-spec/$specscript $CLNAME $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
+                ${codedir}/quick-spec/gather-quickspec-results.sh run-${fitid}-${spectrumid} 1 # overwrites if exists
                 ;;
             *)
                 echo "Problem with instruments?"
@@ -318,19 +358,31 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     # update the radius
 
     r_old=$r
-    # r=$(echo "scale=6;$r*1.2" | bc) # dummy for debug
 
-    pwd
-    # r=`${codedir}/py/t_to_r.py run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.result`
+    # r=$(echo "scale=6;$r*1.2" | bc) # dummy for debug
     ${codedir}/py/t_to_r.py run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.result | tee run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper
 
     r=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     r_phy=$(echo "scale=6;$r*20.0" | bc)
 
+    rcore=$(echo "scale=6;$core_frac*$r" | bc)
+    rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)
+
+    r_diff=$(echo "scale=6;$r-$r_old" | bc)
+    r_diff=`echo ${r_diff#-}`   # get the absolute value
+    reached_r_tolerance=`echo "if($r_diff <= $r_tolerance) 1" | bc`
+
+    ######################################################################
+    # write into the master: note: the current line corresponds to the
+    # spectrum fitted in the (now) r_old aperture
+
+    aper_results=`read_aper_result_file run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper`
+    echo $fitid $iter $r_old $r $r_diff $aper_results >> $LOG_MASTER_FILE
+
     ######################################################################
     # finished iteration step
 
-    cd $dir
+    cd $dir                     # returns to analysis subdir
     pwd
 
     iter=$((iter + 1))

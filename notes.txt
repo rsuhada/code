@@ -9,9 +9,16 @@ General:
 - dedicated source detection module
 - add stuff for standard bands
 - add stuff for dcp bands (?)
+- would be nice to cleanup the namespace (sometime variables are
+  duplicated) and the capitalization convention should be better
 
 Iterator:
-- add core exclusion
+- some trash cleanup?
+- 0.5r500 version
+- core PSF spillover?
+- how to stop before running into low s/n?
+- use andersson optimized band for spectroscopy
+- what about the python deprecation warning
 
 Profiles:
 
@@ -24,6 +31,12 @@ Snowden:
 
 - DONE: qdp plotter on all stages
 
+
+######################################################################
+# dependencies
+
+iter-spec
+- requires cosmo_dist.py in the python path
 
 
 ######################################################################
@@ -262,12 +275,20 @@ export PLT_DIAGNOSTICS=0
 export RELINK_SPEC_PRODUCTS=0
 export MAKE_QUICK_VIEW_IMS=0
 
+for iterative spectroscopy:
+
+- 1 iteration including arf/rmf calculation is ~10 mins (for small
+  apertures <~100")
+
+- convergence typically in <5 iterations (hard limit 10 at the moment)
+
 ######################################################################
 # libraries with internal settings variables
 # i.e. stuff that can/should be tweaked locally in the file
 
 quick-spec-locbg.sh
 iter-spec/iter-spec-driver.sh
+py/t_to_r.py
 
 ######################################################################
 # currently deprecated scripts (debris, early draft no used

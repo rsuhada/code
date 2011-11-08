@@ -1,6 +1,7 @@
 dir=$1
+OVERWRITE=$2
 
-if [[ ! -e $dir ]]
+if [[ ! -e $dir || $OVERWRITE -eq 1 ]]
 then
     mkdir $dir
 

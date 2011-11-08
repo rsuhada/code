@@ -134,3 +134,33 @@ function ds9reg_to_sasdesc {
 
     ls ${inreg}.desc
 }
+
+
+function read_aper_result_file {
+    ######################################################################
+    # reads in the physical parameters for the give aperture file
+    # written by t_to_r.py
+
+    infile=$1
+
+    norm=`egrep "\bnorm\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    norm_err_n=`egrep "\bnorm_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    norm_err_p=`egrep "\bnorm_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t=`egrep "\bt\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t_err_n=`egrep "\bt_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t_err_p=`egrep "\bt_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    z=`egrep "\bz\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    z_err_n=`egrep "\bz_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    z_err_p=`egrep "\bz_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    abund=`egrep "\babund\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    abund_err_n=`egrep "\babund_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    abund_err_p=`egrep "\babund_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+
+    m500=`egrep "\bm500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    m500_err=`egrep "\bm500_err\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    r500=`egrep "\br500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    rcore_ang=`egrep "\b0.15r500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    r500_ang=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+
+    echo $norm $norm_err_n $norm_err_p $t $t_err_n $t_err_p $z $z_err_n $z_err_p $abund $abund_err_n $abund_err_p $m500 $m500_err $r500 $r500_ang $rcore_ang
+}

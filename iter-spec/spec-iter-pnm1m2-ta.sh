@@ -253,8 +253,8 @@ normalisation_err_u=`cat  ${fileid}-err.log | grep " 7 " | grep "(" | awk '{gsub
 
 echo
 echo
-echo "normalisation" ${normalisation_fit} ${normalisation_err_d} "+"${normalisation_err_u} | tee -a ${fileid}.result
-echo "temperature" ${kt_fit} ${kt_err_d} "+"${kt_err_u} | tee ${fileid}.result
+echo "normalisation" ${normalisation_fit} ${normalisation_err_d} "+"${normalisation_err_u} | tee ${fileid}.result
+echo "temperature" ${kt_fit} ${kt_err_d} "+"${kt_err_u} | tee -a ${fileid}.result
 echo "redshift" ${redshift_fit} ${redshift_err_d} "+"${redshift_err_u} | tee -a ${fileid}.result
 echo "abundance" ${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee -a ${fileid}.result
 echo

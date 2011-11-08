@@ -13,6 +13,7 @@ SRC_REGION=$2
 spectrumid=$3
 specdir=$4
 PS_REGION=$5
+CORE_REGION=$6
 
 ######################################################################
 # parse the region files, second parameter equals 0 means region file
@@ -22,7 +23,7 @@ ds9reg_to_sasdesc $SRC_REGION 1
 inpattern=`cat ${SRC_REGION}.desc`
 srcreg="$inpattern"
 
-if [[ $# -ne 5 ]]
+if [[ $# -lt 5 ]]
 then
     echo -e "No point source region file provided"
     psreg=""
@@ -30,6 +31,13 @@ else
     ds9reg_to_sasdesc $PS_REGION 0
     inpattern=`cat ${PS_REGION}.desc`
     psreg="$inpattern"
+
+    if [[ $# -eq 6 ]]
+    then
+        ds9reg_to_sasdesc $CORE_REGION 0
+        inpattern=`cat ${CORE_REGION}.desc`
+        psreg="$psreg $inpattern"
+    fi
 fi
 
 ######################################################################
