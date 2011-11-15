@@ -53,6 +53,15 @@ if __name__ == '__main__':
 
     h = h_0/100.0
 
+
+    ######################################################################
+    # choice of scaling relations
+    #
+    # 1 - T500-M vikhlinin 09, analytic r500
+    # 2 - 0.5T500-T500 vikhlinin09, T500-M vikhlinin 09, analytic r500
+
+    SCALING_OPTION=2
+
     ######################################################################
     # read in the spectrospopy results
 
@@ -88,9 +97,20 @@ if __name__ == '__main__':
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
     ang_scale = da * math.tan(math.pi/(180.0*3600.0))            # [Mpc/asec]
 
-    (m500, m500_err) = scal_rel_lib.MT_vikhlinin09(t, t_err, ez, h) # [Msol]
 
-    r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
+    if (SCALING_OPTION == 1):
+        print "Scaling relation chain : ", SCALING_OPTION
+        (t500, t500_err) = (t, t_err)
+        (m500, m500_err) = scal_rel_lib.MT_vikhlinin09(t, t_err, ez, h) # [Msol]
+        r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
+
+    elif (SCALING_OPTION == 2):
+        print "Scaling relation chain : ", SCALING_OPTION
+        (t500, t500_err) = scal_rel_lib.TT_vikhlinin09(t, t_err)
+        (m500, m500_err) = scal_rel_lib.MT_vikhlinin09(t500, t500_err, ez, h) # [Msol]
+        r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
+
+
     r500_ang = r500 / ang_scale # [asec]
 
     ######################################################################
@@ -107,9 +127,11 @@ if __name__ == '__main__':
     print  'norm         ', norm
     print  'norm_err_n   ', norm_err_n
     print  'norm_err_p   ', norm_err_p
-    print  't            ', t
-    print  't_err_n      ', t_err_n
-    print  't_err_p      ', t_err_p
+    print  't_fit        ', t
+    print  't_fit_err_n  ', t_err_n
+    print  't_fit_err_p  ', t_err_p
+    print  't500         ', t500
+    print  't500_err     ', t500_err
     print  'z            ', z
     print  'z_err_n      ', z_err_n
     print  'z_err_p      ', z_err_p

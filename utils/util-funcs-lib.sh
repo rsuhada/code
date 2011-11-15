@@ -146,9 +146,11 @@ function read_aper_result_file {
     norm=`egrep "\bnorm\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     norm_err_n=`egrep "\bnorm_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     norm_err_p=`egrep "\bnorm_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t=`egrep "\bt\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t_err_n=`egrep "\bt_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t_err_p=`egrep "\bt_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t_fit=`egrep "\bt_fit\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t_fit_err_n=`egrep "\bt_fit_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t_fit_err_p=`egrep "\bt_fit_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t500=`egrep "\bt500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    t500_err=`egrep "\bt500_err\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     z=`egrep "\bz\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     z_err_n=`egrep "\bz_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     z_err_p=`egrep "\bz_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
@@ -162,5 +164,5 @@ function read_aper_result_file {
     rcore_ang=`egrep "\b0.15r500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
     r500_ang=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
 
-    echo $norm $norm_err_n $norm_err_p $t $t_err_n $t_err_p $z $z_err_n $z_err_p $abund $abund_err_n $abund_err_p $m500 $m500_err $r500 $r500_ang $rcore_ang
+    echo $norm $norm_err_n $norm_err_p $t_fit $t_fit_err_n $t_fit_err_p $z $z_err_n $z_err_p $abund $abund_err_n $abund_err_p $t500 $t500_err $m500 $m500_err $r500 $r500_ang $rcore_ang
 }

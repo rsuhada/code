@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(pn m1 m2)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="001"
+export fitid="002"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -68,7 +68,6 @@ then
     cd $startdir
     exit 1
 fi
-
 
 
 ######################################################################
@@ -172,7 +171,7 @@ export rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)
 
 echo $rcore $rcore_phy
 
-echo  "# fitid iter r_fit r_500 r_diff norm norm_err_n norm_err_n t t_err_n t_err_p z z_err_p z_err_n abund abund_err_n abund_err_p m500 m500_err r500 r500_ang rcore_ang" > $LOG_MASTER_FILE
+echo  "# fitid iter r_fit r_500 r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $LOG_MASTER_FILE
 
 
 ######################################################################
@@ -377,6 +376,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     # spectrum fitted in the (now) r_old aperture
 
     aper_results=`read_aper_result_file run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper`
+
     echo $fitid $iter $r_old $r $r_diff $aper_results >> $LOG_MASTER_FILE
 
     ######################################################################

@@ -432,6 +432,38 @@ def M200T_arnaud05_err(temperature, temperature_err, func_ez):
 
     return outM_err
 
+######################################################################
+# T-T relations
+
+def TT_vikhlinin09(temperature, temperature_err):
+    """
+    0.5r500 to r500 scaling of Vikhlinin+09.
+    iscatter at <3% on the T/T2 ratio (negligible).
+
+    Arguments:
+    - `temperature`: 0.15-0.5 r500 temperature (T2)
+    - `temperature_err`: 0.15-0.5 r500 temperature_err
+
+    Output:
+    - temperature in 0.15-1 r500 (T)
+    - temperature error in 0.15-1 r500
+    """
+
+    ADD_INTRINSIC = 0
+    a = 0.9075
+    b = 0.00625
+
+
+    outT = temperature * (a + b * temperature)
+    outT_err = sqrt(a**2 * temperature_err**2 + (2.0*b*temperature*temperature_err)**2)
+
+    if (ADD_INTRINSIC == 1):
+        outT_intr_err = 0.03 * temperature # 3% iscatter on the T/T2 ratio
+        outT_err = sqrt(outT_err**2 + outT_intr_err**2)
+
+    return (outT, outT_err)
+
+
 #############################################################################################
 # r-T scalings
 
@@ -751,4 +783,5 @@ if __name__ == '__main__':
 # list of refactored scaling relations
 
 # MT_vikhlinin09 (needs error propagation)
-
+# TT_vikhlinin09
+# r_overdensity
