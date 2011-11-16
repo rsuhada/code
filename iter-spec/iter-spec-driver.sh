@@ -16,21 +16,22 @@ dir=$1
 
 export instruments=(pn m1 m2)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="002"
+export fitid="003"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
-export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-fit-${fitid}-iter-master.tab"
+export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-master.tab"
 
 export r_init=37.1325                  # [arcsec]   test: 37.1325
+# export r_init=80.0                     # [arcsec]   test: 37.1325
 export max_iter=10                     # maximum number of iterations
 export r_tolerance=4.0                 # [arcsec]
 
 export EXTRACT_SRC_SPEC=1
 export CALCULATE_BACKSCALE=1
 
-export MAKE_RMF=0
-export MAKE_ARF=0
+export MAKE_RMF=1
+export MAKE_ARF=1
 
 export DO_SPECTROSCOPY=1
 export group_min=1
@@ -171,8 +172,7 @@ export rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)
 
 echo $rcore $rcore_phy
 
-echo  "# fitid iter r_fit r_500 r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $LOG_MASTER_FILE
-
+init_log_master $LOG_MASTER_FILE
 
 ######################################################################
 # iterator
@@ -189,7 +189,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
 
     rpad=$(echo $r | bc -l | xargs printf "%1.0f") # round
     rpad=`printf "%03d" $rpad`                     # zero pad
-    spectrumid="iter-r-$rpad"                      # identifier for spectral products
+    spectrumid="run-$fitid-iter-r-$rpad"                      # identifier for spectral products
 
     coordsystem="wcs"
     regname=${specdir}/${SRC_REGION_ID}-${rpad}.wcs.reg
@@ -300,6 +300,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
         cd $specdir
         pwd
 
+        # determine the combination of present instruments
         for instrument in ${instruments[@]}
         do
             case $instrument in
@@ -318,6 +319,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
             esac
         done
 
+        # select the script given the combination of instruments
         # FIXME add other instrument setups
         case $instsum in
             1)
@@ -340,16 +342,17 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
                 ;;
             7)
                 specscript=spec-iter-pnm1m2-${fitpars}.sh
-
-                echo "Running spectroscopy script :: "
-                echo ${codedir}/iter-spec/$specscript $CLNAME $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
-                ${codedir}/iter-spec/$specscript $CLNAME $fitid conf/$parfile $spectrumid $BG_REGION_ID $group_min
-                ${codedir}/quick-spec/gather-quickspec-results.sh run-${fitid}-${spectrumid} 1 # overwrites if exists
                 ;;
             *)
                 echo "Problem with instruments?"
         esac
 
+
+        echo "Running spectroscopy script :: "
+        echo ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
+        ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
+        ${codedir}/quick-spec/gather-quickspec-results.sh ${spectrumid} 1 # overwrites if exists
+        ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid}
 
     fi
 
@@ -359,9 +362,9 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     r_old=$r
 
     # r=$(echo "scale=6;$r*1.2" | bc) # dummy for debug
-    ${codedir}/py/t_to_r.py run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.result | tee run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper
+    ${codedir}/py/t_to_r.py ${spectrumid}/${CLNAME}-${spectrumid}.result | tee ${spectrumid}/${CLNAME}-${spectrumid}.aper
 
-    r=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    r=`egrep "\brfit_ang\b" ${spectrumid}/${CLNAME}-${spectrumid}.aper | awk '{print $2}'`
     r_phy=$(echo "scale=6;$r*20.0" | bc)
 
     rcore=$(echo "scale=6;$core_frac*$r" | bc)
@@ -375,7 +378,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     # write into the master: note: the current line corresponds to the
     # spectrum fitted in the (now) r_old aperture
 
-    aper_results=`read_aper_result_file run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper`
+    aper_results=`read_aper_result_file ${spectrumid}/${CLNAME}-${spectrumid}.aper`
 
     echo $fitid $iter $r_old $r $r_diff $aper_results >> $LOG_MASTER_FILE
 
@@ -393,6 +396,8 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     echo
 
 done
+
+mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final
 
 ######################################################################
 # exit

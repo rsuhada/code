@@ -143,26 +143,37 @@ function read_aper_result_file {
 
     infile=$1
 
-    norm=`egrep "\bnorm\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    norm_err_n=`egrep "\bnorm_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    norm_err_p=`egrep "\bnorm_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t_fit=`egrep "\bt_fit\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t_fit_err_n=`egrep "\bt_fit_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t_fit_err_p=`egrep "\bt_fit_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t500=`egrep "\bt500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    t500_err=`egrep "\bt500_err\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    z=`egrep "\bz\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    z_err_n=`egrep "\bz_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    z_err_p=`egrep "\bz_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    abund=`egrep "\babund\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    abund_err_n=`egrep "\babund_err_n\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    abund_err_p=`egrep "\babund_err_p\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    norm=`egrep "\bnorm\b" ${infile} | awk '{print $2}'`
+    norm_err_n=`egrep "\bnorm_err_n\b" ${infile} | awk '{print $2}'`
+    norm_err_p=`egrep "\bnorm_err_p\b" ${infile} | awk '{print $2}'`
+    t_fit=`egrep "\bt_fit\b" ${infile} | awk '{print $2}'`
+    t_fit_err_n=`egrep "\bt_fit_err_n\b" ${infile} | awk '{print $2}'`
+    t_fit_err_p=`egrep "\bt_fit_err_p\b" ${infile} | awk '{print $2}'`
+    t500=`egrep "\bt500\b" ${infile} | awk '{print $2}'`
+    t500_err=`egrep "\bt500_err\b" ${infile} | awk '{print $2}'`
+    z=`egrep "\bz\b" ${infile} | awk '{print $2}'`
+    z_err_n=`egrep "\bz_err_n\b" ${infile} | awk '{print $2}'`
+    z_err_p=`egrep "\bz_err_p\b" ${infile} | awk '{print $2}'`
+    abund=`egrep "\babund\b" ${infile} | awk '{print $2}'`
+    abund_err_n=`egrep "\babund_err_n\b" ${infile} | awk '{print $2}'`
+    abund_err_p=`egrep "\babund_err_p\b" ${infile} | awk '{print $2}'`
 
-    m500=`egrep "\bm500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    m500_err=`egrep "\bm500_err\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    r500=`egrep "\br500\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    rcore_ang=`egrep "\b0.15r500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
-    r500_ang=`egrep "\br500_ang\b" run-${fitid}-${spectrumid}/${CLNAME}-${spectrumid}-${fitid}.aper | awk '{print $2}'`
+    m500=`egrep "\bm500\b" ${infile} | awk '{print $2}'`
+    m500_err=`egrep "\bm500_err\b" ${infile} | awk '{print $2}'`
+    r500=`egrep "\br500\b" ${infile} | awk '{print $2}'`
+    rcore_ang=`egrep "\b0.15r500_ang\b" ${infile} | awk '{print $2}'`
+    r500_ang=`egrep "\br500_ang\b" ${infile} | awk '{print $2}'`
 
     echo $norm $norm_err_n $norm_err_p $t_fit $t_fit_err_n $t_fit_err_p $z $z_err_n $z_err_p $abund $abund_err_n $abund_err_p $t500 $t500_err $m500 $m500_err $r500 $r500_ang $rcore_ang
+}
+
+
+
+function init_log_master {
+    ######################################################################
+    # writes a topcat compliant header line to the master file that
+    # tracks the results of each iteration
+
+    local __LOG_MASTER_FILE=$1
+    echo  "# fitid iter r_fit r_fit_next r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $__LOG_MASTER_FILE
 }

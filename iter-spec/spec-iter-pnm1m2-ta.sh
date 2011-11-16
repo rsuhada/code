@@ -7,11 +7,10 @@ export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0
 # load in setup
 
 cluster=$1
-fitid=$2
-parfile=$3
-spectrumid=$4
-BG_REGION_ID=$5
-group_min=$6
+parfile=$2
+spectrumid=$3
+BG_REGION_ID=$4
+group_min=$5
 
 if [[ ! -e $parfile ]]
 then
@@ -22,7 +21,7 @@ fi
 
 source $parfile
 
-fileid=${cluster}-${spectrumid}-${fitid}
+fileid=${cluster}-${spectrumid}
 
 ######################################################################
 # rebin the spectra
@@ -161,7 +160,7 @@ save ${fileid}-model.xcm
 
 setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
 iplot ufspec
-label f ${cluster}, xmm, ${fitid}
+label f ${cluster}, xmm, ${spectrumid}
 csize 1.3
 lweigh 2
 lab t
@@ -272,7 +271,7 @@ tsig=`~/data1/sw/calc/calc-src.txt ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc-src.txt ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc-src.txt ${redshift_fit} / ${zerr}`
 
-echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
+echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 
 
 # reinstate sas11 DYLD path

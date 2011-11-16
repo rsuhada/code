@@ -5,16 +5,15 @@ Fri Sep  2 16:46:50 2011
 # TODO
 
 General:
+- background models!!!
 - centralize cosmology (see py and xspec part)
 - dedicated source detection module
 - add stuff for standard bands
-- add stuff for dcp bands (?)
+- add stuff for xdcp bands (?)
 - would be nice to cleanup the namespace (sometime variables are
   duplicated) and the capitalization convention should be better
 
 Iterator:
-- some trash cleanup?
-- 0.5r500 version
 - core PSF spillover?
 - how to stop before running into low s/n?
 - use andersson optimized band for spectroscopy
@@ -28,8 +27,6 @@ Snowden:
 - finalize/test proton
 - finalize/test combine-smooth.sh
 
-
-- DONE: qdp plotter on all stages
 
 
 ######################################################################
