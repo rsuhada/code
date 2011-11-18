@@ -62,7 +62,7 @@ if __name__ == '__main__':
     # 2
     # - 0.5T500-T500 vikhlinin09, T500-M vikhlinin 09, analytic r500
 
-    SCALING_OPTION=1
+    SCALING_OPTION=2
 
     ######################################################################
     # read in the spectrospopy results

@@ -48,6 +48,63 @@ fi
 
 
 ######################################################################
+# get prefix list and save the raw eventlists
+
+pnprefix_string="export PN_EV_PREFIX_LIST='"
+m1prefix_string="export M1_EV_PREFIX_LIST='"
+m2prefix_string="export M2_EV_PREFIX_LIST='"
+m3prefix_string="export MOS_EV_PREFIX_LIST='"
+
+
+for evli in mos1????-ori.fits
+do
+    prefix=`echo ${evli:3:5}`
+    echo $evli
+    echo $prefix
+    m1prefix_string="${m1prefix_string}${prefix} "
+    m3prefix_string="${m3prefix_string}${prefix} "
+    echo $m3prefix_string
+
+done
+
+
+for evli in mos2????-ori.fits
+do
+    prefix=`echo ${evli:3:5}`
+    echo $evli
+    echo $prefix
+    m2prefix_string="${m2prefix_string}${prefix} "
+    m3prefix_string="${m3prefix_string}${prefix} "
+done
+
+
+for evli in pn????-ori.fits
+do
+    prefix=`echo ${evli:2:4}`
+    echo $evli
+    echo $prefix
+    pnprefix_string="${pnprefix_string}${prefix} "
+done
+
+pnprefix_string=${pnprefix_string%?}"'"
+m1prefix_string=${m1prefix_string%?}"'"
+m2prefix_string=${m2prefix_string%?}"'"
+m3prefix_string=${m3prefix_string%?}"'"
+
+echo
+echo "Prefixes:"
+(
+echo
+echo $pnprefix_string
+echo $m1prefix_string
+echo $m2prefix_string
+echo $m3prefix_string
+echo
+) | tee -a $NOTESFILE
+
+
+
+######################################################################
 # clean up temporary files
 
 rm -f *.FIT

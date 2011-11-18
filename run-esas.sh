@@ -25,20 +25,17 @@ then
     exit 1
 fi
 
-
 ######################################################################
 # timing
 
 t="$(date +%s)"
 starttime=`date`
 
-
 ######################################################################
 # read in arguments
 
 export config_file=$1
 export module_list=$2
-
 
 ######################################################################
 # catch missing inputs
@@ -61,7 +58,6 @@ then
 fi
 source $module_list
 
-
 ######################################################################
 # setup
 
@@ -70,7 +66,6 @@ export startdir=`pwd`
 export workdir=${startdir}/${obsid}/analysis
 export NOTESDIR=${startdir}/notes
 export NOTESFILE=${NOTESDIR}/analysis-${CLNAME}.txt
-
 
 ######################################################################
 # check whether observation is present
@@ -82,7 +77,6 @@ then
     cd $startdir
     exit 1
 fi
-
 
 ######################################################################
 # sas setup
@@ -118,7 +112,6 @@ else
     export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
 
 fi
-
 
 ######################################################################
 # write start message

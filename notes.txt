@@ -5,6 +5,9 @@ Fri Sep  2 16:46:50 2011
 # TODO
 
 General:
+
+- top level dir handling should be changed - now requires an OBSID dir
+(or link) so having 2 reductions is cumbersome!
 - background models!!!
 - centralize cosmology (see py and xspec part)
 - dedicated source detection module
@@ -34,6 +37,39 @@ Snowden:
 
 iter-spec
 - requires cosmo_dist.py in the python path
+
+
+######################################################################
+# running on a dir
+
+1. download tar from XSA
+2. untar 1 time: should be OBSID/odf/xxxxxx.tar.gz
+3. have a .conf and .modules file in configs/ (e.g. copy templates)
+4. there should be a notes/ dir for analysis notes
+5. there has to be a soft link OBSID -> your analysis dir
+6. initialize heasoft, sas11
+7.
+
+dir=test0205 ; run-esas.sh configs/${dir}.conf configs/${dir}.modules 2>&1 | tee log-${dir}-TESTING-prefixes.log
+
+NOTES:
+3. -> path can be set from running run-esas.sh
+
+3. 4. -> or change the setups in run-esas.sh
+
+5. -> should be changed to allow multiple reductions per OBSID
+
+######################################################################
+# file naming
+
+possible prefixes are:
+
+[pn,mos1,mos2][U,S]???
+
+
+analysis:
+pnS003-ori.fits    - raw event list
+pnS003-clean.fits  - cleaned event list
 
 
 ######################################################################
