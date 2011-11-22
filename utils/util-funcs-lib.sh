@@ -168,7 +168,6 @@ function read_aper_result_file {
 }
 
 
-
 function init_log_master {
     ######################################################################
     # writes a topcat compliant header line to the master file that
@@ -176,4 +175,84 @@ function init_log_master {
 
     local __LOG_MASTER_FILE=$1
     echo  "# fitid iter r_fit r_fit_next r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $__LOG_MASTER_FILE
+}
+
+
+function make-im {
+    ######################################################################
+    # extracts an image
+
+    inevli=$1
+    outim=$2
+    elo=$3
+    ehi=$4
+    expression=$5
+
+    evselect \
+        table=$inevli \
+        withimageset=yes \
+        imageset=$outim \
+        withspectrumset=yes \
+        spectrumset=$outspec \
+        withzcolumn=$zcol \
+        expression="PI>$elo && PI<$ehi && FLAG .eq. 0 $expression" \
+        filteredset=filtered.fits \
+        withfilteredset=no \
+        keepfilteroutput=no \
+        flagcolumn=EVFLAG \
+        flagbit=-1 \
+        destruct=yes \
+        dssblock='' \
+        filtertype=expression \
+        cleandss=no \
+        updateexposure=yes \
+        filterexposure=yes \
+        writedss=yes \
+        blockstocopy='' \
+        attributestocopy='' \
+        energycolumn=PHA \
+        zcolumn=WEIGHT \
+        zerrorcolumn=EWEIGHT \
+        withzerrorcolumn=no \
+        ignorelegallimits=no \
+        xcolumn=X \
+        ycolumn=Y \
+        ximagebinsize=80 \
+        yimagebinsize=80 \
+        squarepixels=no \
+        ximagesize=600 \
+        yimagesize=600 \
+        imagebinning=binSize \
+        ximagemin=1 \
+        ximagemax=640 \
+        withxranges=no \
+        yimagemin=1 \
+        yimagemax=640 \
+        withyranges=no \
+        imagedatatype=Real64 \
+        withimagedatatype=no \
+        raimagecenter=0 \
+        decimagecenter=0 \
+        withcelestialcenter=no \
+        spectralbinsize=10 \
+        specchannelmin=0 \
+        specchannelmax=4095 \
+        withspecranges=no \
+        rateset=rate.fits \
+        timecolumn=TIME \
+        timebinsize=1 \
+        timemin=0 \
+        timemax=1000 \
+        withtimeranges=no \
+        maketimecolumn=no \
+        makeratecolumn=no \
+        withrateset=no \
+        histogramset=histo.fits \
+        histogramcolumn=TIME \
+        histogrambinsize=1 \
+        histogrammin=0 \
+        histogrammax=1000 \
+        withhistoranges=no \
+        withhistogramset=no
+
 }

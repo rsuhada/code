@@ -288,7 +288,7 @@ export GROUP_SPEC=0                             # FIXME - prefixes the
 # lead to kernel panic if overload)
 
 export QUICK_SPEC_LOCBG=1
-# roughly 20 mins if extracting both source and background, armf, rmf
+# roughly 20 mins if extracting both source and background, arf, rmf
 # and backscale
 
 export PREP_ODF_DIR=0

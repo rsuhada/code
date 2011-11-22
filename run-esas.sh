@@ -411,6 +411,33 @@ then
     fi
 fi
 
+######################################################################
+# imaging pipeline
+
+if [[ $MAKE_IMS -eq 1 ]]
+then
+    ${codedir}/make-ims.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+if [[ $MAKE_EXP_MAP -eq 1 ]]
+then
+    ${codedir}/make-exp-map.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+######################################################################
+
+
 
 ######################################################################
 # utilities

@@ -45,7 +45,7 @@ fi
 
 
 ######################################################################
-# extract pn spectra - soft band
+# extract pn spectra - hard band
 
 prefix=$PN_EV_PREFIX_LIST
 elow='2000'     # detection bands minima [eV]
@@ -67,6 +67,31 @@ then
     cd $startdir
     exit 1
 fi
+
+######################################################################
+# extract pn spectra - standard band
+
+prefix=$PN_EV_PREFIX_LIST
+elow='500'     # detection bands minima [eV]
+ehigh='2000'    # detection bands maxima [eV]
+regfile=$PN_SRC_REGFILE
+pattern=4
+quad1=$PN_QUAD1
+quad2=$PN_QUAD2
+quad3=$PN_QUAD3
+quad4=$PN_QUAD4
+
+
+pn-spectra prefix="$prefix" caldb=$esas_caldb region=$regfile mask=1 elow=$elow ehigh=$ehigh  pattern=4 quad1=$quad1 quad2=$quad2 quad3=$quad3 quad4=$quad4
+
+if [[ $? -ne 0 ]]
+then
+    echo -e "\n** error: pn spectral extraction in standard band failed!"
+    echo -e "*** error in script: $0\n"
+    cd $startdir
+    exit 1
+fi
+
 
 
 ######################################################################
