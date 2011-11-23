@@ -8,6 +8,8 @@ General:
 
 - top level dir handling should be changed - now requires an OBSID dir
 (or link) so having 2 reductions is cumbersome!
+- imaging pipeline
+- find out what causes the eveselct change - go through the pars
 - background models!!!
 - centralize cosmology (see py and xspec part)
 - dedicated source detection module

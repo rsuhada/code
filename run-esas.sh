@@ -416,7 +416,7 @@ fi
 
 if [[ $MAKE_IMS -eq 1 ]]
 then
-    ${codedir}/make-ims.sh ${workdir}
+    ${codedir}/imaging/make-ims.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -427,7 +427,7 @@ fi
 
 if [[ $MAKE_EXP_MAP -eq 1 ]]
 then
-    ${codedir}/make-exp-map.sh ${workdir}
+    ${codedir}/imaging/make-exp-map.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

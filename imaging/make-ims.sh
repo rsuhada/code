@@ -7,19 +7,28 @@ dir=$1
 here=`pwd`
 cd $dir
 
-
-for prefix in $MOS_EV_PREFIX_LIST
-do
+######################################################################
+# extraction for the 0.5-2 keV band
 
 elo="500"
 ehi="2000"
-vignetting=$7
 
-echo make-im mos${prefix}-clean.fits mos${prefix}-im-${elo}-${ehi}.fits $elo $ehi
+pattern="&& (PATTERN<=12)"
 
+for prefix in $MOS_EV_PREFIX_LIST
+do
+    echo make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
+    make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
 done
 
 
+pattern="&& (PATTERN<=4)"
+
+for prefix in $PN_EV_PREFIX_LIST
+do
+    echo make-im pn${prefix}-clean.fits pn${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
+    make-im pn${prefix}-clean.fits pn${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
+done
 
 
 ######################################################################
