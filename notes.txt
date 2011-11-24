@@ -6,15 +6,16 @@ Fri Sep  2 16:46:50 2011
 
 General:
 
+- maybe need to add 02-05 for the esas extract_spec modules? (will
+  increase runtime significantly)
+- in 0205 the pn-man-mask.fits.cheese are merged all 3 (same for m1
+  and m2) - rahter than individual... why?
 - top level dir handling should be changed - now requires an OBSID dir
-(or link) so having 2 reductions is cumbersome!
+  (or link) so having 2 reductions is cumbersome!
 - imaging pipeline
 - find out what causes the eveselct change - go through the pars
-- background models!!!
 - centralize cosmology (see py and xspec part)
 - dedicated source detection module
-- add stuff for standard bands
-- add stuff for xdcp bands (?)
 - would be nice to cleanup the namespace (sometime variables are
   duplicated) and the capitalization convention should be better
 
@@ -302,7 +303,7 @@ export CHEESE_2B=0                              # !!!! not tested yet
 export REMASK=0
 export REMASK_MANUAL_MASK=0
 export CORRECT_PROTON=0            # !!!! not finished/tested yet
-export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
+export COMBINE_SMOOTH=0            # !!!! not finished/tested yet
 export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
 export PIPE_TEST=0
 export PLT_LC_HIST=0
@@ -318,12 +319,18 @@ for iterative spectroscopy:
 - convergence typically in <5 iterations (hard limit 10 at the moment)
 
 ######################################################################
-# libraries with internal settings variables
-# i.e. stuff that can/should be tweaked locally in the file
+# libraries with internal settings/options variables
+# i.e. stuff that can/should be tweaked locally manually  in the file
 
 quick-spec-locbg.sh
 iter-spec/iter-spec-driver.sh
 py/t_to_r.py
+
+/imaging/make-model-bg-spline.sh
+USE_OOT=0                       # use the oot correction for pn? using
+                                # it causes some small (maybe
+                                # negligible) artefacts
+
 
 ######################################################################
 # currently deprecated scripts (debris, early draft no used

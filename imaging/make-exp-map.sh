@@ -1,6 +1,6 @@
 ######################################################################
-# script extracting vignetted and unvignetted exposure maps for the
-# imaging pipe
+# script extracting vignetted and unvignetted exposure maps and
+# detection masks for the imaging pipe
 
 dir=$1
 here=`pwd`
@@ -12,10 +12,10 @@ cd $dir
 elo="500"
 ehi="2000"
 
-
 for prefix in $MOS_EV_PREFIX_LIST
 do
     image=mos${prefix}-${elo}-${ehi}.im
+    image=mos${prefix}-obj-im-400-1250-full.fits
     evli=mos${prefix}-clean.fits
 
     if [[ ! -e $image ]]
@@ -30,13 +30,15 @@ do
         withdetcoords=no withvignetting=yes usefastpixelization=no \
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 
+    outmask=mos${prefix}-${elo}-${ehi}.mask
+	emask expimageset=$outexp detmaskset=$outmask threshold1=0.1
+
     outexp=mos${prefix}-${elo}-${ehi}.uv.exp
     eexpmap imageset=${image} attitudeset=atthk.fits \
         eventset=${evli}:EVENTS expimageset=${outexp} \
         withdetcoords=no withvignetting=no usefastpixelization=no \
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 done
-
 
 for prefix in $PN_EV_PREFIX_LIST
 do
@@ -54,6 +56,9 @@ do
         eventset=${evli}:EVENTS expimageset=${outexp} \
         withdetcoords=no withvignetting=yes usefastpixelization=no \
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
+
+    outmask=pn${prefix}-${elo}-${ehi}.mask
+	emask expimageset=$outexp detmaskset=$outmask threshold1=0.1
 
     outexp=pn${prefix}-${elo}-${ehi}.uv.exp
     eexpmap imageset=${image} attitudeset=atthk.fits \

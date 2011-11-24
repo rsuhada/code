@@ -256,3 +256,47 @@ function make-im {
         zerrorcolumn=EWEIGHT
 
 }
+
+function eval_ccd_pattern {
+    ######################################################################
+    # returns a pattern string for MOS1 or MOS2 based on good chips
+    # note: idiot SAS won't make correct exp maps if you only remove
+    # bad chips - instead you have to allow all the good chips
+
+    inst=$1
+    outpattern='('
+
+    case $inst in
+        m1)
+            for ccd in M1_CCD1 M1_CCD2 M1_CCD3 M1_CCD4 M1_CCD5 M1_CCD6 M1_CCD7
+            do
+                if [[ $ccd -eq 1 ]]
+                then
+                    ccdnr=${ccd#${ccd%?}}
+                    outpattern="${outpattern}(CCDNR == ${ccdnr})||"
+                fi
+            done
+            ;;
+        m2)
+           for ccd in M2_CCD1 M2_CCD2 M2_CCD3 M2_CCD4 M2_CCD5 M2_CCD6 M2_CCD7
+            do
+                if [[ $ccd -eq 1 ]]
+                then
+                    ccdnr=${ccd#${ccd%?}}
+                    outpattern="${outpattern}(CCDNR == ${ccdnr})||"
+                fi
+            done
+            ;;
+        *)
+            echo "** error: unknown instrument"
+            cd $startdir
+            exit 1
+    esac
+
+    # lazy strip the trailing ||
+    outpattern=${outpattern%?}
+    outpattern="${outpattern%?})"
+
+    echo "$outpattern"
+}
+

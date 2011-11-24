@@ -424,7 +424,6 @@ then
     fi
 fi
 
-
 if [[ $MAKE_EXP_MAP -eq 1 ]]
 then
     ${codedir}/imaging/make-exp-map.sh ${workdir}
@@ -435,9 +434,25 @@ then
     fi
 fi
 
-######################################################################
+if [[ $MAKE_MODEL_BG_2COMP -eq 1 ]]
+then
+    ${codedir}/imaging/make-model-bg-2comp.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
 
-
+if [[ $MAKE_MODEL_BG_SPLINE -eq 1 ]]
+then
+    ${codedir}/imaging/make-model-bg-spline.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
 
 ######################################################################
 # utilities

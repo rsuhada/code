@@ -14,13 +14,20 @@ elo="500"
 ehi="2000"
 
 pattern="&& (PATTERN<=12)"
+m1ccdpattern=$(eval_ccd_pattern m1)
+m2ccdpattern=$(eval_ccd_pattern m2)
 
-for prefix in $MOS_EV_PREFIX_LIST
+for prefix in $M1_EV_PREFIX_LIST
 do
-    echo make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
-    make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
+    echo make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern && $m1ccdpattern"
+    make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern && $m1ccdpattern"
 done
 
+for prefix in $M2_EV_PREFIX_LIST
+do
+    echo make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern && $m2ccdpattern"
+    make-im mos${prefix}-clean.fits mos${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern && $m2ccdpattern"
+done
 
 pattern="&& (PATTERN<=4)"
 
@@ -37,8 +44,6 @@ done
 cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0
-
-
 
 
 

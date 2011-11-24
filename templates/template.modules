@@ -42,11 +42,12 @@ export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
 export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
 
 ######################################################################
-# imaging pipeline
+# imaging pipeline: 0.5-2 keV
 
 MAKE_IMS=0
 MAKE_EXP_MAP=0
-MAKE_BG_MAP=0
+MAKE_MODEL_BG_2COMP=0
+MAKE_MODEL_BG_SPLINE=0
 
 ######################################################################
 # utilities
