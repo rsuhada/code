@@ -2,7 +2,6 @@
 # library of utility functions
 
 function get_cluster_pars {
-
     ######################################################################
     # looks through an analysis notebook file returning the requested
     # parameters. Input is an array, e.g.  pars=(RA DE RA60

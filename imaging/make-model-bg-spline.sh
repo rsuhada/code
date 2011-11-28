@@ -21,16 +21,18 @@ USE_OOT=0                       # use the oot correction for pn? using
                                 # it causes some small (maybe
                                 # negligible) artefacts
 
-srclist=emllist-man.fits
 
-if [[ ! -e $srclist ]]
-then
-    echo -e "\n** warning: $srclist does not exists here!"
-    echo -e "*** Will use the automatic $srclist\n"
-    srclist=emllist.fits
-fi
+# emledetextsrclist causes segfault now... so using lower level
+# eboxdetect src list
+# srclist=emllist-man.fits
+# if [[ ! -e $srclist ]]
+# then
+#     echo -e "\n** warning: $srclist does not exists here!"
+#     echo -e "*** Will use the automatic $srclist\n"
+#     srclist=emllist.fits
+# fi
 
-    srclist=boxlist.fits
+srclist=boxlist.fits
 
 ######################################################################
 # do the extraction: 0.5-2 keV band

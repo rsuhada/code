@@ -69,11 +69,14 @@ possible prefixes are:
 
 [pn,mos1,mos2][U,S]???
 
-
 analysis:
 pnS003-ori.fits    - raw event list
 pnS003-clean.fits  - cleaned event list
 
+abbreviations:
+ps - point source(s)
+bg - background
+uv - unvignetted
 
 ######################################################################
 # create region - manual solution - CLOSED
@@ -163,6 +166,8 @@ ecoordconv:-  Region Centre:
 ######################################################################
 # point source removal - CLOSED
 
+# FIXME: adding more elegant solution at the remask step
+
 ds9 *cheese*
 
 compare this to image - if removal is insufficient:
@@ -188,7 +193,7 @@ cuts depending on what is in remask.sh
 
 Further trick:
 
-ds *cheese* &
+ds9 *cheese* &
 
 create contours, 2 levels 0/1, lowest smoothness and save this way
 you'll see which of the all emldetect sources get actually masked out
@@ -243,7 +248,6 @@ PS_REGION=ps-man.phy.reg
 
 6. run quick-spec-locbg.sh via run-esaspi.sh (set it in the modules)
 
-
 ######################################################################
 # analysis-template.txt
 
@@ -253,7 +257,6 @@ PS_REGION=ps-man.phy.reg
   automatically
 - i.e. alternative parameters are supported, and this is the mechanism
   to load them in
-
 
 ######################################################################
 # xspec sas11 conflict
@@ -321,6 +324,8 @@ for iterative spectroscopy:
 ######################################################################
 # libraries with internal settings/options variables
 # i.e. stuff that can/should be tweaked locally manually  in the file
+
+remask.sh - can change options whether or not add manually selected ps
 
 quick-spec-locbg.sh
 iter-spec/iter-spec-driver.sh

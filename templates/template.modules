@@ -12,13 +12,14 @@ export RUN_FILTERS=0
 export CHEESE_1B=0
 export CHEESE_2B=0                              # !!!! not tested yet
 
-# MANUAL STEP: select OK chips/quadrats: ds9 *soft* &
-# MANUAL STEP: inspect point source removal, might need updating: ds9
-# *cheese* & (see notes) - after done and change is required run
-# REMASK
+# MANUAL STEP: select OK chips/quadrats: ds9 *soft* & MANUAL STEP:
+# inspect point source removal, might need updating: ds9 *cheese* &
+# (see notes) - after done and change is required run new sources
+# should be added to ps-man.phy.region, they will be removed by the
+# remask.sh task
 
 export REMASK=0
-export REMASK_MANUAL_MASK=0
+export REMASK_MANUAL_MASK=0         # FIXME: currently a useless mess
 
 # MANUAL STEP: define spectroscopy region in detectro coords - set
 # region names in the option part

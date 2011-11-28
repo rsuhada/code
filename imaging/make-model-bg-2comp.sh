@@ -12,14 +12,15 @@ cd $dir
 elo="500"
 ehi="2000"
 
-srclist=emllist-man.fits
-
-if [[ ! -e $srclist ]]
-then
-    echo -e "\n** warning: $srclist does not exists here!"
-    echo -e "*** Will use the automatic $srclist\n"
-    srclist=emllist.fits
-fi
+# emledetextsrclist causes segfault now... so using lower level
+# eboxdetect src list
+# srclist=emllist-man.fits
+# if [[ ! -e $srclist ]]
+# then
+#     echo -e "\n** warning: $srclist does not exists here!"
+#     echo -e "*** Will use the automatic $srclist\n"
+#     srclist=emllist.fits
+# fi
 
 srclist=boxlist.fits
 

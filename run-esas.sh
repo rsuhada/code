@@ -455,6 +455,20 @@ then
 fi
 
 ######################################################################
+# sb analyis pipe
+
+if [[ $GET_SB_PROFILE -eq 1 ]]
+then
+    ${codedir}/sb/get-sb-profile.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
 # utilities
 
 if [[ $PIPE_TEST -eq 1 ]]
