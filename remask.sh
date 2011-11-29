@@ -21,19 +21,6 @@ echo "** warning: check point source removal condition - currently using esas de
 expression='(DIST_NN >= 20.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)'
 
 ######################################################################
-# add manually adjusted ps to the exclusion
-
-REMOVE_MAN_PS=1
-MAN_PS_REG=ps-man.phy.reg
-
-if [[ $REMOVE_MAN_PS -eq 1 ]]
-then
-    ds9reg_to_sasdesc $MAN_PS_REG 0
-    inpattern=`cat ${MAN_PS_REG}.desc`
-    expression="$expression $inpattern"
-fi
-
-######################################################################
 # m1
 
 export prefix=$M1_EV_PREFIX_LIST

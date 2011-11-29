@@ -1,6 +1,3 @@
-Fri Sep  2 16:46:50 2011
-
-
 ######################################################################
 # TODO
 
@@ -342,3 +339,4 @@ USE_OOT=0                       # use the oot correction for pn? using
 # anymore/not useful at the moment)
 
 quick-spec/setrsp.sh
+see also ../aux-esaspi/ (not under git)
