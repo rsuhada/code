@@ -2,36 +2,7 @@
 import sys
 import pyfits
 from numpy import *
-
-def sqdistance(xcen, ycen, x, y):
-    return (xcen - x)**2 + (ycen - y)**2
-
-def dist_matrix(im, xcen, ycen):
-    outmatrix = zeros([im.shape[0], im.shape[1]])
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            outmatrix[i, j] = sqdistance(xcen, ycen, j , i)
-
-    return outmatrix
-
-def get_stat(im, distmatrix, xim, yim, r_aper):
-    ids = where(distmatrix <= r_aper)
-    num_pix = len(ids[0])
-    # print im[ids]
-    tot_cts = sum(im[ids])
-    mean_cts = mean(im[ids])
-    stdev_cts =std(im[ids])
-
-    # barring the 0 and less elements
-    ids = where((distmatrix <= r_aper) & (im>0))
-    num_pix_non0 = len(ids[0])
-    tot_cts_non0 = sum(im[ids])
-    mean_cts_non0 = mean(im[ids])
-    stdev_cts_non0 =std(im[ids])
-
-    maskfrac=double(num_pix_non0)/double(num_pix)
-
-    return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
+from sb_utils import *
 
 if __name__ == '__main__':
     """
@@ -44,6 +15,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 4:
         ######################################################################
         # gather arguments
+
         imname = sys.argv[1]
         xim = double(sys.argv[2]) - 1.0
         yim = double(sys.argv[3]) - 1.0
@@ -51,13 +23,14 @@ if __name__ == '__main__':
 
         ######################################################################
         # read in data
+
         fname = imname
         hdu = pyfits.open(fname)
         im = hdu[0].data
 
-        distmatrix = dist_matrix(im, xim, yim)
+        distmatrix = sqdist_matrix(im, xim, yim)
 
-        answer = get_stat(im, distmatrix, xim, yim, r_aper)
+        answer = get_cts_stat(im, distmatrix, xim, yim, r_aper)
 
         #############################################################################
         # info output
@@ -90,7 +63,7 @@ if __name__ == '__main__':
             fname = bgname
             hdu = pyfits.open(fname)
             bg = hdu[0].data
-            bgcts = get_stat(bg, distmatrix, xim, yim, r_aper)[0]
+            bgcts = get_cts_stat(bg, distmatrix, xim, yim, r_aper)[0]
 
             mask = bg / bg
 
@@ -100,11 +73,11 @@ if __name__ == '__main__':
             # hdu.writeto('mask.fits', clobber=True)
 
 
-            maskcts=get_stat(mask, distmatrix, xim, yim, r_aper)[0]
+            maskcts=get_cts_stat(mask, distmatrix, xim, yim, r_aper)[0]
 
             areamask = mask + 1.0
             areamask = areamask / areamask
-            areamaskcts = get_stat(areamask, distmatrix, xim, yim, r_aper)[0]
+            areamaskcts = get_cts_stat(areamask, distmatrix, xim, yim, r_aper)[0]
 
             correction=1.0 + (1.0 - maskcts/areamaskcts)
 

@@ -1,5 +1,5 @@
 ######################################################################
-# start the SB analysis
+# extracts
 
 source ${codedir}/utils/util-funcs-lib.sh
 
@@ -12,11 +12,15 @@ cd $dir
 
 elo="500"
 ehi="2000"
-aperture=80.0
+aperture=100.0                  # [pix]
 
 image=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.im
-bgmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.bg
 expmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.exp
+bgmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.bg
+mask=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.mask
+
+######################################################################
+# get center
 
 pars=(X_IM Y_IM)
 out=`get_cluster_pars $pars`
@@ -26,21 +30,8 @@ yim=`echo $out | awk '{print $2}'`
 ######################################################################
 # run
 
-${codedir}/sb/sb_prof.py $image $xim $yim $aperture $bgmap
-
-######################################################################
-#  output report
-
-echo
-echo "###################################"
-echo "image  :: " $image
-echo "bgmap  :: " $bgmap
-echo "expmap :: " $expmap
-echo "###################################"
-echo "xim    :: " $xim
-echo "yim    :: " $yim
-echo "###################################"
-echo
+echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
+${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
 
 ######################################################################
 # exit

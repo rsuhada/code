@@ -457,9 +457,19 @@ fi
 ######################################################################
 # sb analyis pipe
 
-if [[ $GET_SB_PROFILE -eq 1 ]]
+if [[ $GET_CTS_STAT_APER -eq 1 ]]
 then
-    ${codedir}/sb/get-sb-profile.sh ${workdir}
+    ${codedir}/sb/get-cts-stat-aper.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+if [[ $EXTRACT_SB_PROF -eq 1 ]]
+then
+    ${codedir}/sb/extract-sb-prof.sh ${workdir}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

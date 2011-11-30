@@ -11,6 +11,7 @@ cd $dir
 
 elo="500"
 ehi="2000"
+emask_thresh1=0.01              # [ defailt = 0.1 ]
 
 MAN_PS_REG_PHYS=ps-man.phy.reg
 MAN_PS_REG=ps-man.im.reg
@@ -59,7 +60,7 @@ do
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 
     outmask=pn${prefix}-${elo}-${ehi}.mask
-	emask expimageset=$outexp detmaskset=$outmask threshold1=0.1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
 
     outexp=pn${prefix}-${elo}-${ehi}.uv.exp
 
@@ -93,7 +94,7 @@ do
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 
     outmask=mos${prefix}-${elo}-${ehi}.mask
-	emask expimageset=$outexp detmaskset=$outmask threshold1=0.1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
 
     outexp=mos${prefix}-${elo}-${ehi}.uv.exp
 
