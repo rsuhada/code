@@ -72,7 +72,6 @@ if __name__ == '__main__':
             # hdu = pyfits.PrimaryHDU(mask)
             # hdu.writeto('mask.fits', clobber=True)
 
-
             maskcts=get_cts_stat(mask, distmatrix, xim, yim, r_aper)[0]
 
             areamask = mask + 1.0
@@ -89,7 +88,7 @@ if __name__ == '__main__':
             print "Corr. factor :: ", correction
             print "Area corrected BG CTS :: ", correction * bgcts
             print "Area corrected Source CTS ::", correction * (cts-bgcts)
-        print
+            print
 
     else:
         print

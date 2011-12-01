@@ -12,7 +12,8 @@ cd $dir
 
 elo="500"
 ehi="2000"
-aperture=100.0                  # [pix]
+aperture=50.0                  # [pix]
+output="sb-prof."$(date +"%y%m%d")".dat"
 
 image=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.im
 expmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.exp
@@ -30,8 +31,8 @@ yim=`echo $out | awk '{print $2}'`
 ######################################################################
 # run
 
-echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
-${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
+echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
 
 ######################################################################
 # exit
@@ -39,3 +40,5 @@ ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
 cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0
+
+

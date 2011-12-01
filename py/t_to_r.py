@@ -99,7 +99,6 @@ if __name__ == '__main__':
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
     ang_scale = da * math.tan(math.pi/(180.0*3600.0))            # [Mpc/asec]
 
-
     if (SCALING_OPTION == 1):
         print "Scaling relation chain : ", SCALING_OPTION
         (t500, t500_err) = (t, t_err)
@@ -115,7 +114,6 @@ if __name__ == '__main__':
         r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
         r500_ang = r500 / ang_scale # [asec]
         rfit_ang = 0.5 * r500_ang   # fit only in the half aperture
-
 
     ######################################################################
     # output
