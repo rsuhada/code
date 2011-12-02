@@ -3,22 +3,37 @@
 
 source ${codedir}/utils/util-funcs-lib.sh
 
-dir=$1
-here=`pwd`
-cd $dir
+function do_sb_extraction {
+    ######################################################################
+    # the file input/output names
+
+    outputid=$1
+
+    image=${inst}${prefix}-${elo}-${ehi}.im
+    expmap=${inst}${prefix}-${elo}-${ehi}.exp
+    bgmap=${inst}${prefix}-${elo}-${ehi}.bg
+    mask=${inst}${prefix}-${elo}-${ehi}.mask
+    output="sb-prof-${outputid}-"$(date +"%y%m%d")"-${reduction_id}.dat"
+
+    ######################################################################
+    # run
+
+    echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+    ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+
+}
 
 ######################################################################
 # input parameters
 
+dir=$1
+here=`pwd`
+cd $dir
+
 elo="500"
 ehi="2000"
 aperture=50.0                  # [pix]
-output="sb-prof."$(date +"%y%m%d")".dat"
-
-image=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.im
-expmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.exp
-bgmap=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.bg
-mask=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.mask
+reduction_id="001"
 
 ######################################################################
 # get center
@@ -29,10 +44,28 @@ xim=`echo $out | awk '{print $1}'`
 yim=`echo $out | awk '{print $2}'`
 
 ######################################################################
-# run
+# extract the profile
 
-echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
-${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+# pn
+inst=pn
+for prefix in $PN_EV_PREFIX_LIST
+do
+    do_sb_extraction pn
+done
+
+# m1
+inst=mos1
+for prefix in $M1_EV_PREFIX_LIST
+do
+    do_sb_extraction mos1
+done
+
+# m2
+inst=mos2
+for prefix in $M2_EV_PREFIX_LIST
+do
+    do_sb_extraction mos2
+done
 
 ######################################################################
 # exit
@@ -40,5 +73,3 @@ ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture
 cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0
-
-

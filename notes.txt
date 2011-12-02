@@ -338,3 +338,48 @@ USE_OOT=0                       # use the oot correction for pn? using
 
 quick-spec/setrsp.sh
 see also ../aux-esaspi/ (not under git)
+
+
+######################################################################
+# devel notes
+
+0. random
+
+- dmfilth for refiling ps/gaps
+
+1. SB analyisis
+
+- 1D vs 2D fitting
+
+- binning - 3sigma + logarithmic min? or better not at all
+
+- arnaud02 vs mohr99
+- further: pratt & arnaud02 (2d fit), pratt & arnaud05
+- final refinement croston05
+
+- XMM-LSS:
+- alshino10
+- claim arnaud02, not clear
+- get a test case from here?
+
+arnaud02
+- RX J1120.1+4318 - another test case (start here)
+
+other references - helpful:
+
+- lorenzo - no
+- yu-ying thesis - no
+- desiree - no
+- karl - ??
+- SAS ??
+- snowden no
+- sanders ??
+- maughan vids - ??
+
+
+2. background
+
+- in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
+- also the chipgaps are too larger - check snowden parameters on it
+- other methods: arnaud, xmm-LSS, yu-ying, snowden, karl
+
