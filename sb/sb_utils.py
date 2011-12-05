@@ -55,3 +55,54 @@ def cal_aper_sum(im, distmatrix, xim, yim, r_aper):
     tot_cts = sum(im[ids])
 
     return (tot_cts)
+
+
+def beta_model(pars, r):
+    """
+    Return 2D beta model.
+
+    Arguments:
+    - 'pars': parameter list containg:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+    - `r`: radius
+    """
+
+    [norm, rcore, beta] = pars
+
+    out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
+    return out
+
+
+def beta_model_likelihood(r, data, data_err, beta_pars):
+    """
+    Likelihood function for the beta model fitting
+
+    Arguments:
+    - `r`: radius
+    - `data`: curve (surface brightnes) -> data
+    - `data_err`: error on curve (surface brightnes) -> data
+    - 'beta_pars: list of beta mode parameters = [norm, rcore, beta]'
+    """
+    from sb_utils import beta_model
+
+    model = beta_model(beta_pars, r)
+    l = sum(((data-model)/data_err)**2.0)
+
+    return l
+
+
+def arrays2minuit(x, y, y_err):
+    """
+    Convert the three numpy input arrays into a minuit compatible input data
+    structure (list of tuples, where each tuple has 3 element: x[i], y[i],
+    y_err[i])
+    """
+
+    minuit_data = []
+
+    for i in range(len(x)):
+        minuit_data.append((x[i],y[i],y_err[i]))
+
+    return minuit_data

@@ -42,7 +42,7 @@ if __name__ == '__main__':
         f.write('# aper  '+str(aper)+'\n')
         f.write('#\n')
 
-        f.write('# r cts_src cts_bg cts_tot exp_time area_correction mask_area geometric_area cts_src_wps cts_bg_wps cts_tot_wps exp_time_wps area_correction_wps mask_area_wps\n')
+        f.write('# r sb_src sb_bg sb_tot sb_src_err sb_bg_err sb_tot_err ctr_src ctr_bg ctr_tot ctr_src_err ctr_bg_err ctr_tot_err cts_src cts_bg cts_tot cts_src_err cts_bg_err cts_tot_err exp_time area_correction mask_area geometric_area sb_src_wps sb_bg_wps sb_tot_wps sb_src_wps_err sb_bg_wps_err sb_tot_wps_err ctr_src_wps ctr_bg_wps ctr_tot_wps ctr_src_wps_err ctr_bg_wps_err ctr_tot_wps_err cts_src_wps cts_bg_wps cts_tot_wps cts_src_wps_err cts_bg_wps_err cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
 
 
         ######################################################################
@@ -114,7 +114,7 @@ if __name__ == '__main__':
             cts_src_wps = cts_tot_wps - cts_bg_wps
 
             ######################################################################
-            # *withou* ps, area corrected
+            # *without* ps, area corrected
 
             # calculate the missing area correction factor
             mask_area = sum(mask[ids])
@@ -127,30 +127,87 @@ if __name__ == '__main__':
             cts_src = cts_tot - cts_bg
 
             ######################################################################
-            # calculate the countrates (area corrected)
+            # calculate the counts/countrates/surface brightness (area corrected)
 
             if (exp_time_wps > 0.0):
                 # with ps
-                ctr_tot_wps = cts_tot/exp_time_wps
-                ctr_bg_wps  = cts_bg/exp_time_wps
-                ctr_src_wps = cts_src/exp_time_wps
+                ctr_tot_wps     = cts_tot_wps/exp_time_wps
+                ctr_bg_wps      = cts_bg_wps/exp_time_wps
+                ctr_src_wps     = cts_src_wps/exp_time_wps
+
+                sb_tot_wps      = ctr_tot_wps/mask_area_wps
+                sb_bg_wps       = ctr_bg_wps/mask_area_wps
+                sb_src_wps      = ctr_src_wps/mask_area_wps
+
+                # poisson errors
+                cts_tot_wps_err = sqrt(cts_tot)
+                cts_bg_wps_err  = sqrt(cts_bg)
+                cts_src_wps_err = sqrt(cts_tot_wps_err**2.0 + cts_bg_wps_err**2.0)
+
+                ctr_tot_wps_err = cts_tot_wps_err/exp_time_wps
+                ctr_bg_wps_err  = cts_bg_wps_err/exp_time_wps
+                ctr_src_wps_err = sqrt(ctr_tot_wps_err**2.0 + ctr_bg_wps_err**2.0)
+
+                sb_tot_wps_err  = ctr_tot_wps_err/mask_area_wps
+                sb_bg_wps_err   = ctr_bg_wps_err/mask_area_wps
+                sb_src_wps_err  = ctr_src_wps_err/mask_area_wps
 
                 # without point surces
-                ctr_tot = cts_tot/exp_time
-                ctr_bg  = cts_bg/exp_time
-                ctr_src = cts_src/exp_time
+                ctr_tot         = cts_tot/exp_time
+                ctr_bg          = cts_bg/exp_time
+                ctr_src         = cts_src/exp_time
+
+                sb_tot          = ctr_tot/mask_area
+                sb_bg           = ctr_bg/mask_area
+                sb_src          = ctr_src/mask_area
+
+                # poisson errors
+                cts_tot_err = sqrt(cts_tot)
+                cts_bg_err  = sqrt(cts_bg)
+                cts_src_err = sqrt(cts_tot_err**2.0 + cts_bg_err**2.0)
+
+                ctr_tot_err = cts_tot_err/exp_time
+                ctr_bg_err  = cts_bg_err/exp_time
+                ctr_src_err = sqrt(ctr_tot_err**2.0 + ctr_bg_err**2.0)
+
+                sb_tot_err  = ctr_tot_err/mask_area
+                sb_bg_err   = ctr_bg_err/mask_area
+                sb_src_err  = ctr_src_err/mask_area
+
             else:
-                ctr_tot_wps = 0.0
-                ctr_bg_wps  = 0.0
-                ctr_src_wps = 0.0
-                ctr_tot = 0.0
-                ctr_bg  = 0.0
-                ctr_src = 0.0
+                ctr_tot_wps     = 0.0
+                ctr_bg_wps      = 0.0
+                ctr_src_wps     = 0.0
+                ctr_tot         = 0.0
+                ctr_bg          = 0.0
+                ctr_src         = 0.0
+                sb_tot_wps      = 0.0
+                sb_bg_wps       = 0.0
+                sb_src_wps      = 0.0
+                sb_tot          = 0.0
+                sb_bg           = 0.0
+                sb_src          = 0.0
+
+                ctr_tot_wps_err = -1.0
+                ctr_bg_wps_err  = -1.0
+                ctr_src_wps_err = -1.0
+                ctr_tot_err     = -1.0
+                ctr_bg_err      = -1.0
+                ctr_src_err     = -1.0
+                sb_tot_wps_err  = -1.0
+                sb_bg_wps_err   = -1.0
+                sb_src_wps_err  = -1.0
+                sb_tot_err      = -1.0
+                sb_bg_err       = -1.0
+                sb_src_err      = -1.0
+
+
 
             ######################################################################
             # write output file
 
-            f.write('%f %f %f %f %f %f %f %f %f %f %f %f %f %f\n' % (r, cts_src, cts_bg, cts_tot, exp_time, area_correction, mask_area, geometric_area, cts_src_wps, cts_bg_wps, cts_tot_wps, exp_time_wps, area_correction_wps, mask_area_wps))
+            f.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, sb_src, sb_bg, sb_tot, sb_src_err, sb_bg_err, sb_tot_err, ctr_src, ctr_bg, ctr_tot, ctr_src_err, ctr_bg_err, ctr_tot_err, cts_src, cts_bg, cts_tot, cts_src_err, cts_bg_err, cts_tot_err, exp_time, area_correction, mask_area, geometric_area, sb_src_wps, sb_bg_wps, sb_tot_wps, sb_src_wps_err, sb_bg_wps_err, sb_tot_wps_err, ctr_src_wps, ctr_bg_wps, ctr_tot_wps, ctr_src_wps_err, ctr_bg_wps_err, ctr_tot_wps_err, cts_src_wps, cts_bg_wps, cts_tot_wps, cts_src_wps_err, cts_bg_wps_err, cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
+
             print "r :: ", r-1.0, r, geometric_area
 
         f.close()

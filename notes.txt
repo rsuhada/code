@@ -36,7 +36,6 @@ Snowden:
 iter-spec
 - requires cosmo_dist.py in the python path
 
-
 ######################################################################
 # running on a dir
 
@@ -380,6 +379,6 @@ other references - helpful:
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
-- also the chipgaps are too larger - check snowden parameters on it
+- also the chipgaps are too larger - check snowden parameters on it - they are the same
 - other methods: arnaud, xmm-LSS, yu-ying, snowden, karl
 
