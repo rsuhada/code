@@ -299,3 +299,19 @@ function eval_ccd_pattern {
     echo "$outpattern"
 }
 
+    ootscale=$(get-oot-scale pn${prefix}-woot.im)
+
+function get-oot-scale {
+    image=$1
+
+    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'`
+
+
+# FIXME: finish this
+# Full frame      0.063
+# Ext. full frame 0.023
+# Large window    0.0016
+# Small window    0.011
+
+
+}

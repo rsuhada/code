@@ -91,18 +91,13 @@ if __name__ == '__main__':
     ######################################################################
     # simple beta fit
 
-    fname = intab+'.beta.png'
     p0 = [5.0e-5, 10.0, 2.0/3.0]
     rgrid = linspace(0.0, 100.0, 100)
 
     ######################################################################
     # minuit fit
-    data = [(1, 1.1, 0.1), (2, 2.1, 0.1), (3, 2.4, 0.2), (4, 4.3, 0.1)]
 
     data = arrays2minuit(r, sb_src, sb_src_err)
-
-    print data
-
 
     def minuit_beta_model(r, norm, rcore, beta):
         """
@@ -117,8 +112,6 @@ if __name__ == '__main__':
 
         out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
         return out
-
-
 
     def minuit_beta_model_likelihood(norm, rcore, beta):
         """
@@ -154,6 +147,7 @@ if __name__ == '__main__':
     ######################################################################
     # the fit
 
+    # setup
     model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
                                norm=norm0, rcore=rcore0, beta=beta0,
                                limit_norm=limit_norm,
@@ -163,25 +157,36 @@ if __name__ == '__main__':
                                fix_rcore=False,
                                fix_beta=False
                                )
-
+    # fit
     model_fit.migrad()
-    # model_fit.simplex()
+
+    # model_fit.simplex()      # gradient-independent, but no goodness-of-fit eval/errors - check also starting point dependance
 
     # errors around best fit
     # model_fit.hesse()
+    # model_fit.minos()    # non-linear error estimation if the likelihood is non-parabolic around best-fit (on a ~1 sigma scale)
 
     par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
-    print "results: ", par_fitted
+    errors_fitted = model_fit.errors
 
-    # FIXME: error ellipses
-    # c1=array(m.contour("a", "b", 1, 10))
-    # c5=array(m.contour("a", "b", 5, 10))
+    print "results: ", model_fit.values
+    print "errors:  ", errors_fitted
+
+    # error ellipses
+    ell_points = 500            # num. of samples for the surface
+    fname = intab+'.err-ellipse.png'
+
+    ell1 = sort(array(model_fit.contour("beta", "rcore", 1, ell_points)))
+    ell2 = sort(array(model_fit.contour("beta", "rcore", 2, 2*ell_points)))
+    ell3 = sort(array(model_fit.contour("beta", "rcore", 3, 3*ell_points)))
+
+    sb_plotting_utils.plot_minuit_err_ellipse(ell1, ell2, ell3, fname)
 
     ######################################################################
     # plot result
 
     # par_fitted = p0
-
+    fname = intab+'.fit.png'
     sb_plotting_utils.plot_sb_fit(r, sb_src, sb_src_err, par_fitted, fname)
 
     plt.show()

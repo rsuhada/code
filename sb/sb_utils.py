@@ -20,6 +20,19 @@ def sqdist_matrix(im, xcen, ycen):
     return outmatrix
 
 
+def sqdist_matrix2(im, xcen, ycen):
+    """
+    Create a matrix given the squared Euclidean distance of each point
+    wrt the input center.
+    """
+    outmatrix = zeros([im.shape[0], im.shape[1]])
+    for i in range(im.shape[0]):
+        for j in range(im.shape[1]):
+            outmatrix[i, j] = sqdistance(xcen, ycen, j , i)
+
+    return outmatrix
+
+
 def get_cts_stat(im, distmatrix, xim, yim, r_aper):
     """
     Provide basic statistics (total/mean cts etc.) for an input image

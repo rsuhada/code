@@ -52,18 +52,19 @@ do
     do_sb_extraction pn
 done
 
-# m1
-inst=mos
-for prefix in $M1_EV_PREFIX_LIST
-do
-    do_sb_extraction mos1
+# # m1
+# inst=mos
+# for prefix in $M1_EV_PREFIX_LIST
+# do
+#     do_sb_extraction mos1
+# done
 
-# m2
-inst=mos
-for prefix in $M2_EV_PREFIX_LIST
-do
-    do_sb_extraction mos2
-done
+# # m2
+# inst=mos
+# for prefix in $M2_EV_PREFIX_LIST
+# do
+#     do_sb_extraction mos2
+# done
 
 ######################################################################
 # exit

@@ -34,7 +34,13 @@ pattern="&& (PATTERN<=4)"
 for prefix in $PN_EV_PREFIX_LIST
 do
     echo make-im pn${prefix}-clean.fits pn${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
-    make-im pn${prefix}-clean.fits pn${prefix}-${elo}-${ehi}.im $elo $ehi "$pattern"
+    make-im pn${prefix}-clean.fits pn${prefix}-${elo}-${ehi}-woot.im $elo $ehi "$pattern"
+
+    # oot subtraction
+    make-im pn${prefix}-oot.clean.fits pn${prefix}-${elo}-${ehi}-oot.im $elo $ehi "$pattern"
+
+    # FIXME: implement!
+    # subtract-oot pn${prefix}-woot.clean.fits pn${prefix}-oot.clean.fits
 done
 
 

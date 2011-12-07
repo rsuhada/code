@@ -83,7 +83,6 @@ if __name__ == '__main__':
 
         print "calculating distance matrix!"
 
-        # FIXME: could be sped up with some mapping tricks?
         distmatrix = sqdist_matrix(im, xim, yim)
 
         hdu = pyfits.PrimaryHDU(distmatrix, hdr)

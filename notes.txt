@@ -16,7 +16,12 @@ General:
 - would be nice to cleanup the namespace (sometime variables are
   duplicated) and the capitalization convention should be better
 
+Imaging:
+- oot subtraction!
+- distmatrix needs to pass only shape not full im
+
 Iterator:
+- OOT!!!
 - core PSF spillover?
 - how to stop before running into low s/n?
 - use andersson optimized band for spectroscopy
@@ -33,8 +38,17 @@ Snowden:
 ######################################################################
 # dependencies
 
+SAS v. >=11.0.0
+ftools
+
+python:
+- scipy, numpy, pyfits, matplolib
+
 iter-spec
 - requires cosmo_dist.py in the python path
+
+sb fitter:
+requires minuit
 
 ######################################################################
 # running on a dir
@@ -315,6 +329,12 @@ for iterative spectroscopy:
 
 - convergence typically in <5 iterations (hard limit 10 at the moment)
 
+# distmatrix calc:
+3.390972
+3.318338
+3.4243
+3.297625
+
 ######################################################################
 # libraries with internal settings/options variables
 # i.e. stuff that can/should be tweaked locally manually  in the file
@@ -375,10 +395,15 @@ other references - helpful:
 - sanders ??
 - maughan vids - ??
 
+2D:
+
+- needs to extract sub-image for speed -> maybe not: fftconvolve is
+  significantly faster then convolve
 
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
 - also the chipgaps are too larger - check snowden parameters on it - they are the same
 - other methods: arnaud, xmm-LSS, yu-ying, snowden, karl
+
 
