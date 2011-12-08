@@ -299,19 +299,121 @@ function eval_ccd_pattern {
     echo "$outpattern"
 }
 
-    ootscale=$(get-oot-scale pn${prefix}-woot.im)
-
 function get-oot-scale {
+    ######################################################################
+    # script to get the oot scale factor for a pn image based on its
+    # submode
+
     image=$1
 
-    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'`
+    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+
+    case $submode in
+        primefullwindow)
+            oot_scale=0.063
+            ;;
+        primefullwindowextended)
+            oot_scale=0.023
+            ;;
+        primelargewindow)
+            oot_scale=0.0016
+            ;;
+        primesmallwindow)
+            oot_scale=0.011
+            ;;
+        *)
+            echo "\*\* error: unknown submode: $submode in $image!"
+            exit 1
+    esac
+
+    echo $oot_scale
+}
+
+function subtract-oot {
+    ######################################################################
+    # gets the oot correction factor and subtracts the oot image
+
+    image=$1
+    ootimage=$2
+    outimage=$3
+
+    # get oot factor
+    # it is problematic (but not impossible) to source from within
+    # same library - so better repeat myself...
+    # ootscale=$(get-oot-scale $image)   # doesn't have to work
+
+    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+
+    case $submode in
+        primefullwindow)
+            oot_scale=0.063
+            ;;
+        primefullwindowextended)
+            oot_scale=0.023
+            ;;
+        primelargewindow)
+            oot_scale=0.0016
+            ;;
+        primesmallwindow)
+            oot_scale=0.011
+            ;;
+        *)
+            echo "\*\* error: unknown submode: $submode in $image!"
+            exit 1
+    esac
 
 
-# FIXME: finish this
-# Full frame      0.063
-# Ext. full frame 0.023
-# Large window    0.0016
-# Small window    0.011
+    echo $image $ootimage
+    echo "scale :: " $ootscale
 
+    echo farith $ootimage $ootscale ${ootimage}.tmp MUL clobber=yes
+    farith $ootimage $ootscale ${ootimage}.tmp MUL clobber=yes
+    mv ${ootimage}.tmp ${ootimage}
+
+    farith $image $ootimage $outimage SUB clobber=yes
+}
+
+function subtract-oot-spec {
+    ######################################################################
+    # gets the oot correction factor and subtracts the oot spectrum
+
+    image=$1
+    ootimage=$2
+
+    fparkey value=CTS_OOT fitsfile=${ootimage}+1 keyword=TTYPE2
+
+    # add oot column to the source spectrum
+    faddcol infile=${image}+1 colfile=${ootimage}+1 colname=CTS_OOT
+
+    # get oot factor
+    # it is problematic (but not impossible) to source from within
+    # same library - so better repeat myself...
+    # ootscale=$(get-oot-scale $image)   # doesn't have to work
+
+    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+
+    case $submode in
+        primefullwindow)
+            oot_scale=0.063
+            ;;
+        primefullwindowextended)
+            oot_scale=0.023
+            ;;
+        primelargewindow)
+            oot_scale=0.0016
+            ;;
+        primesmallwindow)
+            oot_scale=0.011
+            ;;
+        *)
+            echo "\*\* error: unknown submode: $submode in $image!"
+            exit 1
+    esac
+
+    # scale oot column
+    fcalc clobber=yes infile=${image}+1 outfile=${image} clname=CTS_OOT expr=CTS_OOT*${ootscale}
+
+    # subtract the rescaled values of the CTS_OOT from the COUNTS column of the source spectrum
+    fcalc clobber=yes infile=${image}+1 outfile=${image} clname=COUNTS expr=COUNTS-CTS_OOT
 
 }

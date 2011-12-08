@@ -48,9 +48,9 @@ de=$3
 EXTRACT_SRC=1
 EXTRACT_BG=1
 
-MAKE_RMF=1
-MAKE_ARF=1
-CALCULATE_BACKSCALE=1
+MAKE_RMF=0
+MAKE_ARF=0
+CALCULATE_BACKSCALE=0
 
 SRC_REGION=cluster-man-01.phy.reg
 BG_REGION=bg-ann-01.phy.reg
@@ -199,6 +199,23 @@ then
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
+
+######################################################################
+#  get pn oot spectra
+
+    echo -e '\nGetting pn spectra...'
+
+    pnexpr="$pnpattern && $srcreg $psreg"
+    prefix=$PN_EV_PREFIX_LIST
+    evlist=pn${prefix}-clean-oot.fits
+
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-oot.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
 fi
 
 if [[ $EXTRACT_BG -ne 0 ]]
@@ -257,8 +274,35 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
+######################################################################
+#  get pn oot background spectra
+
+    echo -e '\nGetting pn background spectra...'
+
+    pnexpr="$pnpattern && $bgreg $psreg"
+    prefix=$PN_EV_PREFIX_LIST
+    evlist=pn${prefix}-clean-oot.fits
+
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-${bgid}-oot.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
+
 fi
 
+######################################################################
+# subtract oot
+
+# FIXME: unfortunately needs to jump between dirs...
+cd $specdir
+source ${codedir}/utils/util-funcs-lib.sh
+
+subtract-oot-spec pn.pha pn-oot.pha
+subtract-oot-spec pn-${bgid}.pha pn-${bgid}-oot.pha
+cd $dir
 
 ######################################################################
 # GETTING RMF:
