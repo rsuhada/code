@@ -56,7 +56,6 @@ SRC_REGION=cluster-man-01.phy.reg
 BG_REGION=bg-ann-01.phy.reg
 PS_REGION=ps-man.phy.reg
 
-
 ######################################################################
 # create the spectroscopy dir if it does not exists
 
@@ -300,8 +299,9 @@ fi
 cd $specdir
 source ${codedir}/utils/util-funcs-lib.sh
 
-subtract-oot-spec pn.pha pn-oot.pha
-subtract-oot-spec pn-${bgid}.pha pn-${bgid}-oot.pha
+echo "oot subtraction!"
+subtract_oot_spec pn.pha pn-oot.pha
+subtract_oot_spec pn-${bgid}.pha pn-${bgid}-oot.pha
 cd $dir
 
 ######################################################################

@@ -340,7 +340,7 @@ function subtract-oot {
     # get oot factor
     # it is problematic (but not impossible) to source from within
     # same library - so better repeat myself...
-    # ootscale=$(get-oot-scale $image)   # doesn't have to work
+    # oot_scale=$(get-oot-scale $image)   # doesn't have to work
 
     submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
 
@@ -364,33 +364,41 @@ function subtract-oot {
 
 
     echo $image $ootimage
-    echo "scale :: " $ootscale
+    echo "scale :: " $oot_scale
 
-    echo farith $ootimage $ootscale ${ootimage}.tmp MUL clobber=yes
-    farith $ootimage $ootscale ${ootimage}.tmp MUL clobber=yes
+    echo farith $ootimage $oot_scale ${ootimage}.tmp MUL clobber=yes
+    farith $ootimage $oot_scale ${ootimage}.tmp MUL clobber=yes
     mv ${ootimage}.tmp ${ootimage}
 
     farith $image $ootimage $outimage SUB clobber=yes
 }
 
-function subtract-oot-spec {
+
+function subtract_oot_spec {
     ######################################################################
     # gets the oot correction factor and subtracts the oot spectrum
 
-    image=$1
-    ootimage=$2
+    input_spec=$1
+    input_ootspec=$2
 
-    fparkey value=CTS_OOT fitsfile=${ootimage}+1 keyword=TTYPE2
+    # backup
+    cp ${input_spec} ${input_spec}.orig
+    cp ${input_ootspec} ${input_ootspec}.orig
 
-    # add oot column to the source spectrum
-    faddcol infile=${image}+1 colfile=${ootimage}+1 colname=CTS_OOT
+    ######################################################################
+    # some ftool tasks can't handle dash in filename
 
+    spec=oot_subtraction_tmp_pn.pha
+    ootspec=oot_subtraction_tmp_pn_oot.pha
+
+    mv $input_spec $spec
+    mv $input_ootspec $ootspec
+
+    ######################################################################
     # get oot factor
-    # it is problematic (but not impossible) to source from within
-    # same library - so better repeat myself...
-    # ootscale=$(get-oot-scale $image)   # doesn't have to work
 
-    submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+    # for extrs safety lowcase everything
+    submode=`fkeyprint $spec SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'`
 
     case $submode in
         primefullwindow)
@@ -406,14 +414,42 @@ function subtract-oot-spec {
             oot_scale=0.011
             ;;
         *)
-            echo "\*\* error: unknown submode: $submode in $image!"
+            echo "\*\* error: unknown submode: $submode in $spec!"
+            echo "\*\*\* error: in script $0"
             exit 1
     esac
 
-    # scale oot column
-    fcalc clobber=yes infile=${image}+1 outfile=${image} clname=CTS_OOT expr=CTS_OOT*${ootscale}
+    ######################################################################
+    # prepare files for oot subtraction
 
-    # subtract the rescaled values of the CTS_OOT from the COUNTS column of the source spectrum
-    fcalc clobber=yes infile=${image}+1 outfile=${image} clname=COUNTS expr=COUNTS-CTS_OOT
+    echo "updating spectrum headers and copying oot column"
+    echo "spectrum  :: " ${input_spec}
+    echo "oot       :: " ${input_ootspec}
+    echo "oot scale :: " ${oot_scale}
+
+
+    fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
+    faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+        colname=CTS_OOT_ORIG
+
+    fparkey value=CTS_OOT fitsfile=${ootspec}+1 keyword=TTYPE2
+    faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+        colname=CTS_OOT
+
+    ######################################################################
+    # scale and subtract
+
+    #  "subtracting oot events"
+    fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+        clname=CTS_OOT expr=CTS_OOT*${oot_scale}
+
+    fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+        clname=COUNTS expr=COUNTS-CTS_OOT
+
+    # ######################################################################
+    # # return to original filenames
+
+    mv $spec $input_spec
+    mv $ootspec $input_ootspec
 
 }

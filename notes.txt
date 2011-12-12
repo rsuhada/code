@@ -256,6 +256,20 @@ PS_REGION=ps-man.phy.reg
 
 6. run quick-spec-locbg.sh via run-esaspi.sh (set it in the modules)
 
+7. fitting:
+
+7.1 cd to spec dir
+7.2 check conf/*.conf file
+
+7.3 make sure you don't have a DYLD_LIBRARY_PATH conflict, if it is
+overtaken by SAS, run:
+
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
+7.3 run
+
+
+
 ######################################################################
 # analysis-template.txt
 

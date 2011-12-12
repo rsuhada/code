@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(pn m1 m2)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="004"
+export fitid="005"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -24,14 +24,14 @@ export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-maste
 
 # export r_init=37.1325                  # [arcsec]   test: 37.1325
 export r_init=80.0                     # [arcsec]   test: 37.1325
-export max_iter=10                     # maximum number of iterations
+export max_iter=1                       # maximum number of iterations
 export r_tolerance=4.0                 # [arcsec]
 
 export EXTRACT_SRC_SPEC=1
 export CALCULATE_BACKSCALE=1
 
-export MAKE_RMF=1
-export MAKE_ARF=1
+export MAKE_RMF=0
+export MAKE_ARF=0
 
 export DO_SPECTROSCOPY=1
 export group_min=1
@@ -130,7 +130,7 @@ echo $x_phy $y_phy
 echo
 
 ######################################################################
-# get background spectra (have to be exisiting)
+# get background spectra (link it - have to be already pre-exisiting)
 
 if [[ $LINK_BG -eq 1 ]]
 then

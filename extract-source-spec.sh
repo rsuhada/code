@@ -48,6 +48,7 @@ case $instrument in
         instpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
         prefix=$PN_EV_PREFIX_LIST
         evlist=pn${prefix}-clean.fits
+        ootevlist=pn${prefix}-clean-oot.fits
         ;;
     "m1")
         instpattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
@@ -78,3 +79,30 @@ evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${sp
     withspecranges=true energycolumn=PI specchannelmin=0 \
     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
     writedss=Y expression="$expr"
+
+######################################################################
+# if pn do oot subtraction
+
+if [[ "$instrument" == "pn" ]]
+then
+
+    ######################################################################
+    # extract oot
+
+    echo "extracting oot spectra for $instrument!"
+    expr="$instpattern && $srcreg $psreg"
+
+    evselect table=${ootevlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}-oot.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}-oot.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$expr"
+
+    export here=`pwd`
+    cd $specdir
+    subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
+    cd $here
+
+fi
