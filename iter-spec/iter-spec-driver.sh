@@ -57,7 +57,6 @@ cd $dir
 
 mkdir -p ${specdir}/conf 2> /dev/null
 
-
 ######################################################################
 # check whether we have a non-conflicting run
 

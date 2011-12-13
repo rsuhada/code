@@ -35,13 +35,14 @@ then
     echo "${dir}/analysis ${dir}/odf" > analysis/obsid-list.txt
 fi
 
+echo $NOTESFILE
+sleep 5
+
 if [[ ! -e $NOTESFILE ]]
 then
+    echo "adding analysis notes file: $NOTESFILE"
     cp ${codedir}/templates/analysis-template.txt $NOTESFILE
 fi
-
-
-
 
 ######################################################################
 # copy over the diagonal response matrices needed for spectral fitting

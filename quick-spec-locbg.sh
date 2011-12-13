@@ -48,9 +48,9 @@ de=$3
 EXTRACT_SRC=1
 EXTRACT_BG=1
 
-MAKE_RMF=0
-MAKE_ARF=0
-CALCULATE_BACKSCALE=0
+MAKE_RMF=1
+MAKE_ARF=1
+CALCULATE_BACKSCALE=1
 
 SRC_REGION=cluster-man-01.phy.reg
 BG_REGION=bg-ann-01.phy.reg
@@ -389,7 +389,6 @@ then
         backscale spectrumset=${specdir}/pn.pha badpixlocation=$evlist useodfatt=yes
 
     fi
-
 
     if [[ $EXTRACT_BG -ne 0 ]]
     then

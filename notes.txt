@@ -48,34 +48,43 @@ iter-spec
 - requires cosmo_dist.py in the python path
 
 sb fitter:
-requires minuit
+- requires minuit as the fitting package
 
 ######################################################################
 # running on a dir
 
 1. download tar from XSA
 2. untar 1 time: should be OBSID/odf/xxxxxx.tar.gz
-3. have a .conf and .modules file in configs/ (e.g. copy templates)
+3. have a .conf and .modules file in configs/ (e.g. copy templates):
+
+cp ~/data1/sw/esaspi/templates/template.conf configs/SPT-XXXXX.conf
+cp ~/data1/sw/esaspi/templates/template.modules configs/SPT-XXXXX.modules
+
+- edit them by setting the config options and pick the first module
+
 4. there should be a notes/ dir for analysis notes
 5. there has to be a soft link OBSID -> your analysis dir
 6. initialize heasoft, sas11
-7.
+7. run
 
 dir=test0205 ; run-esas.sh configs/${dir}.conf configs/${dir}.modules 2>&1 | tee log-${dir}-TESTING-prefixes.log
 
 NOTES:
 3. -> path can be set from running run-esas.sh
 
-3. 4. -> or change the setups in run-esas.sh
+3. + 4. -> or change the setups in run-esas.sh
 
 5. -> should be changed to allow multiple reductions per OBSID
 
 ######################################################################
-# file naming
+# file naming etc.
 
 possible prefixes are:
 
 [pn,mos1,mos2][U,S]???
+
+- prefix list is now automatically added to analysis notes files (and
+  should be copied to the .conf file) in the RUN_FILTERS module
 
 analysis:
 pnS003-ori.fits    - raw event list
@@ -319,14 +328,15 @@ export QUICK_SPEC_LOCBG=1
 # roughly 20 mins if extracting both source and background, arf, rmf
 # and backscale
 
-export PREP_ODF_DIR=0
-export MAKE_CCF_ODF=0
-export RUN_EV_CHAINS=0
-export RUN_FILTERS=0
-export CHEESE_1B=0
+export PREP_ODF_DIR=0           # ~ 1min
+export MAKE_CCF_ODF=0           # ~ 1min
+export RUN_EV_CHAINS=0          # ~ 8min
+export RUN_FILTERS=0            # ~ 1min
+export CHEESE_1B=0              # ~ 2min
 export CHEESE_2B=0                              # !!!! not tested yet
 export REMASK=0
 export REMASK_MANUAL_MASK=0
+export DO_EVIGWEIGHT=1          # ~ >1min
 export CORRECT_PROTON=0            # !!!! not finished/tested yet
 export COMBINE_SMOOTH=0            # !!!! not finished/tested yet
 export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
@@ -364,14 +374,13 @@ USE_OOT=0                       # use the oot correction for pn? using
                                 # it causes some small (maybe
                                 # negligible) artefacts
 
-
 ######################################################################
 # currently deprecated scripts (debris, early draft no used
+
 # anymore/not useful at the moment)
 
 quick-spec/setrsp.sh
 see also ../aux-esaspi/ (not under git)
-
 
 ######################################################################
 # devel notes
@@ -379,6 +388,10 @@ see also ../aux-esaspi/ (not under git)
 0. random
 
 - dmfilth for refiling ps/gaps
+
+- oot subbed spectra give slightly (tiny) difference in arf but rmf is
+  exactly same (spec results are unaffected by this)
+
 
 1. SB analyisis
 
