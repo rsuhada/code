@@ -26,7 +26,7 @@ if __name__ == '__main__':
         outfile = argv[8]
 
         ######################################################################
-        # start output file
+        # start output file for profiles
         # FIXME: convert it to fits file output
 
         f = open(outfile, 'w')
@@ -43,6 +43,26 @@ if __name__ == '__main__':
         f.write('#\n')
 
         f.write('# r sb_src sb_bg sb_tot sb_src_err sb_bg_err sb_tot_err ctr_src ctr_bg ctr_tot ctr_src_err ctr_bg_err ctr_tot_err cts_src cts_bg cts_tot cts_src_err cts_bg_err cts_tot_err exp_time area_correction mask_area geometric_area sb_src_wps sb_bg_wps sb_tot_wps sb_src_wps_err sb_bg_wps_err sb_tot_wps_err ctr_src_wps ctr_bg_wps ctr_tot_wps ctr_src_wps_err ctr_bg_wps_err ctr_tot_wps_err cts_src_wps cts_bg_wps cts_tot_wps cts_src_wps_err cts_bg_wps_err cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
+
+
+        ######################################################################
+        # start output file for cumulative profiles
+        # FIXME: convert it to fits file output
+
+        f = open(outfile+'.cumul', 'w')
+
+        g.write('# '+strftime('%a %d %b %Y %H:%M:%S', localtime())+'\n')
+
+        g.write('# image '+str(im_file)+'\n')
+        g.write('# bg    '+str(bg_file)+'\n')
+        g.write('# exp   '+str(exp_file)+'\n')
+        g.write('# mask  '+str(mask_file)+'\n')
+        g.write('# xim   '+str(xim)+'\n')
+        g.write('# yim   '+str(yim)+'\n')
+        g.write('# aper  '+str(aper)+'\n')
+        g.write('#\n')
+
+        g.write('# r cumul_sb_src cumul_sb_bg cumul_sb_tot cumul_sb_src_err cumul_sb_bg_err cumul_sb_tot_err cumul_ctr_src cumul_ctr_bg cumul_ctr_tot cumul_ctr_src_err cumul_ctr_bg_err cumul_ctr_tot_err cumul_cts_src cumul_cts_bg cumul_cts_tot cumul_cts_src_err cumul_cts_bg_err cumul_cts_tot_err exp_time area_correction mask_area geometric_area cumul_sb_src_wps cumul_sb_bg_wps cumul_sb_tot_wps cumul_sb_src_wps_err cumul_sb_bg_wps_err cumul_sb_tot_wps_err cumul_ctr_src_wps cumul_ctr_bg_wps cumul_ctr_tot_wps cumul_ctr_src_wps_err cumul_ctr_bg_wps_err cumul_ctr_tot_wps_err cumul_cts_src_wps cumul_cts_bg_wps cumul_cts_tot_wps cumul_cts_src_wps_err cumul_cts_bg_wps_err cumul_cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
 
 
         ######################################################################
@@ -90,6 +110,47 @@ if __name__ == '__main__':
         hdulist.writeto('distmatrix.fits', clobber=True)
 
         print "distance matrix done!"
+
+        ######################################################################
+        # initialize cumulative curves
+
+        cumul_cts_tot_wps     = 0.0
+        cumul_cts_bg_wps      = 0.0
+        cumul_cts_src_wps     = 0.0
+        cumul_cts_tot         = 0.0
+        cumul_cts_bg          = 0.0
+        cumul_cts_src         = 0.0
+        cumul_ctr_tot_wps     = 0.0
+        cumul_ctr_bg_wps      = 0.0
+        cumul_ctr_src_wps     = 0.0
+        cumul_ctr_tot         = 0.0
+        cumul_ctr_bg          = 0.0
+        cumul_ctr_src         = 0.0
+        cumul_sb_tot_wps      = 0.0
+        cumul_sb_bg_wps       = 0.0
+        cumul_sb_src_wps      = 0.0
+        cumul_sb_tot          = 0.0
+        cumul_sb_bg           = 0.0
+        cumul_sb_src          = 0.0
+
+        cumul_cts_tot_wps_err = 0.0
+        cumul_cts_bg_wps_err  = 0.0
+        cumul_cts_src_wps_err = 0.0
+        cumul_cts_tot_err     = 0.0
+        cumul_cts_bg_err      = 0.0
+        cumul_cts_src_err     = 0.0
+        cumul_ctr_tot_wps_err = 0.0
+        cumul_ctr_bg_wps_err  = 0.0
+        cumul_ctr_src_wps_err = 0.0
+        cumul_ctr_tot_err     = 0.0
+        cumul_ctr_bg_err      = 0.0
+        cumul_ctr_src_err     = 0.0
+        cumul_sb_tot_wps_err  = 0.0
+        cumul_sb_bg_wps_err   = 0.0
+        cumul_sb_src_wps_err  = 0.0
+        cumul_sb_tot_err      = 0.0
+        cumul_sb_bg_err       = 0.0
+        cumul_sb_src_err      = 0.0
 
         ######################################################################
         # do the profile extraction
@@ -174,6 +235,9 @@ if __name__ == '__main__':
                 sb_src_err  = ctr_src_err/mask_area
 
             else:
+                ######################################################################
+                # ring missing
+
                 ctr_tot_wps     = 0.0
                 ctr_bg_wps      = 0.0
                 ctr_src_wps     = 0.0
@@ -200,16 +264,63 @@ if __name__ == '__main__':
                 sb_bg_err       = -1.0
                 sb_src_err      = -1.0
 
+            ######################################################################
+            # cumulative curves
+
+            cumul_cts_tot_wps     = cumul_cts_tot_wps + cts_tot_wps
+            cumul_cts_bg_wps      = cumul_cts_bg_wps + cts_bg_wps
+            cumul_cts_src_wps     = cumul_cts_src_wps + cts_src_wps
+            cumul_cts_tot         = cumul_cts_tot + cts_tot
+            cumul_cts_bg          = cumul_cts_bg + cts_bg
+            cumul_cts_src         = cumul_cts_src + cts_src
+            cumul_ctr_tot_wps     = cumul_ctr_tot_wps + ctr_tot_wps
+            cumul_ctr_bg_wps      = cumul_ctr_bg_wps + ctr_bg_wps
+            cumul_ctr_src_wps     = cumul_ctr_src_wps + ctr_src_wps
+            cumul_ctr_tot         = cumul_ctr_tot + ctr_tot
+            cumul_ctr_bg          = cumul_ctr_bg + ctr_bg
+            cumul_ctr_src         = cumul_ctr_src + ctr_src
+            cumul_sb_tot_wps      = cumul_sb_tot_wps + sb_tot_wps
+            cumul_sb_bg_wps       = cumul_sb_bg_wps + sb_bg_wps
+            cumul_sb_src_wps      = cumul_sb_src_wps + sb_src_wps
+            cumul_sb_tot          = cumul_sb_tot + sb_tot
+            cumul_sb_bg           = cumul_sb_bg + sb_bg
+            cumul_sb_src          = cumul_sb_src + sb_src
+
+            #  formal errors - bins are not independent
+            cumul_cts_tot_wps_err = (cumul_cts_tot_wps_err**2 + cts_tot_wps_err**2)**0.5
+            cumul_cts_bg_wps_err  = (cumul_cts_bg_wps_err**2 + cts_bg_wps_err**2)**0.5
+            cumul_cts_src_wps_err = (cumul_cts_src_wps_err**2 + cts_src_wps_err**2)**0.5
+            cumul_cts_tot_err     = (cumul_cts_tot_err**2 + cts_tot_err**2)**0.5
+            cumul_cts_bg_err      = (cumul_cts_bg_err**2 + cts_bg_err**2)**0.5
+            cumul_cts_src_err     = (cumul_cts_src_err**2 + cts_src_err**2)**0.5
+            cumul_ctr_tot_wps_err = (cumul_ctr_tot_wps_err**2 + ctr_tot_wps_err**2)**0.5
+            cumul_ctr_bg_wps_err  = (cumul_ctr_bg_wps_err**2 + ctr_bg_wps_err**2)**0.5
+            cumul_ctr_src_wps_err = (cumul_ctr_src_wps_err**2 + ctr_src_wps_err**2)**0.5
+            cumul_ctr_tot_err     = (cumul_ctr_tot_err**2 + ctr_tot_err**2)**0.5
+            cumul_ctr_bg_err      = (cumul_ctr_bg_err**2 + ctr_bg_err**2)**0.5
+            cumul_ctr_src_err     = (cumul_ctr_src_err**2 + ctr_src_err**2)**0.5
+            cumul_sb_tot_wps_err  = (cumul_sb_tot_wps_err**2 + sb_tot_wps_err**2)**0.5
+            cumul_sb_bg_wps_err   = (cumul_sb_bg_wps_err**2 + sb_bg_wps_err**2)**0.5
+            cumul_sb_src_wps_err  = (cumul_sb_src_wps_err**2 + sb_src_wps_err**2)**0.5
+            cumul_sb_tot_err      = (cumul_sb_tot_err**2 + sb_tot_err**2)**0.5
+            cumul_sb_bg_err       = (cumul_sb_bg_err**2 + sb_bg_err**2)**0.5
+            cumul_sb_src_err      = (cumul_sb_src_err**2 + sb_src_err**2)**0.5
+
+            ######################################################################
+            # write output profile file
+
+            f.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, sb_src, sb_bg, sb_tot, sb_src_err, sb_bg_err, sb_tot_err, ctr_src, ctr_bg, ctr_tot, ctr_src_err, ctr_bg_err, ctr_tot_err, cts_src, cts_bg, cts_tot, cts_src_err, cts_bg_err, cts_tot_err, exp_time, area_correction, mask_area, geometric_area, sb_src_wps, sb_bg_wps, sb_tot_wps, sb_src_wps_err, sb_bg_wps_err, sb_tot_wps_err, ctr_src_wps, ctr_bg_wps, ctr_tot_wps, ctr_src_wps_err, ctr_bg_wps_err, ctr_tot_wps_err, cts_src_wps, cts_bg_wps, cts_tot_wps, cts_src_wps_err, cts_bg_wps_err, cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
 
 
             ######################################################################
-            # write output file
+            # write output profile file
 
-            f.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, sb_src, sb_bg, sb_tot, sb_src_err, sb_bg_err, sb_tot_err, ctr_src, ctr_bg, ctr_tot, ctr_src_err, ctr_bg_err, ctr_tot_err, cts_src, cts_bg, cts_tot, cts_src_err, cts_bg_err, cts_tot_err, exp_time, area_correction, mask_area, geometric_area, sb_src_wps, sb_bg_wps, sb_tot_wps, sb_src_wps_err, sb_bg_wps_err, sb_tot_wps_err, ctr_src_wps, ctr_bg_wps, ctr_tot_wps, ctr_src_wps_err, ctr_bg_wps_err, ctr_tot_wps_err, cts_src_wps, cts_bg_wps, cts_tot_wps, cts_src_wps_err, cts_bg_wps_err, cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
+            g.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, cumul_sb_src, cumul_sb_bg, cumul_sb_tot, cumul_sb_src_err, cumul_sb_bg_err, cumul_sb_tot_err, cumul_ctr_src, cumul_ctr_bg, cumul_ctr_tot, cumul_ctr_src_err, cumul_ctr_bg_err, cumul_ctr_tot_err, cumul_cts_src, cumul_cts_bg, cumul_cts_tot, cumul_cts_src_err, cumul_cts_bg_err, cumul_cts_tot_err, exp_time, area_correction, mask_area, geometric_area, cumul_sb_src_wps, cumul_sb_bg_wps, cumul_sb_tot_wps, cumul_sb_src_wps_err, cumul_sb_bg_wps_err, cumul_sb_tot_wps_err, cumul_ctr_src_wps, cumul_ctr_bg_wps, cumul_ctr_tot_wps, cumul_ctr_src_wps_err, cumul_ctr_bg_wps_err, cumul_ctr_tot_wps_err, cumul_cts_src_wps, cumul_cts_bg_wps, cumul_cts_tot_wps, cumul_cts_src_wps_err, cumul_cts_bg_wps_err, cumul_cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
 
             print "r :: ", r-1.0, r, geometric_area
 
         f.close()
+        g.close()
 
         ######################################################################
         # write report

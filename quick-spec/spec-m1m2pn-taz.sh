@@ -221,6 +221,8 @@ hard ${cluster}-${fitid}-nice.ps/cps
 exit
 #################################################
 
+# write a flux/luminosity log
+log ${cluster}-${fitid}-fx-lx.log
 dummyrsp
 flux 0.5 2
 flux 2 10
@@ -230,8 +232,8 @@ flux 1.1 7.0
 newpar 1 0
 cosmo 70 0 0.7
 lumin 0.5 2.0 ${redshift}
+lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
-lumin 0.5 7.0 ${redshift}
 
 exit
 y

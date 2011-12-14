@@ -212,6 +212,7 @@ flux 2 10
 newpar 1 0
 cosmo 70 0 0.7
 lumin 0.5 2.0 ${redshift}
+lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
 log none
 

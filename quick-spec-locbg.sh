@@ -45,15 +45,19 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=1
+EXTRACT_SRC=0
 EXTRACT_BG=1
 
-MAKE_RMF=1
-MAKE_ARF=1
+MAKE_RMF=0
+MAKE_ARF=0
+
+MAKE_RMF_BG=1
+MAKE_ARF_BG=1
+
 CALCULATE_BACKSCALE=1
 
 SRC_REGION=cluster-man-01.phy.reg
-BG_REGION=bg-ann-01.phy.reg
+BG_REGION=bg-ann-03.phy.reg
 PS_REGION=ps-man.phy.reg
 
 ######################################################################
@@ -125,7 +129,6 @@ bgid=`echo $BG_REGION | sed 's/\..*//g'`
 parse-spec-reg.sh $SRC_REGION 1
 parse-spec-reg.sh $BG_REGION 1
 parse-spec-reg.sh $PS_REGION 0
-
 
 ######################################################################
 # prepare the region descriptors
@@ -215,6 +218,16 @@ then
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
+
+
+    # FIXME: unfortunately needs to jump between dirs...
+    cd $specdir
+    source ${codedir}/utils/util-funcs-lib.sh
+
+    echo "oot subtraction - background!"
+    subtract_oot_spec pn.pha pn-oot.pha
+    cd $dir
+
 fi
 
 if [[ $EXTRACT_BG -ne 0 ]]
@@ -290,19 +303,20 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
+    ######################################################################
+    # subtract oot
+
+    # FIXME: unfortunately needs to jump between dirs...
+    cd $specdir
+    source ${codedir}/utils/util-funcs-lib.sh
+
+    echo "oot subtraction - background!"
+    subtract_oot_spec pn-${bgid}.pha pn-${bgid}-oot.pha
+    cd $dir
+
 fi
 
-######################################################################
-# subtract oot
 
-# FIXME: unfortunately needs to jump between dirs...
-cd $specdir
-source ${codedir}/utils/util-funcs-lib.sh
-
-echo "oot subtraction!"
-subtract_oot_spec pn.pha pn-oot.pha
-subtract_oot_spec pn-${bgid}.pha pn-${bgid}-oot.pha
-cd $dir
 
 ######################################################################
 # GETTING RMF:
@@ -310,28 +324,23 @@ cd $dir
 if [[ $MAKE_RMF -ne 0 ]]
 then
 
-    if [[ $EXTRACT_SRC -ne 0 ]]
-    then
-
-        echo -e '\nGetting source RMF...'
-        rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-        rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-        rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-
-    fi
-
-
-    if [[ $EXTRACT_BG -ne 0 ]]
-    then
-
-        echo -e '\nGetting background RMF...'
-        rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-        rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-        rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-
-    fi
+    echo -e '\nGetting source RMF...'
+    rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
+
+if [[ $MAKE_RMF_BG -ne 0 ]]
+then
+
+    echo -e '\nGetting background RMF...'
+    rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+
+fi
+
 
 ######################################################################
 # GETTING ARF:
@@ -339,28 +348,30 @@ fi
 if [[ $MAKE_ARF -ne 0 ]]
 then
 
-# WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
+    # WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
     export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
-#export set="withsourcepos=yes sourcecoords="det" sourcex=3320.25 sourcey=8438.24 withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+    #export set="withsourcepos=yes sourcecoords="det" sourcex=3320.25 sourcey=8438.24 withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
 
-    if [[ $EXTRACT_SRC -ne 0 ]]
-    then
+    echo -e '\nGetting source ARFs...'
 
-        echo -e '\nGetting source ARFs...'
+    arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf
+    arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf
+    arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf
 
-        arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf
-        arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf
-        arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf
-    fi
+fi
 
-    if [[ $EXTRACT_BG -ne 0 ]]
-    then
-        echo -e '\nGetting background ARFs...'
+if [[ $MAKE_ARF_BG -ne 0 ]]
+then
 
-        arfgen spectrumset=${specdir}/pn-${bgid}.pha  $set rmfset=${specdir}/pn-${bgid}.rmf  arfset=${specdir}/pn-${bgid}.arf
-        arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf
-        arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf
-    fi
+    # WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
+    export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+    #export set="withsourcepos=yes sourcecoords="det" sourcex=3320.25 sourcey=8438.24 withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+
+    echo -e '\nGetting background ARFs...'
+
+    arfgen spectrumset=${specdir}/pn-${bgid}.pha  $set rmfset=${specdir}/pn-${bgid}.rmf  arfset=${specdir}/pn-${bgid}.arf
+    arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf
+    arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf
 
 fi
 
