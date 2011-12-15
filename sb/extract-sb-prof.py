@@ -49,7 +49,7 @@ if __name__ == '__main__':
         # start output file for cumulative profiles
         # FIXME: convert it to fits file output
 
-        f = open(outfile+'.cumul', 'w')
+        g = open(outfile+'.cumul', 'w')
 
         g.write('# '+strftime('%a %d %b %Y %H:%M:%S', localtime())+'\n')
 
@@ -212,6 +212,24 @@ if __name__ == '__main__':
                 sb_bg_wps_err   = ctr_bg_wps_err/mask_area_wps
                 sb_src_wps_err  = ctr_src_wps_err/mask_area_wps
 
+            else:
+                ######################################################################
+                # ring missing
+
+                ctr_tot_wps     = 0.0
+                ctr_bg_wps      = 0.0
+                ctr_src_wps     = 0.0
+                sb_tot_wps      = 0.0
+                sb_bg_wps       = 0.0
+                sb_src_wps      = 0.0
+                ctr_tot_wps_err = -1.0
+                ctr_bg_wps_err  = -1.0
+                ctr_src_wps_err = -1.0
+                sb_tot_wps_err  = -1.0
+                sb_bg_wps_err   = -1.0
+                sb_src_wps_err  = -1.0
+
+            if (exp_time > 0.0):
                 # without point surces
                 ctr_tot         = cts_tot/exp_time
                 ctr_bg          = cts_bg/exp_time
@@ -238,28 +256,15 @@ if __name__ == '__main__':
                 ######################################################################
                 # ring missing
 
-                ctr_tot_wps     = 0.0
-                ctr_bg_wps      = 0.0
-                ctr_src_wps     = 0.0
                 ctr_tot         = 0.0
                 ctr_bg          = 0.0
                 ctr_src         = 0.0
-                sb_tot_wps      = 0.0
-                sb_bg_wps       = 0.0
-                sb_src_wps      = 0.0
                 sb_tot          = 0.0
                 sb_bg           = 0.0
                 sb_src          = 0.0
-
-                ctr_tot_wps_err = -1.0
-                ctr_bg_wps_err  = -1.0
-                ctr_src_wps_err = -1.0
                 ctr_tot_err     = -1.0
                 ctr_bg_err      = -1.0
                 ctr_src_err     = -1.0
-                sb_tot_wps_err  = -1.0
-                sb_bg_wps_err   = -1.0
-                sb_src_wps_err  = -1.0
                 sb_tot_err      = -1.0
                 sb_bg_err       = -1.0
                 sb_src_err      = -1.0

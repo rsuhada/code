@@ -11,9 +11,10 @@ function do_sb_extraction {
 
     image=${inst}${prefix}-${elo}-${ehi}.im
     expmap=${inst}${prefix}-${elo}-${ehi}.exp
-    bgmap=${inst}${prefix}-${elo}-${ehi}.bg
+    # bgmap=${inst}${prefix}-${elo}-${ehi}.bg
+    bgmap=${inst}${prefix}-${elo}-${ehi}.spl.bg
     mask=${inst}${prefix}-${elo}-${ehi}.mask
-    output="sb-prof-${outputid}-"$(date +"%y%m%d")"-${reduction_id}.dat"
+    output=${sb_dir}/sb-prof-${outputid}-${reduction_id}.dat
 
     ######################################################################
     # run
@@ -31,12 +32,16 @@ cd $dir
 
 elo="500"
 ehi="2000"
-aperture=50.0                  # [pix]
-reduction_id="001"
+aperture=100.0                  # [pix]
+reduction_id="002"
+sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
 
 ######################################################################
-# get center
+# do preparations
 
+mkdir $sb_dir 2> /dev/null
+
+# get center
 pars=(X_IM Y_IM)
 out=`get_cluster_pars $pars`
 xim=`echo $out | awk '{print $1}'`
@@ -52,19 +57,19 @@ do
     do_sb_extraction pn
 done
 
-# # m1
-# inst=mos
-# for prefix in $M1_EV_PREFIX_LIST
-# do
-#     do_sb_extraction mos1
-# done
+# m1
+inst=mos
+for prefix in $M1_EV_PREFIX_LIST
+do
+    do_sb_extraction mos1
+done
 
-# # m2
-# inst=mos
-# for prefix in $M2_EV_PREFIX_LIST
-# do
-#     do_sb_extraction mos2
-# done
+# m2
+inst=mos
+for prefix in $M2_EV_PREFIX_LIST
+do
+    do_sb_extraction mos2
+done
 
 ######################################################################
 # exit

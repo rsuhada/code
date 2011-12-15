@@ -94,6 +94,8 @@ abbreviations:
 ps - point source(s)
 bg - background
 uv - unvignetted
+oot - out of time events
+woot - *with* oot (i.e. pre-subtraction)
 
 ######################################################################
 # create region - manual solution - CLOSED
