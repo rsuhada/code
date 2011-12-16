@@ -11,8 +11,8 @@ function do_sb_extraction {
 
     image=${inst}${prefix}-${elo}-${ehi}.im
     expmap=${inst}${prefix}-${elo}-${ehi}.exp
-    # bgmap=${inst}${prefix}-${elo}-${ehi}.bg
-    bgmap=${inst}${prefix}-${elo}-${ehi}.spl.bg
+    bgmap=${inst}${prefix}-${elo}-${ehi}.bg
+    # bgmap=${inst}${prefix}-${elo}-${ehi}.spl.bg
     mask=${inst}${prefix}-${elo}-${ehi}.mask
     output=${sb_dir}/sb-prof-${outputid}-${reduction_id}.dat
 
@@ -33,7 +33,7 @@ cd $dir
 elo="500"
 ehi="2000"
 aperture=100.0                  # [pix]
-reduction_id="002"
+reduction_id="003"
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
 
 ######################################################################

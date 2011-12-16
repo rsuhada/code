@@ -21,6 +21,7 @@ MAN_PS_REG=ps-man.im.reg
 
 if [[ -e $MAN_PS_REG_PHYS ]]
 then
+    image=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.im
 
     if [[ ! -e $image ]]
     then
@@ -29,7 +30,6 @@ then
     fi
 
     # convert the region in physical coords to image coords
-    image=pn${PN_EV_PREFIX_LIST}-${elo}-${ehi}.im
     ${codedir}/utils/convert-wcs2im-ds9.sh $image $MAN_PS_REG_PHYS
 
     # need to remove the negative sign in front of the shape
@@ -77,7 +77,6 @@ done
 for prefix in $MOS_EV_PREFIX_LIST
 do
     image=mos${prefix}-${elo}-${ehi}.im
-    image=mos${prefix}-obj-im-400-1250-full.fits
     evli=mos${prefix}-clean.fits
 
     if [[ ! -e $image ]]

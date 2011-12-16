@@ -176,10 +176,89 @@ function init_log_master {
     echo  "# fitid iter r_fit r_fit_next r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $__LOG_MASTER_FILE
 }
 
-
 function make-im {
     ######################################################################
-    # extracts an image
+    # extracts an image: default settings
+
+    inevli=$1
+    outim=$2
+    elo=$3
+    ehi=$4
+    expression=$5
+
+    evselect \
+        attributestocopy='' \
+        blockstocopy='' \
+        cleandss=no \
+        decimagecenter=0 \
+        destruct=yes \
+        dssblock='' \
+        energycolumn=PHA \
+        expression="(PI in [${elo}:${ehi}]) && (FLAG .eq. 0) $expression" \
+        filteredset=filtered.fits \
+        filterexposure=yes \
+        filtertype=expression \
+        flagbit=-1 \
+        flagcolumn=EVFLAG \
+        histogrambinsize=1 \
+        histogramcolumn=TIME \
+        histogrammax=1000 \
+        histogrammin=0 \
+        histogramset=histo.fits \
+        ignorelegallimits=no \
+        imagebinning=binSize \
+        imagedatatype=Real32 \
+        imageset=$outim \
+        keepfilteroutput=no \
+        makeratecolumn=no \
+        maketimecolumn=no \
+        raimagecenter=0 \
+        rateset=rate.fits \
+        specchannelmax=4095 \
+        specchannelmin=0 \
+        spectralbinsize=10 \
+        spectrumset=spectrum.fits \
+        squarepixels=yes \
+        table=${inevli}:EVENTS \
+        timebinsize=1 \
+        timecolumn=TIME \
+        timemax=1000 \
+        timemin=0 \
+        updateexposure=yes \
+        withcelestialcenter=no \
+        withfilteredset=no \
+        withhistogramset=no \
+        withhistoranges=no \
+        withimagedatatype=yes \
+        withimageset=yes \
+        withrateset=no \
+        withspecranges=no \
+        withspectrumset=no \
+        withtimeranges=no \
+        withxranges=no \
+        withyranges=no \
+        withzcolumn=no \
+        withzerrorcolumn=no \
+        writedss=yes \
+        xcolumn=X \
+        ximagebinsize=80 \
+        ximagemax=640 \
+        ximagemin=1 \
+        ximagesize=600 \
+        ycolumn=Y \
+        yimagebinsize=80 \
+        yimagemax=640 \
+        yimagemin=1 \
+        yimagesize=600 \
+        zcolumn=WEIGHT \
+        zerrorcolumn=EWEIGHT
+
+}
+
+
+function make-im-esas {
+    ######################################################################
+    # extracts an image: using the esas settings
 
     inevli=$1
     outim=$2
@@ -371,6 +450,15 @@ function subtract-oot {
     mv ${ootimage}.tmp ${ootimage}
 
     farith $image $ootimage $outimage SUB clobber=yes
+
+    # copy the original extensions (bintables)
+    hdunum=`fstruct ${image} | grep BINTABLE | tail -1 | awk '{print $1}'`
+    for ((i=1; i<=$hdunum;i++))
+    do
+        echo fappend ${image}[$i] ${outimage}
+        fappend ${image}[$i] ${outimage}
+    done
+
 }
 
 
@@ -441,10 +529,11 @@ function subtract_oot_spec {
 
     #  "subtracting oot events"
     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-        clname=CTS_OOT expr=CTS_OOT*${oot_scale}
+        clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
+
 
     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-        clname=COUNTS expr=COUNTS-CTS_OOT
+        clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
 
     # ######################################################################
     # # return to original filenames

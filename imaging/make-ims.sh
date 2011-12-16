@@ -42,7 +42,6 @@ do
     # oot subtraction
     make-im pn${prefix}-clean-oot.fits pn${prefix}-${elo}-${ehi}-oot.im $elo $ehi "$pattern"
 
-    # FIXME: implement!
     subtract-oot pn${prefix}-${elo}-${ehi}-woot.im pn${prefix}-${elo}-${ehi}-oot.im pn${prefix}-${elo}-${ehi}.im
 done
 

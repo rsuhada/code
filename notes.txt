@@ -233,7 +233,6 @@ make_mask inimage=pnS005-obj-im.fits inmask=pnS005-mask-im.fits outmask=pnS005-c
 - note the radiusstyle differes, is this significant or bug?
 
 
-
 ######################################################################
 # rass background spectrum - CLOSED
 
@@ -243,6 +242,36 @@ http://heasarc.gsfc.nasa.gov/cgi-bin/Tools/xraybg/xraybg.pl
 1. put in source coords
 2. region annulus: inner 1 deg, outer 2 deg
 3. save spectrum as rass.pi and response as pspcc.rsp in analysis/
+
+######################################################################
+# images
+
+ESAS part:
+
+for *obj-im*  900x900
+for *obj-det* 780x780
+
+RS part:
+900x900
+
+DCP pipe:
+648x648
+1pix=4"
+1"=20phypix
+
+e.g. in iter-spec:
+
+export r=$r_init
+export r_phy=$(echo "scale=6;$r*20.0" | bc)
+
+-> these are sky coordinates so the conversion is independent of
+   binning
+
+pprof pipe:
+648x648
+
+kapi:
+?x? - unlisted, seems no way to get it (no headers, maybe paper?)
 
 
 ######################################################################

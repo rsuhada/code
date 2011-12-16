@@ -20,6 +20,7 @@ if __name__ == '__main__':
 
     reload(sb_plotting_utils)
 
+    # FIXME: 4.0 for 648x648, 2.5 for 900x900 binning
     pixscale = 4.0               # [arcsec/pix]
 
     ######################################################################
