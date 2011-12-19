@@ -27,6 +27,7 @@ srclist=boxlist.fits
 ######################################################################
 # do the extraction: 0.5-2 keV band
 
+# FIXME: add wps bg?
 for prefix in $MOS_EV_PREFIX_LIST
 do
     image=mos${prefix}-${elo}-${ehi}.im

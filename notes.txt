@@ -44,11 +44,17 @@ ftools
 python:
 - scipy, numpy, pyfits, matplolib
 
-iter-spec
+quick-spec:
+- requires vikhlinins calculator # FIXME: refactor to remove this dependency
+
+iter-spec:
 - requires cosmo_dist.py in the python path
+- requires vikhlinins calculator # FIXME: refactor to remove this dependency
 
 sb fitter:
 - requires minuit as the fitting package
+
+
 
 ######################################################################
 # running on a dir
@@ -91,10 +97,12 @@ pnS003-ori.fits    - raw event list
 pnS003-clean.fits  - cleaned event list
 
 abbreviations:
-ps - point source(s)
+
 bg - background
-uv - unvignetted
+gc - growth curve = cumulative profile
 oot - out of time events
+ps - point source(s)
+uv - unvignetted
 woot - *with* oot (i.e. pre-subtraction)
 
 ######################################################################

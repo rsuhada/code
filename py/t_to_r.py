@@ -95,6 +95,10 @@ if __name__ == '__main__':
     ######################################################################
     # do the calculations
 
+    print
+    print '######################################################################'
+    print 'Results:'
+
     ez = ez_func(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0)
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
     ang_scale = da * math.tan(math.pi/(180.0*3600.0))            # [Mpc/asec]

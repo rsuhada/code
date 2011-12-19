@@ -32,9 +32,37 @@ cd $dir
 
 elo="500"
 ehi="2000"
-aperture=100.0                  # [pix]
-reduction_id="003"
+aperture=150.0                  # [pix]
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
+
+
+######################################################################
+# assign profile ID - keep in sync with the naming convention in
+# do_sb_extraction
+
+# # FIXME: add incrementing
+# reduction_id=`ls -rt1 ${sb_dir}/sb-prof*.dat  | tail -1 | sed 's/.*\///g'| cut -c 14-16`
+
+# echo $reduction_id
+# sleep 5
+
+# if [[ "$reduction_id" == "" ]]
+# then
+#     reduction_id=001
+# fi
+
+reduction_id="006"
+check_file=`ls -rt1 ${sb_dir}/sb-prof*-${reduction_id}.dat  | tail -1`
+
+if [[ -e ${check_file} ]]
+then
+    echo -e "\n** error: ${check_file} already exists here!"
+    echo -e "*** error in $0\n"
+    cd $startdir
+    exit 1
+fi
+
+
 
 ######################################################################
 # do preparations

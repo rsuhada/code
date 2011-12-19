@@ -23,6 +23,9 @@ source $parfile
 
 fileid=${cluster}-${spectrumid}
 
+fit_band_min=0.4                # default: 0.4
+fit_band_max=10.0               # default: 10.0
+
 ######################################################################
 # rebin the spectra
 
@@ -47,12 +50,12 @@ abund angr
 
 setp e
 
-ignore 1:1 0.-0.4
-ignore 1:1 10.-**
-ignore 2:2 0.-0.4
-ignore 2:2 10.-**
-ignore 3:3 0.-0.4
-ignore 3:3 10.-**
+ignore 1:1 0.-${fit_band_min}
+ignore 1:1 ${fit_band_max}-**
+ignore 2:2 0.-${fit_band_min}
+ignore 2:2 ${fit_band_max}-**
+ignore 3:3 0.-${fit_band_min}
+ignore 3:3 ${fit_band_max}-**
 ignore bad
 
 model wabs(mekal)
@@ -264,13 +267,13 @@ echo
 ######################################################################
 # not used at the moment
 
-terr=`~/data1/sw/calc/calc-src.txt \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
-aerr=`~/data1/sw/calc/calc-src.txt \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
-zerr=`~/data1/sw/calc/calc-src.txt \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
+terr=`~/data1/sw/calc/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
+aerr=`~/data1/sw/calc/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
+zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
 
-tsig=`~/data1/sw/calc/calc-src.txt ${kt_fit} / ${terr}`
-asig=`~/data1/sw/calc/calc-src.txt ${abundance_fit} / ${aerr}`
-zsig=`~/data1/sw/calc/calc-src.txt ${redshift_fit} / ${zerr}`
+tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
+asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
+zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 

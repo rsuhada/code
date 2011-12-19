@@ -13,8 +13,8 @@ elo="500"
 ehi="2000"
 emask_thresh1=0.01              # [ defailt = 0.1 ]
 
-MAN_PS_REG_PHYS=ps-man.phy.reg
-MAN_PS_REG=ps-man.im.reg
+MAN_PS_REG_PHYS=ps-man-01.phy.reg
+MAN_PS_REG=ps-man-01.im.reg
 
 ######################################################################
 # prepare the region file with the point sources
@@ -61,6 +61,7 @@ do
 
     outmask=pn${prefix}-${elo}-${ehi}.mask
 	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=${outmask}.wps threshold1=$emask_thresh1
 
     outexp=pn${prefix}-${elo}-${ehi}.uv.exp
 
@@ -94,6 +95,7 @@ do
 
     outmask=mos${prefix}-${elo}-${ehi}.mask
 	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=${outmask}.wps threshold1=$emask_thresh1
 
     outexp=mos${prefix}-${elo}-${ehi}.uv.exp
 

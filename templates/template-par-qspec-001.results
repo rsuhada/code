@@ -15,7 +15,7 @@ bg_m1       m1-bg-ann-01.pha
 bg_m2       m2-bg-ann-01,pha
 bg_pn       pn-bg-ann-01,pha
 stat        c
-core        1
+excise_core 0
 
 
 
