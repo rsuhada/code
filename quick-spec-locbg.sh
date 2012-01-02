@@ -45,11 +45,11 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=0
+EXTRACT_SRC=1
 EXTRACT_BG=1
 
-MAKE_RMF=0
-MAKE_ARF=0
+MAKE_RMF=1
+MAKE_ARF=1
 
 MAKE_RMF_BG=1
 MAKE_ARF_BG=1

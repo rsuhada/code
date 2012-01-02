@@ -152,6 +152,3 @@ if __name__ == '__main__':
     print  'r500_ang     ', r500_ang
     print
     print  'rfit_ang     ', rfit_ang
-
-
-

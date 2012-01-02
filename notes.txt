@@ -54,8 +54,6 @@ iter-spec:
 sb fitter:
 - requires minuit as the fitting package
 
-
-
 ######################################################################
 # running on a dir
 
@@ -184,11 +182,7 @@ ecoordconv:-  Region Centre:
  RAWX: RAWY: 303 300
  CCD(s):  1 centred on CCD: 1
 
-
-
 - dmmakereg in ciao might be relevant
-
-
 
 ######################################################################
 # point source removal - CLOSED
@@ -203,10 +197,11 @@ fcat2reg.sh emllist.fits 10.0 ML_ID_SRC
 
 fv emllist.fits &
 
-find the ML_ID_SOURCE you want to keep and edit it DIST_NN so that it
-is > 40 (possibly but unlikely also edit other columns so that it
-makes the cut of the region task, see below)
-columns to change:
+find the ML_ID_SOURCE you want to remove and edit it DIST_NN so that
+it is > 40 (possibly but unlikely also edit other columns so that it
+makes the cut of the region task, see below) columns to change:
+
+# Mon Jan  2 15:35:54 2012: the default is now 20", it's set in cheese
 
 DET_ML
 FLUX
@@ -351,6 +346,7 @@ export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0
 
 ######################################################################
 # timing
+# times are for ~40-60 ks observations
 
 export EXTRACT_SPEC_ESAS_PN=0
 export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
