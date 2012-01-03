@@ -1,5 +1,5 @@
 ######################################################################
-# extracts
+# extracts a sb profiles (also cumulative profiles)
 
 source ${codedir}/utils/util-funcs-lib.sh
 
@@ -11,8 +11,7 @@ function do_sb_extraction {
 
     image=${inst}${prefix}-${elo}-${ehi}.im
     expmap=${inst}${prefix}-${elo}-${ehi}.exp
-    bgmap=${inst}${prefix}-${elo}-${ehi}.bg
-    # bgmap=${inst}${prefix}-${elo}-${ehi}.spl.bg
+    bgmap=${inst}${prefix}-${elo}-${ehi}${bg_type_id}.bg
     mask=${inst}${prefix}-${elo}-${ehi}.mask
     output=${sb_dir}/sb-prof-${outputid}-${reduction_id}.dat
 
@@ -30,11 +29,12 @@ dir=$1
 here=`pwd`
 cd $dir
 
+reduction_id="002"              # FIXME: add autonaming - see below
 elo="500"
 ehi="2000"
-aperture=150.0                  # [pix]
+aperture=300.0                  # [pix]
+bg_type_id=".spl"               # "" - 2comp, ".spl" - spline
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
-
 
 ######################################################################
 # assign profile ID - keep in sync with the naming convention in
@@ -51,7 +51,6 @@ sb_dir=../sb                    # directory for the sb analysis relative to the 
 #     reduction_id=001
 # fi
 
-reduction_id="006"
 check_file=`ls -rt1 ${sb_dir}/sb-prof*-${reduction_id}.dat  | tail -1`
 
 if [[ -e ${check_file} ]]
@@ -61,8 +60,6 @@ then
     cd $startdir
     exit 1
 fi
-
-
 
 ######################################################################
 # do preparations

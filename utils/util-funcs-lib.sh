@@ -515,7 +515,6 @@ function subtract_oot_spec {
     echo "oot       :: " ${input_ootspec}
     echo "oot scale :: " ${oot_scale}
 
-
     fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
     faddcol infile=${spec}+1 colfile=${ootspec}+1 \
         colname=CTS_OOT_ORIG
@@ -527,16 +526,18 @@ function subtract_oot_spec {
     ######################################################################
     # scale and subtract
 
-    #  "subtracting oot events"
+    # subtracting oot events
     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
         clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
-
 
     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
         clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
 
-    # ######################################################################
-    # # return to original filenames
+    ######################################################################
+    # return to original filenames
+
+    # remove negative values FIXME: check if this patch is valid
+    # fcopy "${spec}[COUNTS>-1]" ${input_spec}
 
     mv $spec $input_spec
     mv $ootspec $input_ootspec

@@ -3,16 +3,30 @@
 
 General:
 
+- check pn-spectra for oot removal (INT format + negaitive bins?)
+
+- from pn-spectra extract part that adds the proper ps regions to
+  images like *-obj-im-500-2000.fits (ideally automatize extraction
+  and coordinate conversion for the reg) - now EXTRACT_SPEC_ESAS_ has
+  to be run which takes too much time if the esas background part is
+  not yet used
+
 - maybe need to add 02-05 for the esas extract_spec modules? (will
   increase runtime significantly)
+
 - in 0205 the pn-man-mask.fits.cheese are merged all 3 (same for m1
   and m2) - rahter than individual... why?
+
 - top level dir handling should be changed - now requires an OBSID dir
   (or link) so having 2 reductions is cumbersome!
 - imaging pipeline
-- find out what causes the eveselct change - go through the pars
+
+- find out what causes the eveselct change - go through the parameters
+
 - centralize cosmology (see py and xspec part)
+
 - dedicated source detection module
+
 - would be nice to cleanup the namespace (sometime variables are
   duplicated) and the capitalization convention should be better
 
@@ -283,12 +297,14 @@ kapi:
 1. run esaspi in a standard manner, until the end
 
 2. open e.g. pnS003-obj-im-400-1250.fits
+(for background annulus mos is better to contain it in a single chip)
 
 3. adjust regions to needs, define core and bgann - keep the ps
 regions roughly confined to the spectroscopic regions - in order not
 to have too many regions which conflicts with SAS tasks (still so with
 SASv11?). For ps you can load in the *bkg_region.fits to ds9. The
-exclusion red bar can be set in the "properties" menu
+exclusion red bar can be (un-)set in the "properties" menu (select all
+first)
 
 4. save the regions in wcs and phys, standard naming:
 SRC_REGION=cluster-man-01.phy.reg

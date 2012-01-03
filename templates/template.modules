@@ -43,12 +43,19 @@ export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
 export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
 
 ######################################################################
-# imaging pipeline: 0.5-2 keV
+# imaging pipeline: 0.5-2 keV (FIXME: at the moment requires
+# EXTRACT_SPEC_ to be run before for ps region file)
 
 MAKE_IMS=0
 MAKE_EXP_MAP=0
 MAKE_MODEL_BG_2COMP=0
 MAKE_MODEL_BG_SPLINE=0
+
+######################################################################
+# sb analysis
+
+GET_CTS_STAT_APER=0         # get basic aperture estimates for cts/ctr
+EXTRACT_SB_PROF=0           # extract image/background/exp profiles
 
 ######################################################################
 # utilities

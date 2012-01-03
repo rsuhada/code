@@ -185,32 +185,20 @@ plot ldata res
 #################################################
 # Nice plot
 
-iplot
-
-ma 4 on 1
-ma 4 on 3
-
-ma 6 on 4
-ma 6 on 6
-
-ma 12 on 7
-ma 12 on 9
-
-view .1 .1 .6 .9
-window 2
-view .1 .1 .6
-
-window 1
-csiz 1.35
-la t
-la f
+iplot ldata res
 time off
 
+window 1
+view .2 .4 .7 .9
+la t
 la y Normalised counts/s/keV
 
 window 2
-la x Channel energy (keV)
+view .2 .1 .7 .4
+la y Residuals
+la t
 
+csize 1.35
 lw 2
 font roman
 hard ${cluster}-${fitid}-nice.ps/cps
@@ -230,6 +218,8 @@ cosmo 70 0 0.7
 lumin 0.5 2.0 ${redshift}
 lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
+lumin 0.5 7.0 ${redshift}
+log none
 
 exit
 y
