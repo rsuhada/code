@@ -29,10 +29,10 @@ spectrumid=${cluster}-${fitid}
 # rebin the spectra
 
 # background spectra
-grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${bgid}.rmf & chkey ANCRFILE ${single_inst}-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
 
 echo -e "
@@ -184,8 +184,6 @@ exit
 #################################################
 
 # write a flux/luminosity log
-log ${fileid}-fx-lx.log
-# write a flux/luminosity log
 log ${cluster}-${fitid}-fx-lx.log
 dummyrsp
 flux 0.5 2
@@ -204,9 +202,6 @@ y
 " > ${cluster}-${fitid}.xspec
 
 xspec < ${cluster}-${fitid}.xspec
-
-
-
 
 ######################################################################
 # extract spectroscopy results

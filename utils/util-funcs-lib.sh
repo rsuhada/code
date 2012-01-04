@@ -428,7 +428,7 @@ function subtract-oot {
             oot_scale=0.063
             ;;
         primefullwindowextended)
-            oot_scale=0.023
+            oot_scale=0.0232    # FIXME: see below
             ;;
         primelargewindow)
             oot_scale=0.0016
@@ -493,7 +493,14 @@ function subtract_oot_spec {
             oot_scale=0.063
             ;;
         primefullwindowextended)
-            oot_scale=0.023
+            oot_scale=0.0232
+
+        # FIXME: based on frame time (FRMTIME) there are 2
+        # primefullwindowextended submodes, the other being
+        # following. implement this branch too
+        # primefullwindowextended)
+        # oot_scale=0.0163 ;;
+
             ;;
         primelargewindow)
             oot_scale=0.0016
@@ -534,10 +541,25 @@ function subtract_oot_spec {
         clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
 
     ######################################################################
-    # return to original filenames
+    # remove negative values FIXME: check if this patch is valid wrt
+    # esas (though it's typically only few (~5) bins at very high energies,
+    # most likely outside fitting range)
 
-    # remove negative values FIXME: check if this patch is valid
-    # fcopy "${spec}[COUNTS>-1]" ${input_spec}
+    rm remove_neg.tmp.fits 2> /dev/null
+
+    fcopy "${spec}[COUNTS<0.0]" remove_neg.tmp.fits
+
+    fdump infile=remove_neg.tmp.fits+1 outfile=${spec}.ascii clobber=yes \
+        columns=CHANNEL rows=- \
+        prhead=no showunit=no showrow=no showscale=no showcol=no
+
+    sed '/^$/d' ${spec}.ascii | awk '{print $0+1 " " 0.0}' > ${spec}.ascii2
+    fmodtab ${spec}+1 COUNTS ${spec}.ascii2
+
+    rm ${spec}.ascii ${spec}.ascii2 remove_neg.tmp.fits
+
+    ######################################################################
+    # move to original filenames
 
     mv $spec $input_spec
     mv $ootspec $input_ootspec
