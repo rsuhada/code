@@ -478,6 +478,7 @@ function subtract_oot_spec {
 
     spec=oot_subtraction_tmp_pn.pha
     ootspec=oot_subtraction_tmp_pn_oot.pha
+    outspec=oot_subtraction_tmp_pn_sub.pha
 
     mv $input_spec $spec
     mv $input_ootspec $ootspec
@@ -522,46 +523,67 @@ function subtract_oot_spec {
     echo "oot       :: " ${input_ootspec}
     echo "oot scale :: " ${oot_scale}
 
-    fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
-    faddcol infile=${spec}+1 colfile=${ootspec}+1 \
-        colname=CTS_OOT_ORIG
-
-    fparkey value=CTS_OOT fitsfile=${ootspec}+1 keyword=TTYPE2
-    faddcol infile=${spec}+1 colfile=${ootspec}+1 \
-        colname=CTS_OOT
-
-    ######################################################################
-    # scale and subtract
-
-    # subtracting oot events
-    fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-        clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
-
-    fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-        clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
-
-    ######################################################################
-    # remove negative values FIXME: check if this patch is valid wrt
-    # esas (though it's typically only few (~5) bins at very high energies,
-    # most likely outside fitting range)
-
-    rm remove_neg.tmp.fits 2> /dev/null
-
-    fcopy "${spec}[COUNTS<0.0]" remove_neg.tmp.fits
-
-    fdump infile=remove_neg.tmp.fits+1 outfile=${spec}.ascii clobber=yes \
-        columns=CHANNEL rows=- \
-        prhead=no showunit=no showrow=no showscale=no showcol=no
-
-    sed '/^$/d' ${spec}.ascii | awk '{print $0+1 " " 0.0}' > ${spec}.ascii2
-    fmodtab ${spec}+1 COUNTS ${spec}.ascii2
-
-    rm ${spec}.ascii ${spec}.ascii2 remove_neg.tmp.fits
+mathpha <<EOT
+${spec}-$oot_scale*${ootspec}
+R
+$outspec
+$spec
+1
+0
+EOT
 
     ######################################################################
     # move to original filenames
 
-    mv $spec $input_spec
+    mv $outspec $input_spec
     mv $ootspec $input_ootspec
+
+# ######################################################################
+# # alternative version in CTS space
+# ######################################################################
+#     fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
+#     faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+#         colname=CTS_OOT_ORIG
+
+#     fparkey value=CTS_OOT fitsfile=${ootspec}+1 keyword=TTYPE2
+#     faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+#         colname=CTS_OOT
+
+#     ######################################################################
+#     # scale and subtract
+
+#     # subtracting oot events
+#     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+#         clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
+
+#     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+#         clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
+
+#     ######################################################################
+#     # remove negative values FIXME: check if this patch is valid wrt
+#     # esas (though it's typically only few (~5) bins at very high energies,
+#     # most likely outside fitting range)
+
+#     rm remove_neg.tmp.fits 2> /dev/null
+
+#     fcopy "${spec}[COUNTS<0.0]" remove_neg.tmp.fits
+
+#     fdump infile=remove_neg.tmp.fits+1 outfile=${spec}.ascii clobber=yes \
+#         columns=CHANNEL rows=- \
+#         prhead=no showunit=no showrow=no showscale=no showcol=no
+
+#     sed '/^$/d' ${spec}.ascii | awk '{print $0+1 " " 0.0}' > ${spec}.ascii2
+#     fmodtab ${spec}+1 COUNTS ${spec}.ascii2
+
+#     rm ${spec}.ascii ${spec}.ascii2 remove_neg.tmp.fits
+
+#    ######################################################################
+#    # move to original filenames
+
+#    mv $spec $input_spec
+#    mv $ootspec $input_ootspec
+# ######################################################################
+# # alternative version in CTS space
+# ######################################################################
 
 }

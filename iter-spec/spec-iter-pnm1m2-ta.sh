@@ -23,8 +23,8 @@ source $parfile
 
 fileid=${cluster}-${spectrumid}
 
-fit_band_min=0.5                # default: 0.4
-fit_band_max=7.0               # default: 10.0
+fit_band_min=0.4                # default: 0.4
+fit_band_max=10.0               # default: 10.0
 
 ######################################################################
 # rebin the spectra

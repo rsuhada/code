@@ -434,6 +434,18 @@ quick-spec/setrsp.sh
 see also ../aux-esaspi/ (not under git)
 
 ######################################################################
+# arf/rmf
+
+my old rmf/arf parameter setup vs. the esas setup gives agreement to
+better than 0.5%
+
+so I currently use the badpixel location, psf weighted rmf and arf
+calculated with a detmap - likely you cand do better then this though
+the difference is totally negligible
+
+FIXME: add this arf/rmf setup also to iter-spec
+
+######################################################################
 # devel notes
 
 0. random

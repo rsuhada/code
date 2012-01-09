@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(pn m1 m2)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="008"
+export fitid="002"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -37,7 +37,7 @@ export DO_SPECTROSCOPY=1
 export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
-export BG_REGION_ID=bg-ann-04
+export BG_REGION_ID=bg-ann-01
 export PS_REGION_ID=ps-man-01
 export LINK_BG=1                       # soft link bg annulus
 

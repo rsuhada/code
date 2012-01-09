@@ -49,10 +49,10 @@ EXTRACT_SRC=1
 EXTRACT_BG=1
 
 MAKE_RMF=0
-MAKE_ARF=0
+MAKE_ARF=1
 
 MAKE_RMF_BG=0
-MAKE_ARF_BG=0
+MAKE_ARF_BG=1
 
 CALCULATE_BACKSCALE=1
 
@@ -166,6 +166,15 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=m1-detmask.im \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m1.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr"
+
 
 ######################################################################
 #  get m2 spectra
@@ -184,6 +193,14 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=m2-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m2.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr"
 
 ######################################################################
 #  get pn spectra
@@ -196,6 +213,15 @@ then
 
     evselect table=${evlist} withimageset=yes imageset=${specdir}/pn.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
+
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=pn-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
         withspectrumset=true spectrumset=${specdir}/pn.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
@@ -219,6 +245,14 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=pn-oot-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
 
     # FIXME: unfortunately needs to jump between dirs...
     cd $specdir
@@ -250,6 +284,14 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=m1-${bgid}-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr"
 
 ######################################################################
 #  get m2 background spectra
@@ -262,6 +304,15 @@ then
 
     evselect table=${evlist} withimageset=yes imageset=${specdir}/m2-${bgid}.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr"
+
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=m2-${bgid}-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
         withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
@@ -286,6 +337,15 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
+
 ######################################################################
 #  get pn oot background spectra
 
@@ -297,6 +357,15 @@ then
 
     evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-${bgid}-oot.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr"
+
+    # detector map file for arfgen
+    evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-oot-detmap.ds \
+        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
@@ -321,13 +390,16 @@ fi
 ######################################################################
 # GETTING RMF:
 
+export detmaptype=psf             # sas for ext sources: flat; esas: psf
+
 if [[ $MAKE_RMF -ne 0 ]]
 then
 
     echo -e '\nGetting source RMF...'
-    rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+
+    rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
 
@@ -335,9 +407,9 @@ if [[ $MAKE_RMF_BG -ne 0 ]]
 then
 
     echo -e '\nGetting background RMF...'
-    rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
 
@@ -345,18 +417,24 @@ fi
 ######################################################################
 # GETTING ARF:
 
+# export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y modelootcorr=no"
+
+export set="badpixelresolution=2 crossregionarf=no detmaptype=dataset extendedsource=yes filterdss=yes filteredset=filteredpixellist.ds ignoreoutoffov=yes keeparfset=yes modelee=no modeleffarea=yes modelfiltertrans=yes modelootcorr=no modelquantumeff=yes psfenergy=2 setbackscale=no sourcecoords=eqpos sourcex=0 sourcey=0 useodfatt=no withbadpixcorr=yes withdetbounds=no withfilteredset=no withrmfset=yes withsourcepos=no"
+
+
 if [[ $MAKE_ARF -ne 0 ]]
 then
 
     # WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
-    export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+    # export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+
     #export set="withsourcepos=yes sourcecoords="det" sourcex=3320.25 sourcey=8438.24 withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
 
     echo -e '\nGetting source ARFs...'
 
-    arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf
-    arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf
-    arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf
+    arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-detmap.ds
+    arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-detmap.ds
+    arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-detmap.ds
 
 fi
 
@@ -364,14 +442,15 @@ if [[ $MAKE_ARF_BG -ne 0 ]]
 then
 
     # WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
-    export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+    # export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
+
     #export set="withsourcepos=yes sourcecoords="det" sourcex=3320.25 sourcey=8438.24 withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
 
     echo -e '\nGetting background ARFs...'
 
-    arfgen spectrumset=${specdir}/pn-${bgid}.pha  $set rmfset=${specdir}/pn-${bgid}.rmf  arfset=${specdir}/pn-${bgid}.arf
-    arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf
-    arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf
+    arfgen spectrumset=${specdir}/pn-${bgid}.pha  $set rmfset=${specdir}/pn-${bgid}.rmf  arfset=${specdir}/pn-${bgid}.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-${bgid}-detmap.ds
+    arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-${bgid}-detmap.ds
+    arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-${bgid}-detmap.ds
 
 fi
 

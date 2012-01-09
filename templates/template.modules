@@ -40,7 +40,8 @@ export GROUP_SPEC=0                             # FIXME - prefixes
 
 export CORRECT_PROTON=0            # !!!! not finished/tested yet
 export COMBINE_SMOOTH=0            # !!!! not finishedtested yet
-export RENAME_SPEC_PRODUCTS=0      # should be used after CORRECT_PROTON and COMBINE_SMOOTH
+export RENAME_SPEC_PRODUCTS=0      # should be used after
+                                   # CORRECT_PROTON and COMBINE_SMOOTH
 
 ######################################################################
 # imaging pipeline: 0.5-2 keV (FIXME: at the moment requires
