@@ -46,10 +46,10 @@ abund angr
 
 setp e
 
-ignore 1:1 0.-0.4
-ignore 1:1 10.-**
-ignore 2:2 0.-0.4
-ignore 2:2 10.-**
+ignore 1:1 0.0-$fit_band_min
+ignore 1:1 $fit_band_max-**
+ignore 2:2 0.0-$fit_band_min
+ignore 2:2 $fit_band_max-**
 ignore bad
 
 model wabs(mekal)
@@ -78,9 +78,10 @@ setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
 pl ld res
 
 # weight standard
-# weight model
 
 statistic cstat
+# statistic chi
+# weight churazov
 
 fit 100000000
 fit 100000000
@@ -270,4 +271,5 @@ asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
+
 

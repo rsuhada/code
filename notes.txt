@@ -80,6 +80,11 @@ cp ~/data1/sw/esaspi/templates/template.modules configs/SPT-XXXXX.modules
 
 - edit them by setting the config options and pick the first module
 
+update:
+get-templates.sh 060401099
+
+- standalone script to do the prep work
+
 4. there should be a notes/ dir for analysis notes
 5. there has to be a soft link OBSID -> your analysis dir
 6. initialize heasoft, sas11

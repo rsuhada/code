@@ -43,8 +43,8 @@ abund angr
 
 setp e
 
-ignore 1:1 0.-0.4
-ignore 1:1 10.-**
+ignore 1:1 0.0-$fit_band_min
+ignore 1:1 $fit_band_max-**
 ignore bad
 
 model wabs(mekal)
