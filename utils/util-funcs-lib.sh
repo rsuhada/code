@@ -468,6 +468,8 @@ function subtract_oot_spec {
 
     input_spec=$1
     input_ootspec=$2
+    RATE_SPACE=0                # 1 - subtraction in rate-space
+                                # (mathpha) but incompatible w c-stat (?)
 
     # backup
     cp ${input_spec} ${input_spec}.orig
@@ -486,7 +488,7 @@ function subtract_oot_spec {
     ######################################################################
     # get oot factor
 
-    # for extrs safety lowcase everything
+    # for extra safety lowcase everything
     submode=`fkeyprint $spec SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'`
 
     case $submode in
@@ -523,6 +525,9 @@ function subtract_oot_spec {
     echo "oot       :: " ${input_ootspec}
     echo "oot scale :: " ${oot_scale}
 
+    if [[ $RATE_SPACE -eq 1 ]]
+    then
+
 mathpha <<EOT
 ${spec}-$oot_scale*${ootspec}
 R
@@ -538,52 +543,55 @@ EOT
     mv $outspec $input_spec
     mv $ootspec $input_ootspec
 
-# ######################################################################
-# # alternative version in CTS space
-# ######################################################################
-#     fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
-#     faddcol infile=${spec}+1 colfile=${ootspec}+1 \
-#         colname=CTS_OOT_ORIG
+    else
 
-#     fparkey value=CTS_OOT fitsfile=${ootspec}+1 keyword=TTYPE2
-#     faddcol infile=${spec}+1 colfile=${ootspec}+1 \
-#         colname=CTS_OOT
+    ######################################################################
+    # alternative version in CTS space
+    ######################################################################
+        fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
+        faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+            colname=CTS_OOT_ORIG
 
-#     ######################################################################
-#     # scale and subtract
+        fparkey value=CTS_OOT fitsfile=${ootspec}+1 keyword=TTYPE2
+        faddcol infile=${spec}+1 colfile=${ootspec}+1 \
+            colname=CTS_OOT
 
-#     # subtracting oot events
-#     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-#         clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
+    ######################################################################
+    # scale and subtract
 
-#     fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
-#         clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
+    # subtracting oot events
+        fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+            clname=CTS_OOT expr=CTS_OOT*${oot_scale} copyall=yes
 
-#     ######################################################################
-#     # remove negative values FIXME: check if this patch is valid wrt
-#     # esas (though it's typically only few (~5) bins at very high energies,
-#     # most likely outside fitting range)
+        fcalc clobber=yes infile=${spec}+1 outfile=${spec} \
+            clname=COUNTS expr=COUNTS-CTS_OOT copyall=yes
 
-#     rm remove_neg.tmp.fits 2> /dev/null
+    ######################################################################
+    # remove negative values FIXME: check if this patch is valid wrt
+    # esas (though it's typically only few (~5) bins at very high energies,
+    # most likely outside fitting range)
 
-#     fcopy "${spec}[COUNTS<0.0]" remove_neg.tmp.fits
+        rm remove_neg.tmp.fits 2> /dev/null
 
-#     fdump infile=remove_neg.tmp.fits+1 outfile=${spec}.ascii clobber=yes \
-#         columns=CHANNEL rows=- \
-#         prhead=no showunit=no showrow=no showscale=no showcol=no
+        fcopy "${spec}[COUNTS<0.0]" remove_neg.tmp.fits
 
-#     sed '/^$/d' ${spec}.ascii | awk '{print $0+1 " " 0.0}' > ${spec}.ascii2
-#     fmodtab ${spec}+1 COUNTS ${spec}.ascii2
+        fdump infile=remove_neg.tmp.fits+1 outfile=${spec}.ascii clobber=yes \
+            columns=CHANNEL rows=- \
+            prhead=no showunit=no showrow=no showscale=no showcol=no
 
-#     rm ${spec}.ascii ${spec}.ascii2 remove_neg.tmp.fits
+        sed '/^$/d' ${spec}.ascii | awk '{print $0+1 " " 0.0}' > ${spec}.ascii2
+        fmodtab ${spec}+1 COUNTS ${spec}.ascii2
 
-#    ######################################################################
-#    # move to original filenames
+        rm ${spec}.ascii ${spec}.ascii2 remove_neg.tmp.fits
 
-#    mv $spec $input_spec
-#    mv $ootspec $input_ootspec
-# ######################################################################
-# # alternative version in CTS space
-# ######################################################################
+   ######################################################################
+   # move to original filenames
 
+        mv $spec $input_spec
+        mv $ootspec $input_ootspec
+   ######################################################################
+   # alternative version in CTS space
+   ######################################################################
+
+fi
 }

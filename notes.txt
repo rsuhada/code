@@ -3,6 +3,11 @@
 
 General:
 
+- in quick-spec/iter-spec ps removal might be improved if you look at
+  the images in the full band (acutally in pn there can be very bright
+  hot pixels but it seems they are all belove 0.4keV and don't affect
+  results atm)
+
 - check pn-spectra for oot removal (INT format + negaitive bins?)
 
 - from pn-spectra extract part that adds the proper ps regions to
@@ -10,9 +15,6 @@ General:
   and coordinate conversion for the reg) - now EXTRACT_SPEC_ESAS_ has
   to be run which takes too much time if the esas background part is
   not yet used
-
-- maybe need to add 02-05 for the esas extract_spec modules? (will
-  increase runtime significantly)
 
 - in 0205 the pn-man-mask.fits.cheese are merged all 3 (same for m1
   and m2) - rahter than individual... why?
@@ -449,6 +451,23 @@ calculated with a detmap - likely you cand do better then this though
 the difference is totally negligible
 
 FIXME: add this arf/rmf setup also to iter-spec
+
+######################################################################
+# standalone/external scripts
+# i.e. small utility scripts that can be run outside run-esaspi.sh
+
+utils/get-coords-from-reg.sh
+
+- extracts coordinates for analysis script
+- INPUT: region ID (bar wcs id and suffix, standard naming)
+
+utils/parse-spec-reg.sh
+
+- converts a region to .desc file: a SAS compliant selection
+  expression
+- INPUT:
+  1. ds9 region file
+  2. 0/1 - remove/keep these regions? i.e. put &&! or &&
 
 ######################################################################
 # devel notes
