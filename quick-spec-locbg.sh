@@ -45,20 +45,20 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=0
+EXTRACT_SRC=1
 EXTRACT_BG=1
 
-MAKE_RMF=0
-MAKE_ARF=0
+MAKE_RMF=1
+MAKE_ARF=1
 
 MAKE_RMF_BG=1
 MAKE_ARF_BG=1
 
 CALCULATE_BACKSCALE=1
 
-SRC_REGION=cluster-man-01.phy.reg
-BG_REGION=bg-ann-02.phy.reg
-PS_REGION=ps-man-01.phy.reg
+SRC_REGION=cluster-man-02.phy.reg
+BG_REGION=bg-ann-03.phy.reg
+PS_REGION=ps-man-02.phy.reg
 
 ######################################################################
 # create the spectroscopy dir if it does not exists
@@ -142,13 +142,15 @@ srcreg="$inpattern"
 inpattern=`cat ${BG_REGION}.desc`
 bgreg="$inpattern"
 
+# original
 
 # mospattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
 # pnpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
 
 # esas
+
 mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
-pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000]) &&! circle(20646.785,25880.5,273.78466,X,Y) &&! circle(25156.745,31484.459,228.75482,X,Y) &&! circle(28885.276,25322.337,183.22576,X,Y) &&! circle(23794.826,30680.704,152.08227,X,Y) &&! circle(27783.833,31983.085,184.4124,X,Y)"
+pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
 
 if [[ $EXTRACT_SRC -ne 0 ]]
 then
@@ -171,7 +173,7 @@ then
         writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=m1-detmask.im \
+    evselect table=${evlist} withimageset=yes imageset=m1-detmap.ds \
         xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
         withspectrumset=true spectrumset=${specdir}/m1.pha \

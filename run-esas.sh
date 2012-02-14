@@ -61,18 +61,18 @@ source $module_list
 ######################################################################
 # setup
 
-export obsid=$OBSID             # FIXME: refactor it
+export obsid=$OBSID
 export startdir=`pwd`
-export workdir=${startdir}/${obsid}/analysis
+export workdir=${startdir}/${ANALYSIS_DIR}/analysis
 export NOTESDIR=${startdir}/notes
 export NOTESFILE=${NOTESDIR}/analysis-${CLNAME}.txt
 
 ######################################################################
 # check whether observation is present
 
-if [[ ! -e $obsid ]]
+if [[ ! -e $ANALYSIS_DIR ]]
 then
-    echo -e "\n** error: obsid $obsid does not exists here: "
+    echo -e "\n** error: directory $ANALYSIS_DIR does not exists here: "
     echo -e "*** $startdir\n"
     cd $startdir
     exit 1
@@ -93,8 +93,8 @@ then
     export SAS_MEMORY_MODEL=high
     export SAS_VERBOSITY=4
 
-    export SAS_ODF=${startdir}/${obsid}/odf
-    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
+    export SAS_ODF=${startdir}/${ANALYSIS_DIR}/odf
+    export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
 
 else
 
@@ -108,8 +108,8 @@ else
     # export SAS_MEMORY_MODEL=high
     # export SAS_VERBOSITY=4
 
-    export SAS_ODF=${startdir}/${obsid}/odf
-    export SAS_CCF=${startdir}/${obsid}/analysis/ccf.cif
+    export SAS_ODF=${startdir}/${ANALYSIS_DIR}/odf
+    export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
 
 fi
 
@@ -117,12 +117,13 @@ fi
 # write start message
 
 echo -e "\n############################################################"
-echo -e "start time :: " $starttime
-echo -e "directory  :: " $startdir
-echo -e "obsid      :: " $obsid
-echo -e "config     :: " $config_file
-echo -e "modules    :: " $module_list
-echo -e "code       :: " $codedir
+echo -e "start time    :: " $starttime
+echo -e "analysis path :: " $startdir
+echo -e "analysis dir  :: " $ANALYSIS_DIR
+echo -e "obsid         :: " $obsid
+echo -e "config        :: " $config_file
+echo -e "modules       :: " $module_list
+echo -e "code          :: " $codedir
 echo -e "############################################################\n"
 
 echo -e "\nInitial SAS setup : \n"
@@ -132,7 +133,7 @@ sasversion
 ######################################################################
 # move to obsid directory
 
-cd $obsid
+cd $ANALYSIS_DIR
 echo "Moved to dir :"
 pwd
 
@@ -142,7 +143,7 @@ pwd
 
 if [[ $PREP_ODF_DIR -eq 1 ]]
 then
-    ${codedir}/prep-odf-dir.sh ${startdir}/${obsid}
+    ${codedir}/prep-odf-dir.sh ${startdir}/${ANALYSIS_DIR}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -564,17 +565,19 @@ cd $startdir
 echo -e "\nAnalysis done. You have been using:\n"
 sasversion
 
-
 endtime=`date`
 t="$(($(date +%s)-t))"
 
 echo -e "\n############################################################"
-echo -e "obsid      :: " $obsid
-echo -e "config     :: " $config_file
-echo -e "modules    :: " $module_list
-echo -e "start time :: " $starttime
-echo -e "end time   :: " $endtime
-printf  "runtime    ::  %02dd:%02dh:%02dm:%02ds\n" "$((t/86400))" "$((t/3600%24))" "$((t/60%60))" "$((t%60))"
+echo -e "analysis path :: " $startdir
+echo -e "analysis dir  :: " $ANALYSIS_DIR
+echo -e "obsid         :: " $obsid
+echo -e "config        :: " $config_file
+echo -e "modules       :: " $module_list
+echo -e "code          :: " $codedir
+echo -e "start time    :: " $starttime
+echo -e "end time      :: " $endtime
+printf  "runtime       ::  %02dd:%02dh:%02dm:%02ds\n" "$((t/86400))" "$((t/3600%24))" "$((t/60%60))" "$((t%60))"
 echo -e "############################################################\n"
 
 echo -e "Done :: $obsid\n"

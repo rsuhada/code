@@ -41,7 +41,7 @@ sb_dir=../sb                    # directory for the sb analysis relative to the 
 # do_sb_extraction
 
 # # FIXME: add incrementing
-# reduction_id=`ls -rt1 ${sb_dir}/sb-prof*.dat  | tail -1 | sed 's/.*\///g'| cut -c 14-16`
+# reduction_id=`ls -rt1 ${sb_dir}/sb-prof*.dat | tail -1 | sed 's/.*\///g'| cut -c 14-16`
 
 # echo $reduction_id
 # sleep 5

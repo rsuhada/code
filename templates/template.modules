@@ -57,6 +57,7 @@ MAKE_MODEL_BG_SPLINE=0
 
 GET_CTS_STAT_APER=0         # get basic aperture estimates for cts/ctr
 EXTRACT_SB_PROF=0           # extract image/background/exp profiles
+                            # has options
 
 ######################################################################
 # utilities
@@ -65,11 +66,13 @@ export PIPE_TEST=0
 export PLT_LC_HIST=0
 export PLT_DIAGNOSTICS=0
 export RELINK_SPEC_PRODUCTS=0
-export QUICK_SPEC_LOCBG=0
+export QUICK_SPEC_LOCBG=0       # extraction for spectroscopy - local
+                                # background
+                                # has options
 export MAKE_QUICK_VIEW_IMS=0
 
 
 ######################################################################
 # in development
 
-ITER_SPEC=0
+ITER_SPEC=0                     # has options

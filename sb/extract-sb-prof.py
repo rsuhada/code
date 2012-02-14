@@ -355,4 +355,3 @@ if __name__ == '__main__':
         print "- coords in ds9 image coordinates"
         print
         print
-

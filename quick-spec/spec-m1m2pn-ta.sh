@@ -44,6 +44,8 @@ data 1:1 pn.grp.pha
 data 2:2 m1.grp.pha
 data 3:3 m2.grp.pha
 
+# cosmo 70 0 0.7
+cosmo 50 0 0.3
 query yes
 abund angr
 

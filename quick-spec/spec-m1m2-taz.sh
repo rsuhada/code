@@ -267,3 +267,5 @@ asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
+
+
