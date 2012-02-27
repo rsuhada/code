@@ -332,9 +332,15 @@ overtaken by SAS, run:
 
 export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
 
-7.3 run
+7.3 run a fitter from the quick-spec dir, e.g.
 
+spec-m1m2pn-ta.sh abc-0205 001 abc-0502-par-001.conf
 
+where
+
+cluster=$1
+fitid=$2
+parfile=$3
 
 ######################################################################
 # analysis-template.txt

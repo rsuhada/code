@@ -102,6 +102,7 @@ then
 
     export here=`pwd`
     cd $specdir
+    echo "doing oot subtraction"
     subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
     cd $here
 

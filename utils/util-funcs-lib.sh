@@ -386,13 +386,18 @@ function get-oot-scale {
     image=$1
 
     submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+    frametime=`fkeyprint $spec FRMTIME | grep = | awk '{print $3}' | sed "s/'//g"`
 
     case $submode in
         primefullwindow)
             oot_scale=0.063
             ;;
         primefullwindowextended)
-            oot_scale=0.023
+            oot_scale=0.0232
+            if [[ $frametime -ge 210 ]]
+            then
+                oot_scale=0.0163
+            fi
             ;;
         primelargewindow)
             oot_scale=0.0016
@@ -404,6 +409,9 @@ function get-oot-scale {
             echo "\*\* error: unknown submode: $submode in $image!"
             exit 1
     esac
+
+    # uncomment to temporarily disable oot subtraction
+    # oot_scale=0.00
 
     echo $oot_scale
 }
@@ -422,13 +430,18 @@ function subtract-oot {
     # oot_scale=$(get-oot-scale $image)   # doesn't have to work
 
     submode=`fkeyprint $image SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'` # for extrs safety lowcase everything
+    frametime=`fkeyprint $image FRMTIME | grep = | awk '{print $3}' | sed "s/'//g"`
 
     case $submode in
         primefullwindow)
             oot_scale=0.063
             ;;
         primefullwindowextended)
-            oot_scale=0.0232    # FIXME: see below
+            oot_scale=0.0232
+            if [[ $frametime -ge 210 ]]
+            then
+                oot_scale=0.0163
+            fi
             ;;
         primelargewindow)
             oot_scale=0.0016
@@ -468,7 +481,7 @@ function subtract_oot_spec {
 
     input_spec=$1
     input_ootspec=$2
-    RATE_SPACE=0                # 1 - subtraction in rate-space
+    RATE_SPACE=1                # 1 - subtraction in rate-space
                                 # (mathpha) but incompatible w c-stat (?)
 
     # backup
@@ -490,6 +503,7 @@ function subtract_oot_spec {
 
     # for extra safety lowcase everything
     submode=`fkeyprint $spec SUBMODE | grep = | awk '{print $3}' | sed "s/'//g" | tr '[A-Z]' '[a-z]'`
+    frametime=`fkeyprint $spec FRMTIME | grep = | awk '{print $3}' | sed "s/'//g"`
 
     case $submode in
         primefullwindow)
@@ -497,13 +511,10 @@ function subtract_oot_spec {
             ;;
         primefullwindowextended)
             oot_scale=0.0232
-
-        # FIXME: based on frame time (FRMTIME) there are 2
-        # primefullwindowextended submodes, the other being
-        # following. implement this branch too
-        # primefullwindowextended)
-        # oot_scale=0.0163 ;;
-
+            if [[ $frametime -ge 210 ]]
+            then
+                oot_scale=0.0163
+            fi
             ;;
         primelargewindow)
             oot_scale=0.0016
@@ -523,6 +534,8 @@ function subtract_oot_spec {
     echo "updating spectrum headers and copying oot column"
     echo "spectrum  :: " ${input_spec}
     echo "oot       :: " ${input_ootspec}
+    echo "submode   :: " ${submode}
+    echo "frametime :: " ${frametime}
     echo "oot scale :: " ${oot_scale}
 
     if [[ $RATE_SPACE -eq 1 ]]
@@ -548,6 +561,8 @@ EOT
     ######################################################################
     # alternative version in CTS space
     ######################################################################
+        echo "subtracting oot now!"
+
         fparkey value=CTS_OOT_ORIG fitsfile=${ootspec}+1 keyword=TTYPE2
         faddcol infile=${spec}+1 colfile=${ootspec}+1 \
             colname=CTS_OOT_ORIG
@@ -589,6 +604,7 @@ EOT
 
         mv $spec $input_spec
         mv $ootspec $input_ootspec
+
    ######################################################################
    # alternative version in CTS space
    ######################################################################

@@ -38,26 +38,25 @@ function get_cluster_pars {
     fi
 }
 
-
 ######################################################################
 # settings
 
 ra=$2
 de=$3
 
-EXTRACT_SRC=1
+EXTRACT_SRC=0
 EXTRACT_BG=1
 
-MAKE_RMF=1
-MAKE_ARF=1
+MAKE_RMF=0
+MAKE_ARF=0
 
 MAKE_RMF_BG=1
 MAKE_ARF_BG=1
 
 CALCULATE_BACKSCALE=1
 
-SRC_REGION=cluster-man-02.phy.reg
-BG_REGION=bg-ann-03.phy.reg
+SRC_REGION=cluster-man-01.phy.reg
+BG_REGION=bg-ann-07.phy.reg
 PS_REGION=ps-man-02.phy.reg
 
 ######################################################################
@@ -250,22 +249,14 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
-    # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=pn-oot-detmap.ds \
-        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
-        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
-        withspecranges=true energycolumn=PI specchannelmin=0 \
-        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
-
-    # FIXME: unfortunately needs to jump between dirs...
-    cd $specdir
-    source ${codedir}/utils/util-funcs-lib.sh
-
-    echo "oot subtraction - background!"
-    subtract_oot_spec pn.pha pn-oot.pha
-    cd $dir
+    # # detector map file for arfgen
+    # evselect table=${evlist} withimageset=yes imageset=pn-oot-detmap.ds \
+    #     xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+    #     yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+    #     withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
+    #     withspecranges=true energycolumn=PI specchannelmin=0 \
+    #     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+    #     writedss=Y expression="$pnexpr"
 
 fi
 
@@ -368,25 +359,14 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
-    # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-oot-detmap.ds \
-        xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
-        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
-        withspecranges=true energycolumn=PI specchannelmin=0 \
-        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
-
-    ######################################################################
-    # subtract oot
-
-    # FIXME: unfortunately needs to jump between dirs...
-    cd $specdir
-    source ${codedir}/utils/util-funcs-lib.sh
-
-    echo "oot subtraction - background!"
-    subtract_oot_spec pn-${bgid}.pha pn-${bgid}-oot.pha
-    cd $dir
+    # # detector map file for arfgen
+    # evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-oot-detmap.ds \
+    #     xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
+    #     yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+    #     withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
+    #     withspecranges=true energycolumn=PI specchannelmin=0 \
+    #     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+    #     writedss=Y expression="$pnexpr"
 
 fi
 
@@ -411,8 +391,8 @@ then
 
     echo -e '\nGetting background RMF...'
     rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    # rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    # rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
 
@@ -504,9 +484,32 @@ then
 
 fi
 
+######################################################################
+# do the OOT subtraction moved past the rmfgen/arfgen/backscale tasks
+# - if subtracting before them there were sometime problems (e.g. with
+# mathpha, updating keywords could fix it but this seems to be
+# standard enough (i.e. to do rmfgen/arfgen on pre-oot subtraction))
+
+# FIXME: unfortunately needs to jump between dirs...
+cd $specdir
+source ${codedir}/utils/util-funcs-lib.sh
+
+if [[ $EXTRACT_SRC -eq 1  ]]
+then
+    echo "oot subtraction - source"
+    subtract_oot_spec pn.pha pn-oot.pha
+fi
+
+if [[ $EXTRACT_BG -eq 1 ]]
+then
+    echo "oot subtraction - background"
+    subtract_oot_spec pn-${bgid}.pha pn-${bgid}-oot.pha
+fi
+
+cd $dir
 
 ######################################################################
-# exit
+# EXIT
 
 cd $here
 echo -e "\n$0 in $obsid done!"

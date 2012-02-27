@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -94,7 +97,7 @@ pl ld res
 # weight standard
 # weight model
 
-statistic cstat
+# statistic cstat
 
 fit 100000000
 fit 100000000

@@ -23,8 +23,8 @@ source $parfile
 
 fileid=${cluster}-${spectrumid}
 
-fit_band_min=0.4                # default: 0.4
-fit_band_max=10.0               # default: 10.0
+fit_band_min=0.5                # default: 0.4
+fit_band_max=7.0               # default: 10.0
 
 ######################################################################
 # rebin the spectra
@@ -38,7 +38,6 @@ grppha infile=pn-${BG_REGION_ID}.pha outfile=pn-${BG_REGION_ID}.grp.pha chatter=
 grppha infile=m1-${spectrumid}.pha outfile=m1-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${spectrumid}.rmf & chkey ANCRFILE m1-${spectrumid}.arf & chkey BACKFILE m1-${BG_REGION_ID}.grp.pha & exit" clobber=yes
 grppha infile=m2-${spectrumid}.pha outfile=m2-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${spectrumid}.rmf & chkey ANCRFILE m2-${spectrumid}.arf & chkey BACKFILE m2-${BG_REGION_ID}.grp.pha & exit" clobber=yes
 grppha infile=pn-${spectrumid}.pha outfile=pn-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${spectrumid}.rmf & chkey ANCRFILE pn-${spectrumid}.arf & chkey BACKFILE pn-${BG_REGION_ID}.grp.pha & exit" clobber=yes
-
 
 echo -e "
 data 1:1 pn-${spectrumid}.grp.pha

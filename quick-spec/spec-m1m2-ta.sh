@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -26,6 +29,32 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+######################################################################
 # rebin the spectra
 
 # background spectra
@@ -36,6 +65,20 @@ grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group m
 grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
+
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1.grp.pha m2.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+
+# sleep 200
+
+######################################################################
+# do the fitting
 
 echo -e "
 data 1:1 m1.grp.pha
@@ -78,10 +121,11 @@ setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
 pl ld res
 
 # weight standard
-
-statistic cstat
-# statistic chi
 # weight churazov
+# weight model
+
+# statistic cstat
+statistic chi
 
 fit 100000000
 fit 100000000
