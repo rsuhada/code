@@ -556,6 +556,13 @@ EOT
     mv $outspec $input_spec
     mv $ootspec $input_ootspec
 
+    # restore primary header and update keys in first extension
+    cphead ${input_spec}.orig+0 ${input_spec}+0
+    fkeyprint ${input_spec}.orig+1 BACKSCAL | grep =  > pn-header.tmp.txt
+    fkeyprint ${input_spec}.orig+1 EXPOSURE | grep = >> pn-header.tmp.txt
+    fmodhead ${input_spec}+1 pn-header.tmp.txt
+    rm pn-header.tmp.txt ${spec}
+
     else
 
     ######################################################################

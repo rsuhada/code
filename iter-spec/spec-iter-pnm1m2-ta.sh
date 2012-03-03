@@ -23,8 +23,38 @@ source $parfile
 
 fileid=${cluster}-${spectrumid}
 
-fit_band_min=0.5                # default: 0.4
-fit_band_max=7.0               # default: 10.0
+######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=1
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
 
 ######################################################################
 # rebin the spectra
@@ -39,6 +69,23 @@ grppha infile=m1-${spectrumid}.pha outfile=m1-${spectrumid}.grp.pha chatter=0 co
 grppha infile=m2-${spectrumid}.pha outfile=m2-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${spectrumid}.rmf & chkey ANCRFILE m2-${spectrumid}.arf & chkey BACKFILE m2-${BG_REGION_ID}.grp.pha & exit" clobber=yes
 grppha infile=pn-${spectrumid}.pha outfile=pn-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${spectrumid}.rmf & chkey ANCRFILE pn-${spectrumid}.arf & chkey BACKFILE pn-${BG_REGION_ID}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in pn-${bgid}.grp.pha m1-${bgid}.grp.pha m2-${bgid}.grp.pha pn.grp.pha m1.grp.pha m2.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+
+# sleep 200
+fi
+
+######################################################################
+# do the fitting
 echo -e "
 data 1:1 pn-${spectrumid}.grp.pha
 data 2:2 m1-${spectrumid}.grp.pha

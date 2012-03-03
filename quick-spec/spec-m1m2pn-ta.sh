@@ -29,6 +29,39 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha # pn.pha pn-{bgid}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
@@ -41,14 +74,32 @@ grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} 
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
+
+CONVERT_TO_CTR=0
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poisson errors appropriate" > header.tmp
+for i in pn-${bgid}.grp.pha pn.grp.pha # m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1.grp.pha m2.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+# sleep 200
+fi
+
+######################################################################
+# do the fitting
 
 echo -e "
 data 1:1 pn.grp.pha
 data 2:2 m1.grp.pha
 data 3:3 m2.grp.pha
 
-# cosmo 70 0 0.7
-cosmo 50 0 0.3
+cosmo 70 0 0.7
+# cosmo 50 0 0.3
+
 query yes
 abund angr
 
@@ -97,7 +148,8 @@ pl ld res
 # weight standard
 # weight model
 
-# statistic cstat
+statistic cstat
+# statistic chi
 
 fit 100000000
 fit 100000000

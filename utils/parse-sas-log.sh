@@ -2,8 +2,9 @@
 
 logfile=$1
 
-
-echo
+echo "######################################################################"
+echo "TASK is designed to find SAS errors only"
+echo "the list of other errors might be incomplete!"
 echo "######################################################################"
 echo "Warnings:"
 echo

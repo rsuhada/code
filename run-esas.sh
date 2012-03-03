@@ -556,6 +556,24 @@ then
     fi
 fi
 
+
+######################################################################
+# temporary hot-fix
+
+CONVERT_REG_WCS_TO_DET=0
+export wcs_region=cluster-man-02.wcs.reg
+
+if [[ $CONVERT_REG_WCS_TO_DET -eq 1 ]]
+then
+    ${codedir}/convert-reg-wcs-to-det.sh ${workdir} ${wcs_region}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
 ######################################################################
 # write finish message
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -26,18 +29,69 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in ${single_inst}-${bgid}.pha ${single_inst}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
-grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${bgid}.rmf & chkey ANCRFILE ${single_inst}-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+# grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${bgid}.rmf & chkey ANCRFILE ${single_inst}-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha chatter=0 comm=" group min 3 & chkey RESPFILE ${single_inst}-${bgid}.rmf & chkey ANCRFILE ${single_inst}-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
 grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
+
+CONVERT_TO_CTR=1
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in  ${single_inst}-${bgid}.grp.pha ${single_inst}.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+fi
+
+######################################################################
+# do the fitting
 
 echo -e "
 data 1:1 ${single_inst}.grp.pha
 
+cosmo 70 0 0.7
 query yes
 abund angr
 
@@ -68,6 +122,7 @@ pl ld res
 # weight model
 
 statistic cstat
+# statistic chi
 
 fit 100000000
 fit 100000000
@@ -138,17 +193,17 @@ fit
 log none
 save ${cluster}-${fitid}-model.xcm
 
-setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
-iplot ufspec
-label f ${cluster}, xmm, ${fitid}
-csize 1.3
-lweigh 2
-lab t
-time off
-hardcopy ${cluster}-${fitid}-uf.ps/cps
-exit
+# setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
+# iplot ufspec
+# label f ${cluster}, xmm, ${fitid}
+# csize 1.3
+# lweigh 2
+# lab t
+# time off
+# hardcopy ${cluster}-${fitid}-uf.ps/cps
+# exit
 
-plot ufspec
+# plot ufspec
 
 iplot ldata res
 csize 1.3

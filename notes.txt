@@ -417,12 +417,6 @@ for iterative spectroscopy:
 
 - convergence typically in <5 iterations (hard limit 10 at the moment)
 
-# distmatrix calc:
-3.390972
-3.318338
-3.4243
-3.297625
-
 ######################################################################
 # libraries with internal settings/options variables
 # i.e. stuff that can/should be tweaked locally manually  in the file

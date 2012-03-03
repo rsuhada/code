@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
 if [[ $# != 3 ]]
 then
-    echo -e "** error: missing clusterid, runid and parameter file"
+    echo -e "** error: missing clusterid, fitid and parameter file"
     echo -e "e.g.: ./spec-m1m2pn-ta.sh abc-0205 001 abc-0502-par-001.conf"
     exit 1
 fi
@@ -38,11 +41,12 @@ grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} 
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
-
 echo -e "
 data 1:1 pn.grp.pha
 data 2:2 m1.grp.pha
 data 3:3 m2.grp.pha
+
+cosmo 70 0 0.7
 
 query yes
 abund angr
@@ -93,6 +97,7 @@ pl ld res
 # weight model
 
 statistic cstat
+# statistic chi
 
 fit 100000000
 fit 100000000
@@ -217,6 +222,8 @@ cosmo 70 0 0.7
 lumin 0.5 2.0 ${redshift}
 lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
+lumin 0.5 7.0 ${redshift}
+log none
 
 exit
 y
@@ -278,5 +285,5 @@ tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
-echo "Spectroscopical analysis done for :" ${cluster} ${runid}
+echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
 

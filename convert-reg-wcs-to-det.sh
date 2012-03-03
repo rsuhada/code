@@ -72,7 +72,6 @@ do
         echo $radius
         echo
 
-
         # run coordinate conversion: pn
         ecoordconv_image=`ls -1 pnS???-obj-im.fits`
         tmp=${region_file}.pn.ecoordconv
@@ -80,8 +79,8 @@ do
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
-            detx=`grep DETX obj-wcs-core.reg.pn.ecoordconv | awk '{print $3}'`
-            dety=`grep DETX obj-wcs-core.reg.pn.ecoordconv | awk '{print $4}'`
+            detx=`grep DETX ${region_file}.pn.ecoordconv | awk '{print $3}'`
+            dety=`grep DETX ${region_file}.pn.ecoordconv | awk '{print $4}'`
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.pn-reg.txt
             echo "${shape}($detx,$dety,$radius)" >> $pn_det_reg
         else
@@ -97,8 +96,8 @@ do
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
-            detx=`grep DETX obj-wcs-core.reg.m1.ecoordconv | awk '{print $3}'`
-            dety=`grep DETX obj-wcs-core.reg.m1.ecoordconv | awk '{print $4}'`
+            detx=`grep DETX ${region_file}.m1.ecoordconv | awk '{print $3}'`
+            dety=`grep DETX ${region_file}.m1.ecoordconv | awk '{print $4}'`
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.m1-reg.txt
             echo "${shape}($detx,$dety,$radius)" >> $m1_det_reg
         else
@@ -114,8 +113,8 @@ do
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
-            detx=`grep DETX obj-wcs-core.reg.m2.ecoordconv | awk '{print $3}'`
-            dety=`grep DETX obj-wcs-core.reg.m2.ecoordconv | awk '{print $4}'`
+            detx=`grep DETX ${region_file}.m2.ecoordconv | awk '{print $3}'`
+            dety=`grep DETX ${region_file}.m2.ecoordconv | awk '{print $4}'`
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.m2-reg.txt
             echo "${shape}($detx,$dety,$radius)" >> $m2_det_reg
         else
