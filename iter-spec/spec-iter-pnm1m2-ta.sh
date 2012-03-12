@@ -26,14 +26,14 @@ fileid=${cluster}-${spectrumid}
 ######################################################################
 # convert to ctr = cts/s
 
-CONVERT_TO_CTR=1
+CONVERT_TO_CTR=0
 
 if [[ $CONVERT_TO_CTR -eq 1 ]]
 then
 
 spec=inspec.pha
 
-for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha
+for i in m1-${spectrumid}.pha m2-${spectrumid}.pha m1.pha m2.pha
 do
 mv $i ${spec}
 outspec=${i%.pha}.grp.pha
@@ -72,16 +72,16 @@ grppha infile=pn-${spectrumid}.pha outfile=pn-${spectrumid}.grp.pha chatter=0 co
 ######################################################################
 # hack header - grppha overwrites
 
+CONVERT_TO_CTR=1
+
 if [[ $CONVERT_TO_CTR -eq 1 ]]
 then
 echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
-for i in pn-${bgid}.grp.pha m1-${bgid}.grp.pha m2-${bgid}.grp.pha pn.grp.pha m1.grp.pha m2.grp.pha
+for i in pn-${bgid}.grp.pha pn-${spectrumid}.grp.pha # m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1-${spectrumid}.grp.pha m2-${spectrumid}.grp.pha
 do
     fmodhead $i header.tmp
 done
 rm header.tmp
-
-# sleep 200
 fi
 
 ######################################################################

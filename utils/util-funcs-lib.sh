@@ -531,6 +531,7 @@ function subtract_oot_spec {
     ######################################################################
     # prepare files for oot subtraction
 
+    echo "Subtracting oot with option :: " $RATE_SPACE
     echo "updating spectrum headers and copying oot column"
     echo "spectrum  :: " ${input_spec}
     echo "oot       :: " ${input_ootspec}

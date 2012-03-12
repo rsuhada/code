@@ -77,7 +77,7 @@ grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} 
 ######################################################################
 # hack header - grppha overwrites
 
-CONVERT_TO_CTR=0
+CONVERT_TO_CTR=1
 if [[ $CONVERT_TO_CTR -eq 1 ]]
 then
 echo "POISSERR=                    T / Poisson errors appropriate" > header.tmp

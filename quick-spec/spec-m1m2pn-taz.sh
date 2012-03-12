@@ -38,7 +38,23 @@ grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} 
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
 
+CONVERT_TO_CTR=1
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poisson errors appropriate" > header.tmp
+for i in pn-${bgid}.grp.pha pn.grp.pha # m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1.grp.pha m2.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+# sleep 200
+fi
+
+######################################################################
+# do the fitting
 echo -e "
 data 1:1 pn.grp.pha
 data 2:2 m1.grp.pha

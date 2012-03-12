@@ -31,14 +31,14 @@ export r_tolerance=4.0                 # [arcsec]
 export EXTRACT_SRC_SPEC=1
 export CALCULATE_BACKSCALE=1
 
-export MAKE_RMF=0
-export MAKE_ARF=0
+export MAKE_RMF=1
+export MAKE_ARF=1
 
 export DO_SPECTROSCOPY=1
 export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
-export BG_REGION_ID=bg-ann-01
+export BG_REGION_ID=bg-ann-07
 export PS_REGION_ID=ps-man
 export LINK_BG=1                       # soft link bg annulus
 
@@ -182,6 +182,16 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     echo "######################################################################"
     echo "iteration :: " $iter "current val :: " $r " old val :: " $r_old "diff :: " $r_diff, "tolerance reached :: " $reached_r_tolerance
 
+    is_positive=`echo "if($r > 0.0) 1" | bc `
+
+    if [[ $is_positive -eq 0 ]]
+    then
+        echo -e "\n** error: current value for aperture radius is <= 0.0, r=$r"
+        echo -e "*** error in script: $0\n"
+        cd $startdir
+        exit 1
+    fi
+
     ######################################################################
     # write region files
 
@@ -289,6 +299,18 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
             fi
         done
     fi
+
+    ######################################################################
+    # do the oot subtraction
+
+    echo "Running oot subtraction: "
+    export here=`pwd`
+    cd $specdir
+    echo "doing oot subtraction"
+    subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
+    cd $here
+
+    # sleep 1000
 
     ######################################################################
     # do the spectral fit
@@ -405,3 +427,4 @@ mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final
 cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0
+

@@ -44,26 +44,32 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=0
+EXTRACT_SRC=1
 EXTRACT_BG=1
 
-MAKE_RMF=0
-MAKE_ARF=0
+MAKE_RMF=1
+MAKE_ARF=1
 
-MAKE_RMF_BG=0
-MAKE_ARF_BG=0
+MAKE_RMF_BG=1
+MAKE_ARF_BG=1
 
 CALCULATE_BACKSCALE=1
 
 # # 0205
 # SRC_REGION=cluster-man-01.phy.reg
-# BG_REGION=bg-ann-06.phy.reg
+# BG_REGION=bg-ann-07.phy.reg
 # PS_REGION=ps-man-02.phy.reg
 
-# 0559
-SRC_REGION=cluster-man-02.phy.reg
-BG_REGION=bg-ann-03.phy.reg
-PS_REGION=ps-man-03.phy.reg
+# # 0559
+# SRC_REGION=cluster-man-02.phy.reg
+# BG_REGION=bg-ann-03.phy.reg
+# PS_REGION=ps-man-03.phy.reg
+
+
+# 2332
+SRC_REGION=cluster-man-01.phy.reg
+BG_REGION=bg-ann-01.phy.reg
+PS_REGION=ps-man-02.phy.reg
 
 ######################################################################
 # create the spectroscopy dir if it does not exists
@@ -387,8 +393,8 @@ then
     echo -e '\nGetting source RMF...'
 
     rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    # rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    # rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
 
@@ -397,11 +403,10 @@ then
 
     echo -e '\nGetting background RMF...'
     rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    # rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    # rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
 fi
-
 
 ######################################################################
 # GETTING ARF:
@@ -422,8 +427,8 @@ then
     echo -e '\nGetting source ARFs...'
 
     arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-detmap.ds
-    # arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-detmap.ds
-    # arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-detmap.ds
+    arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-detmap.ds
+    arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-detmap.ds
 
 fi
 
@@ -438,8 +443,8 @@ then
     echo -e '\nGetting background ARFs...'
 
     arfgen spectrumset=${specdir}/pn-${bgid}.pha  $set rmfset=${specdir}/pn-${bgid}.rmf  arfset=${specdir}/pn-${bgid}.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-${bgid}-detmap.ds
-    # arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-${bgid}-detmap.ds
-    # arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-${bgid}-detmap.ds
+    arfgen spectrumset=${specdir}/m1-${bgid}.pha  $set rmfset=${specdir}/m1-${bgid}.rmf  arfset=${specdir}/m1-${bgid}.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-${bgid}-detmap.ds
+    arfgen spectrumset=${specdir}/m2-${bgid}.pha  $set rmfset=${specdir}/m2-${bgid}.rmf  arfset=${specdir}/m2-${bgid}.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-${bgid}-detmap.ds
 
 fi
 
@@ -502,7 +507,6 @@ source ${codedir}/utils/util-funcs-lib.sh
 if [[ $EXTRACT_SRC -eq 1  ]]
 then
     echo "oot subtraction - source"
-    pn.pha
     subtract_oot_spec pn.pha pn-oot.pha
 fi
 

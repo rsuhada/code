@@ -81,7 +81,7 @@ evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${sp
     writedss=Y expression="$expr"
 
 ######################################################################
-# if pn do oot subtraction
+# if pn create also the oot stuff
 
 if [[ "$instrument" == "pn" ]]
 then
@@ -99,11 +99,5 @@ then
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$expr"
-
-    export here=`pwd`
-    cd $specdir
-    echo "doing oot subtraction"
-    subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
-    cd $here
 
 fi
