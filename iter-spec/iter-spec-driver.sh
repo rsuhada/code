@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(m1 m2 pn)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="999"
+export fitid="009"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background

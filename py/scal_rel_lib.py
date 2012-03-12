@@ -302,19 +302,37 @@ def LM_gwp09_bol_noevol_err(luminosity_bol, luminosity_bol_err, func_ez):
 
 def MT_vikhlinin09(temperature, temperature_err, func_ez, h):
     """
+    M - T scaling relation from Vikhlinin et al. 2009
+
+    Use the ADD_INTRINSIC toggle whether the intrinsic scatter should
+    be included in the error propagation.
+
+    # FIXME: implement this
+    NOTE: relation should be multiplied by 1.17 for *merging clusters*
+    see 4.1.3 and 4.1.4 in vikhlinin09.
+
     Arguments:
     - `temperature`: [keV] 0.15-1 r500 X-ray temperature
     - `temperature_err`: [keV] 0.15-1 r500 X-ray temperature error
     - `func_ez`: E = E(z) - the Hubble parameter evolution function
     - `h`: h = H(z=0)/100.0
     """
+
+    ADD_INTRINSIC = 1
+
     M0 = 3.02e14/h
     alpha = 1.53
+    INTRINSIC_SIGMA = 0.2       # 20% - only simulations, though
+                                # Vikhlinin09 seems to confirm this
+                                # well
 
     outM = M0*(temperature/5.0)**alpha / func_ez
+    outM_err = alpha * outM * temperature_err / temperature
 
-    # FIXME: error propagation
-    outM_err = 999.0
+    if (ADD_INTRINSIC == 1):
+        outM_intr_err =  INTRINSIC_SIGMA * outM
+        outM_err = sqrt(outM_err**2.0 + outM_intr_err**2.0)
+        print "Intrinsic error is included!"
 
     return (outM, outM_err)
 

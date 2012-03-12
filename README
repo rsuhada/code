@@ -1,9 +1,5 @@
-X-ray analysis pipeline.
-------------------------
+h2. X-ray analysis pipeline
 
-The code serves as an example of bash/python analysis pipeline with
-fully automated as well as interactive parts (via config scripts).
+* The code serves as an example of bash/python analysis pipeline with fully automated as well as interactive parts (via config scripts).
 
-The pipeline is under development and documentation is not available,
-because the software is not intended to be public yet, but rather as a
-sample/demonstration example.
+* The pipeline is under development and documentation is not available, because the software is not intended to be public yet, but rather as a sample/demonstration example.

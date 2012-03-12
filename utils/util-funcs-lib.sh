@@ -482,7 +482,9 @@ function subtract_oot_spec {
     input_spec=$1
     input_ootspec=$2
     RATE_SPACE=1                # 1 - subtraction in rate-space
-                                # (mathpha) but incompatible w c-stat (?)
+                                # (STRONGLY RECOMMENDED).
+                                # TODO: explore incompatibility with
+                                # c-stat (?)
 
     # backup
     cp ${input_spec} ${input_spec}.orig
