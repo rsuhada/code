@@ -332,7 +332,7 @@ def MT_vikhlinin09(temperature, temperature_err, func_ez, h):
     if (ADD_INTRINSIC == 1):
         outM_intr_err =  INTRINSIC_SIGMA * outM
         outM_err = sqrt(outM_err**2.0 + outM_intr_err**2.0)
-        print "Intrinsic error is included!"
+        print "M - T Intrinsic error is included!"
 
     return (outM, outM_err)
 

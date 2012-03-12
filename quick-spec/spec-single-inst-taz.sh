@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -26,6 +29,36 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in ${single_inst}-${bgid}.pha ${single_inst}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
@@ -34,6 +67,22 @@ grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha 
 # source spectra
 grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
+
+CONVERT_TO_CTR=1
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in  ${single_inst}-${bgid}.grp.pha ${single_inst}.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+fi
+
+######################################################################
+# do the fitting
 
 echo -e "
 data 1:1 ${single_inst}.grp.pha
@@ -67,6 +116,7 @@ pl ld res
 # weight standard
 # weight model
 
+# statistic chi
 statistic cstat
 
 fit 100000000
@@ -204,9 +254,6 @@ y
 
 xspec < ${cluster}-${fitid}.xspec
 
-
-
-
 ######################################################################
 # extract spectroscopy results
 
@@ -232,7 +279,6 @@ redshift_err_u=`cat  ${spectrumid}-err.log | grep " 5 " | grep "(" | awk '{gsub(
 
 normalisation_err_d=`cat   ${spectrumid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
 normalisation_err_u=`cat  ${spectrumid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
-
 
 ######################################################################
 # write out report

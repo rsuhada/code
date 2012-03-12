@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -26,6 +29,39 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha # pn.pha pn-{bgid}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
@@ -36,7 +72,8 @@ grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group m
 grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
 grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 
-
+######################################################################
+# do the fitting
 echo -e "
 data 1:1 m1.grp.pha
 data 2:2 m2.grp.pha
@@ -81,6 +118,7 @@ pl ld res
 # weight standard
 # weight model
 
+# statistic chi
 statistic cstat
 
 fit 100000000

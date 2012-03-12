@@ -55,10 +55,10 @@ MAKE_ARF_BG=1
 
 CALCULATE_BACKSCALE=1
 
-# # 0205
-# SRC_REGION=cluster-man-01.phy.reg
-# BG_REGION=bg-ann-07.phy.reg
-# PS_REGION=ps-man-02.phy.reg
+# 0205
+SRC_REGION=cluster-man-02.phy.reg
+BG_REGION=bg-ann-07.phy.reg
+PS_REGION=ps-man-03.phy.reg
 
 # # 0559
 # SRC_REGION=cluster-man-02.phy.reg
@@ -66,10 +66,10 @@ CALCULATE_BACKSCALE=1
 # PS_REGION=ps-man-03.phy.reg
 
 
-# 2332
-SRC_REGION=cluster-man-01.phy.reg
-BG_REGION=bg-ann-01.phy.reg
-PS_REGION=ps-man-02.phy.reg
+# # 2332
+# SRC_REGION=cluster-man-01.phy.reg
+# BG_REGION=bg-ann-01.phy.reg
+# PS_REGION=ps-man-02.phy.reg
 
 ######################################################################
 # create the spectroscopy dir if it does not exists

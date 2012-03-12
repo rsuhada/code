@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -24,6 +27,40 @@ fi
 source $parfile
 
 spectrumid=${cluster}-${fitid}
+
+######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha # pn.pha pn-{bgid}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
 
 ######################################################################
 # rebin the spectra
@@ -108,6 +145,7 @@ pl ld res
 # weight standard
 # weight model
 
+# statistic chi
 statistic cstat
 
 fit 100000000
