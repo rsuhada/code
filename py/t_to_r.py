@@ -107,6 +107,10 @@ if __name__ == '__main__':
         print "Scaling relation chain : ", SCALING_OPTION
         (t500, t500_err) = (t, t_err)
         (m500, m500_err) = scal_rel_lib.MT_vikhlinin09(t, t_err, ez, h) # [Msol]
+
+        (yx500, yx500_err) = scal_rel_lib.MYx_vikhlinin09(m500, m500_err, ez, h)
+        (ysz500, ysz500_err) = scal_rel_lib.MYsz_andersson11(m500, m500_err, ez)
+
         r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
         r500_ang = r500 / ang_scale # [asec]
         rfit_ang = r500_ang
@@ -115,6 +119,10 @@ if __name__ == '__main__':
         print "Scaling relation chain : ", SCALING_OPTION
         (t500, t500_err) = scal_rel_lib.TT_vikhlinin09(t, t_err)
         (m500, m500_err) = scal_rel_lib.MT_vikhlinin09(t500, t500_err, ez, h) # [Msol]
+
+        (yx500, yx500_err) = scal_rel_lib.MYx_vikhlinin09(m500, m500_err, ez, h)
+        (ysz500, ysz500_err) = scal_rel_lib.MYsz_andersson11(m500, m500_err, ez)
+
         r500 = scal_rel_lib.r_overdensity(overdensity, m500, m500_err, ez)[0] # [Mpc]
         r500_ang = r500 / ang_scale # [asec]
         rfit_ang = 0.5 * r500_ang   # fit only in the half aperture
@@ -142,6 +150,11 @@ if __name__ == '__main__':
     print  'abund        ', abund
     print  'abund_err_n  ', abund_err_n
     print  'abund_err_p  ', abund_err_p
+    print
+    print  'yx500        ', yx500
+    print  'yx500_err    ', yx500_err
+    print  'ysz500       ', ysz500
+    print  'ysz500_err   ', ysz500_err
     print
     print  't500         ', t500
     print  't500_err     ', t500_err

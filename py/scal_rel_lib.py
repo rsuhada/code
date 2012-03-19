@@ -643,6 +643,53 @@ def MYx_arnaud07_err(mass, mass_err, func_ez):
     outY_err = outY*mass_err*(1.0/alpha)/mass
     return outY_err
 
+def MYx_vikhlinin(m500, m500_err, ez, h):
+    """
+    M500Yx - Yx relation from Vikhlinin et al. 2009.
+    intrinsic scatter = 0.07 - from KVN sims, no measurement
+    """
+
+    A = 5.77e14
+    PIVOT = 3.0e14
+    alpha = 0.57
+
+    ADD_INTRINSIC = 1
+    INTRINSIC_SIGMA = 0.13067       # from KVN sims, no measurement -
+                                    # inverted from 0.07
+
+    outY = PIVOT * (m500 / (A * h**0.5))**{1.0/alpha} * ez**(2.0/5.0)
+    outY_err = outY * {1.0/alpha} * m500_err / m500
+
+    if (ADD_INTRINSIC == 1):
+        outY_intr_err = INTRINSIC_SIGMA * outY
+        outY_err = sqrt(outY_err**2 + outY_intr_err**2)
+
+    return (outY, outY_err)
+
+def MYsz_andersson11(m500, m500_err, ez):
+    """
+    M500Yx - Ysz relation from Andersson et al. 2011 (eq. 19, tab. 5, B parameter
+    fitted)
+    """
+
+    A = 14.06
+    B = 1.67
+    C = 2.0/3.0
+    PIVOT = 3.0e14
+
+    ADD_INTRINSIC = 1
+    INTRINSIC_SIGMA = 0.09
+
+    outY = 10.0**A * (m500 / PIVOT)**B * ez**C
+    outY_err = B * outY * m500_err / m500
+
+    if (ADD_INTRINSIC == 1):
+        outY_intr_err = INTRINSIC_SIGMA * outY
+        outY_err = sqrt(outY_err**2 + outY_intr_err**2)
+
+    return (outY, outY_err)
+
+
 #############################################################################################
 ### L-Yx scalings
 
