@@ -643,7 +643,7 @@ def MYx_arnaud07_err(mass, mass_err, func_ez):
     outY_err = outY*mass_err*(1.0/alpha)/mass
     return outY_err
 
-def MYx_vikhlinin(m500, m500_err, ez, h):
+def MYx_vikhlinin09(m500, m500_err, ez, h):
     """
     M500Yx - Yx relation from Vikhlinin et al. 2009.
     intrinsic scatter = 0.07 - from KVN sims, no measurement
@@ -657,8 +657,8 @@ def MYx_vikhlinin(m500, m500_err, ez, h):
     INTRINSIC_SIGMA = 0.13067       # from KVN sims, no measurement -
                                     # inverted from 0.07
 
-    outY = PIVOT * (m500 / (A * h**0.5))**{1.0/alpha} * ez**(2.0/5.0)
-    outY_err = outY * {1.0/alpha} * m500_err / m500
+    outY = PIVOT * (m500 / (A * h**0.5))**(1.0/alpha) * ez**(2.0/5.0)
+    outY_err = outY * (1.0/alpha) * m500_err / m500
 
     if (ADD_INTRINSIC == 1):
         outY_intr_err = INTRINSIC_SIGMA * outY

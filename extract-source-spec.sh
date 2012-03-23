@@ -68,7 +68,7 @@ esac
 ######################################################################
 #  get source spectra
 
-echo -e '\nGetting m1 spectra...'
+echo -e "\nGetting spectra for " $instrument
 
 expr="$instpattern && $srcreg $psreg"
 

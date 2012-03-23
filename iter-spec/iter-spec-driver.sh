@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(m1 m2 pn)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="009"
+export fitid="010"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -309,8 +309,6 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     echo "doing oot subtraction"
     subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
     cd $here
-
-    # sleep 1000
 
     ######################################################################
     # do the spectral fit
