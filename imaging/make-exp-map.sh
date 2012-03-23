@@ -13,6 +13,7 @@ elo="500"
 ehi="2000"
 emask_thresh1=0.01              # [ defailt = 0.1 ]
 
+# FIXME: file names shouldn't be hardcoded!
 MAN_PS_REG_PHYS=ps-man-01.phy.reg
 MAN_PS_REG=ps-man-01.im.reg
 

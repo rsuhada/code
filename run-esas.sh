@@ -98,7 +98,7 @@ then
 
 else
 
-    # FIXME
+    # FIXME: - set paths for your machine
     export codedir="/Users/rs/data1/sw/esaspi"
     export esas_caldb="/Users/rs/calib/esas"
 
