@@ -56,20 +56,20 @@ MAKE_ARF_BG=1
 CALCULATE_BACKSCALE=1
 
 # 0205
-SRC_REGION=cluster-man-02.phy.reg
-BG_REGION=bg-ann-07.phy.reg
-PS_REGION=ps-man-03.phy.reg
+BG_REGION_ID=bg-ann-07
+SRC_REGION_ID=cluster-man-02
+PS_REGION_ID=ps-man-03
 
 # # 0559
-# SRC_REGION=cluster-man-02.phy.reg
-# BG_REGION=bg-ann-03.phy.reg
-# PS_REGION=ps-man-03.phy.reg
+# SRC_REGION_ID=cluster-man-02
+# BG_REGION_ID=bg-ann-03
+# PS_REGION_ID=ps-man-03
 
 
 # # 2332
-# SRC_REGION=cluster-man-01.phy.reg
-# BG_REGION=bg-ann-01.phy.reg
-# PS_REGION=ps-man-02.phy.reg
+# SRC_REGION_ID=cluster-man-01
+# BG_REGION_ID=bg-ann-01
+# PS_REGION_ID=ps-man-02
 
 ######################################################################
 # create the spectroscopy dir if it does not exists
@@ -105,6 +105,11 @@ fi
 ######################################################################
 # check existence of region files
 
+BG_REGION=${BG_REGION_ID}.phy.reg
+SRC_REGION=${SRC_REGION_ID}.phy.reg
+PS_REGION=${PS_REGION_ID}.phy.reg
+
+
 if [[ ! -e $SRC_REGION ]]
 then
     echo -e "\n** error: $SRC_REGION does not exists here!"
@@ -129,7 +134,7 @@ then
     exit 1
 fi
 
-cp $SRC_REGION $BG_REGION $PS_REGION $specdir
+cp $SRC_REGION $BG_REGION $PS_REGION ${PS_REGION_ID}.im.reg $specdir
 bgid=`echo $BG_REGION | sed 's/\..*//g'`
 
 ######################################################################

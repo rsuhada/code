@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(m1 m2 pn)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="010"
+export fitid="999"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -30,9 +30,12 @@ export r_tolerance=4.0                 # [arcsec]
 
 export EXTRACT_SRC_SPEC=1
 export CALCULATE_BACKSCALE=1
+export CALCULATE_AREACORR=1            # calculate area correction
+                                       # factors for flux/luminosity,
+                                       # due to ps masking, chipgaps etc.
 
-export MAKE_RMF=1
-export MAKE_ARF=1
+export MAKE_RMF=0
+export MAKE_ARF=0
 
 export DO_SPECTROSCOPY=1
 export group_min=1
@@ -420,9 +423,22 @@ done
 mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final
 
 ######################################################################
+# do area correction calculation
+
+if [[ CALCULATE_AREACORR -eq 1 ]]
+then
+    cd ${specdir}/${spectrumid}-final
+    area-correction-factors.sh 0 $r  # call with 0 parameter = keep
+                                     # current SAS settings
+fi
+
+
+######################################################################
 # exit
+
 
 cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0
+
 

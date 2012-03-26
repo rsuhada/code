@@ -72,13 +72,27 @@ echo -e "\nGetting spectra for " $instrument
 
 expr="$instpattern && $srcreg $psreg"
 
+# XMM-BCS type binning
+# evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}.im \
+#     xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+#     yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+#     withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}.pha \
+#     withspecranges=true energycolumn=PI specchannelmin=0 \
+#     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+#     writedss=Y expression="$expr"
+
+# ESAS type binning
 evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}.im \
-    xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
-    yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+    xcolumn=X ycolumn=Y withzcolumn=N withzerrorcolumn=N \
+    ximagebinsize=1 yimagebinsize=1 squarepixels=yes \
+    ximagesize=900 yimagesize=900 imagebinning=imageSize \
+    withxranges=yes ximagemin=3401 ximagemax=48400 withxranges=yes \
+    withyranges=yes yimagemin=3401 yimagemax=48400 withyranges=yes \
     withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}.pha \
     withspecranges=true energycolumn=PI specchannelmin=0 \
     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
     writedss=Y expression="$expr"
+
 
 ######################################################################
 # if pn create also the oot stuff
@@ -92,12 +106,47 @@ then
     echo "extracting oot spectra for $instrument!"
     expr="$instpattern && $srcreg $psreg"
 
+    # XMM-BCS type binning
+    # evselect table=${ootevlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}-oot.im \
+    #     xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+    #     yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+    #     withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}-oot.pha \
+    #     withspecranges=true energycolumn=PI specchannelmin=0 \
+    #     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+    #     writedss=Y expression="$expr"
+
+    # ESAS type binning
     evselect table=${ootevlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}-oot.im \
-        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
-        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        xcolumn=X ycolumn=Y withzcolumn=N withzerrorcolumn=N \
+        ximagebinsize=1 yimagebinsize=1 squarepixels=yes \
+        ximagesize=900 yimagesize=900 imagebinning=imageSize \
+        withxranges=yes ximagemin=3401 ximagemax=48400 withxranges=yes \
+        withyranges=yes yimagemin=3401 yimagemax=48400 withyranges=yes \
         withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$expr"
 
 fi
+
+
+# XPROC0  = 'evselect table=pnS003-clean.fits:EVENTS filteredset=filtered.fits w&'
+# CONTINUE  'ithfilteredset=yes keepfilteroutput=yes flagcolumn=EVFLAG flagbit=-&'
+# CONTINUE  '1 destruct=yes dssblock='''' expression=''(PI in [500:2000]) && (FL&'
+# CONTINUE  'AG .eq. 0) && (PATTERN<=4)'' filtertype=expression cleandss=no upda&'
+# CONTINUE  'teexposure=yes filterexposure=yes writedss=yes blockstocopy='''' at&'
+# CONTINUE  'tributestocopy='''' energycolumn=PHA zcolumn=WEIGHT zerrorcolumn=EW&'
+# CONTINUE  'EIGHT withzerrorcolumn=no withzcolumn=no ignorelegallimits=yes imag&'
+# CONTINUE  'eset=pnS003-500-2000-woot.im xcolumn=X ycolumn=Y ximagebinsize=1 yi&'
+# CONTINUE  'magebinsize=1 squarepixels=yes ximagesize=900 yimagesize=900 imageb&'
+# CONTINUE  'inning=imageSize ximagemin=3401 ximagemax=48400 withxranges=yes yim&'
+# CONTINUE  'agemin=3401 yimagemax=48400 withyranges=yes imagedatatype=Int32 wit&'
+# CONTINUE  'himagedatatype=yes raimagecenter=0 decimagecenter=0 withcelestialce&'
+# CONTINUE  'nter=no withimageset=yes spectrumset=spectrum.fits spectralbinsize=&'
+# CONTINUE  '10 specchannelmin=0 specchannelmax=4095 withspecranges=no withspect&'
+# CONTINUE  'rumset=no rateset=rate.fits timecolumn=TIME timebinsize=1 timemin=0&'
+# CONTINUE  ' timemax=1000 withtimeranges=no maketimecolumn=no makeratecolumn=no&'
+# CONTINUE  ' withrateset=no histogramset=histo.fits histogramcolumn=TIME histog&'
+# CONTINUE  'rambinsize=1 histogrammin=0 histogrammax=1000 withhistoranges=no wi&'
+# CONTINUE  'thhistogramset=no # (evselect-3.61) [xmmsas_20110223_1803-11.0.0]'
+
