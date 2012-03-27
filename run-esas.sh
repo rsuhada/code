@@ -3,8 +3,6 @@
 ###########################################################
 # XMM-Newton analysis pipeline                            #
 # pipeline based on the Snowden & Kuntz analysis method   #
-# builds the infrastructure around the runit-image script #
-# plus a few utility scripts                              #
 ###########################################################
 
 
@@ -129,14 +127,12 @@ echo -e "############################################################\n"
 echo -e "\nInitial SAS setup : \n"
 sasversion
 
-
 ######################################################################
 # move to obsid directory
 
 cd $ANALYSIS_DIR
 echo "Moved to dir :"
 pwd
-
 
 ######################################################################
 # prepare odf directory
@@ -151,14 +147,12 @@ then
     fi
 fi
 
-
 ######################################################################
 # move to obsid directory
 
 cd analysis
 echo "Moved to dir :"
 pwd
-
 
 ######################################################################
 # make ccf and odf files
@@ -200,7 +194,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # run single band image cheesing

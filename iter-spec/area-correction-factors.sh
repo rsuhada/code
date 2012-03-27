@@ -8,40 +8,10 @@ source ${codedir}/utils/util-funcs-lib.sh
 # setup SAS
 
 here=`pwd`                      # should be cluster/iter-spec/iteration
-
-SETUP_SAS=1                     # should I set SAS path? 0 - no, use
-                                # current setting
-aperture=80.0                   # [ pix ]
 MAKE_EXP_MAP=1                  # create exposure maps? 0 - no they
                                 # already exist (debugging)
 
-EVLI_DIR=${workdir}             # dir with filtered eventlists
-
-if [[ $# -ge 1 ]]
-then
-    SETUP_SAS=$2
-    aperture=$3
-fi
-
-if [[ ${SETUP_SAS} -eq 1 ]]
-then
-    echo "setting custom paths..."
-    # this part might need manual settings!
-    export EVLI_DIR=../../analysis
-    export SAS_ODF=../../analysis/odf
-    export SAS_CCF=../../analysis/ccf.cif
-
-    export codedir="/Users/rs/data1/sw/esaspi"
-    export esas_caldb="/Users/rs/calib/esas"
-
-    export SAS_DIR="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
-    export SAS_PATH="/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803"
-    export SAS_CCFPATH="/Users/rs/calib/xmm/ccf/"
-    export SAS_MEMORY_MODEL=high
-    export SAS_VERBOSITY=4
-fi
-
-sasversion
+aperture="$1"
 
 ######################################################################
 # satup parameterss
@@ -69,7 +39,7 @@ do
     # FIXME: assumes that the keyword is on a single line (should be OK)
     image=`ls ${instrument}-*.im`
     evli=`fkeyprint ${image}+0 XPROC0 | grep -o "table=[^ ]*" | sed 's/table=//g'`
-    evli=${EVLI_DIR}/${evli##*/}   # strips possible path and adds the correct one
+    evli=${startdir}/${ANALYSIS_DIR}/analysis/${evli##*/}   # strips possible path and adds the correct one
 
     if [[ ! -e $evli ]]
     then
@@ -85,13 +55,13 @@ do
     fi
 
     outexp=${image%.*}.exp
-    outexp_wps=${image%.*}.wps,exp
+    outexp_wps=${image%.*}.wps.exp
 
     ######################################################################
     # make exposure map
     if [[ $MAKE_EXP_MAP -eq 1 ]]
     then
-        eexpmap imageset=${image} attitudeset=${EVLI_DIR}/atthk.fits \
+        eexpmap imageset=${image} attitudeset=${startdir}/${ANALYSIS_DIR}/analysis/atthk.fits \
             eventset=${evli}:EVENTS expimageset=${outexp_wps} \
             withdetcoords=no withvignetting=yes usefastpixelization=no \
             usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
@@ -106,25 +76,36 @@ do
 
     ######################################################################
     # create the mask
-    outmask=${image%.*},mask
+    outmask=${image%.*}.mask
     emask expimageset=$outexp_wps detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
 
-    farith $outexp $outexp_wps $outmask MUL clobber=yes
+    ######################################################################
+    # exposure maps are not strictly needed here, but its easier to
+    # supply them to python then the mask (where data is in
+    # 2. extension)
+
+    # ftools can't handle dash in file name
+    cp $outexp_wps exp.tmp.fits
+    cp $outmask mask.tmp.fits
+
+    farith exp.tmp.fits mask.tmp.fits+1 out.tmp.fits MUL clobber=yes
+
+    mv out.tmp.fits $outexp
+    rm exp.tmp.fits mask.tmp.fits
 
     ######################################################################
     # get the correcton factors
 
     image=${image}
-    expmap=${outexp}
-    bgmap=${outmask}            # irrelevant here: dummy
+    bgmap=${outexp}            # irrelevant here - just need the
+                               # correct mask area
 
     pars=(X_IM Y_IM)
     out=`get_cluster_pars $pars`
     xim=`echo $out | awk '{print $1}'`
     yim=`echo $out | awk '{print $2}'`
 
-    ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture $bgmap
-
+    ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture $bgmap > ${image%.*} > ${image%.*}.areacorr.txt
 
 done
 
@@ -133,3 +114,4 @@ done
 
 echo -e "\n$0 in $obsid done!"
 exit 0
+

@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(m1 m2 pn)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="999"
+export fitid="011"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -34,15 +34,15 @@ export CALCULATE_AREACORR=1            # calculate area correction
                                        # factors for flux/luminosity,
                                        # due to ps masking, chipgaps etc.
 
-export MAKE_RMF=0
-export MAKE_ARF=0
+export MAKE_RMF=1
+export MAKE_ARF=1
 
 export DO_SPECTROSCOPY=1
 export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
 export BG_REGION_ID=bg-ann-07
-export PS_REGION_ID=ps-man
+export PS_REGION_ID=ps-man-02
 export LINK_BG=1                       # soft link bg annulus
 
 export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
@@ -425,10 +425,10 @@ mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final
 ######################################################################
 # do area correction calculation
 
-if [[ CALCULATE_AREACORR -eq 1 ]]
+if [[ $CALCULATE_AREACORR -eq 1 ]]
 then
     cd ${specdir}/${spectrumid}-final
-    area-correction-factors.sh 0 $r  # call with 0 parameter = keep
+    area-correction-factors.sh "$r"  # call with 0 parameter = keep
                                      # current SAS settings
 fi
 
