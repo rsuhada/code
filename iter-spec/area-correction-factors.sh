@@ -11,7 +11,8 @@ here=`pwd`                      # should be cluster/iter-spec/iteration
 MAKE_EXP_MAP=1                  # create exposure maps? 0 - no they
                                 # already exist (debugging)
 
-aperture="$1"
+aperture1="$1"
+aperture2="$2"                  # for annulus (EXCLUDE_CORE = 1)
 
 ######################################################################
 # satup parameterss
@@ -19,15 +20,19 @@ aperture="$1"
 elo="500"                       # band is not crucial for our purposes
 ehi="2000"
 emask_thresh1=0.01              # [ defailt = 0.1 ]
+areacorrection_file=area_correction.txt
+
 MAN_PS_REG=`ls ps-man*.im.reg`
 
 if [[ ! -e $MAN_PS_REG ]]
 then
-    echo -e "\n** error: $MAN_PS_REG does not exists in $here!"
+    echo -e "\n** error: region $MAN_PS_REG does not exists in $here!"
     echo -e "*** error in $0\n"
     cd $startdir
     exit 1
 fi
+
+rm $areacorrection_file 2>/dev/null
 
 ######################################################################
 # get the exposure maps
@@ -105,8 +110,17 @@ do
     xim=`echo $out | awk '{print $1}'`
     yim=`echo $out | awk '{print $2}'`
 
-    ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture $bgmap > ${image%.*} > ${image%.*}.areacorr.txt
+    if [[ $EXCLUDE_CORE -eq 0 ]]
+    then
+        echo "Getting area correction for non-core excised image"
+        ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture1 $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+    else
+        echo "Getting area correction for core excised image"
+        ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1 $aperture2 $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+    fi
 
+    acorr=`grep -i "area correction factor" ${image%.*}-areacorr.txt | awk '{print $5}'`
+    echo $instrument $acorr >> ${areacorrection_file}
 done
 
 ######################################################################

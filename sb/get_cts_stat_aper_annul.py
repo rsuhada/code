@@ -7,20 +7,21 @@ from sb_utils import *
 if __name__ == '__main__':
     """
     Get aperture count statistics in an annulus.
-    INPUT: input_image xcoord ycoord aperture [bg_image]
+    INPUT: input_image xcoord ycoord aperture_min aperture_max [bg_image]
 
-    EXAMPLE image.fits 315 324 10 bg.fits
+    EXAMPLE image.fits 315 324 10 50 bg.fits
     - coords are in ds9 image coords
     - aperture in im pixels
     """
-    if len(sys.argv) > 4:
+    if len(sys.argv) > 5:
         ######################################################################
         # gather arguments
 
         imname = sys.argv[1]
         xim = double(sys.argv[2]) - 1.0
         yim = double(sys.argv[3]) - 1.0
-        r_aper = double(sys.argv[4])**2                            # sqare for speedup
+        r_min = double(sys.argv[4])**2                            # sqare for speedup
+        r_max = double(sys.argv[5])**2                            # sqare for speedup
 
         ######################################################################
         # read in data
@@ -31,7 +32,7 @@ if __name__ == '__main__':
 
         distmatrix = sqdist_matrix(im, xim, yim)
 
-        answer = get_cts_stat(im, distmatrix, xim, yim, r_aper)
+        answer = get_cts_stat_annul(im, distmatrix, xim, yim, r_min, r_max)
 
         #############################################################################
         # info output
@@ -40,7 +41,8 @@ if __name__ == '__main__':
         print "image                  :: ", imname
         print "x [im ds9]             :: ", xim + 1.0
         print "y [im ds9]             :: ", yim + 1.0
-        print "r_aper [im pix]        :: ", sqrt(r_aper)
+        print "r_min [im pix]         :: ", sqrt(r_min)
+        print "r_max [im pix]         :: ", sqrt(r_max)
         print "----------------------------------"
         print "Center val             :: ", im[yim, xim]
         print "Total num. pixels      :: ", answer[6]
@@ -58,13 +60,13 @@ if __name__ == '__main__':
         print "sum                    :: ", answer[0]
         print
 
-        if len(sys.argv)==6:
+        if len(sys.argv)==7:
             cts = answer[0]
-            bgname = sys.argv[5]
+            bgname = sys.argv[6]
             fname = bgname
             hdu = pyfits.open(fname)
             bg = hdu[0].data
-            bgcts = get_cts_stat(bg, distmatrix, xim, yim, r_aper)[0]
+            bgcts = get_cts_stat_annul(bg, distmatrix, xim, yim, r_min, r_max)[0]
 
             mask = bg / bg
 
@@ -73,22 +75,22 @@ if __name__ == '__main__':
             # hdu = pyfits.PrimaryHDU(mask)
             # hdu.writeto('mask.fits', clobber=True)
 
-            maskcts=get_cts_stat(mask, distmatrix, xim, yim, r_aper)[0]
+            maskcts=get_cts_stat_annul(mask, distmatrix, xim, yim, r_min, r_max)[0]
 
             areamask = mask + 1.0
             areamask = areamask / areamask
-            areamaskcts = get_cts_stat(areamask, distmatrix, xim, yim, r_aper)[0]
+            areamaskcts = get_cts_stat_annul(areamask, distmatrix, xim, yim, r_min, r_max)[0]
 
             correction=1.0 + (1.0 - maskcts/areamaskcts)
 
             print "bg image                  :: ", bgname
             print "BG CTS                    :: ", bgcts
-            print "Source CTS                ::", cts-bgcts
+            print "Source CTS                :: ", cts-bgcts
             print "mask area                 :: ", maskcts
             print "geom. area                :: ", areamaskcts
-            print "area correction factor              :: ", correction
+            print "area correction factor    :: ", correction
             print "Area corrected BG CTS     :: ", correction * bgcts
-            print "Area corrected Source CTS ::", correction * (cts-bgcts)
+            print "Area corrected Source CTS :: ", correction * (cts-bgcts)
             print
 
     else:

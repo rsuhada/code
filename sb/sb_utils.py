@@ -56,6 +56,29 @@ def get_cts_stat(im, distmatrix, xim, yim, r_aper):
 
     return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
 
+def get_cts_stat_annul(im, distmatrix, xim, yim, r_min, r_max):
+    """
+    Provide basic statistics (total/mean cts etc.) for an input image
+    in an annulus (r_min<r<=r_max) aperture around the chosen center.
+    """
+    ids = where((distmatrix <= r_max) & (r_min < distmatrix))
+    num_pix = len(ids[0])
+    # print im[ids]
+    tot_cts = sum(im[ids])
+    mean_cts = mean(im[ids])
+    stdev_cts =std(im[ids])
+
+    # barring the 0 and less elements
+    ids = where((distmatrix <= r_max) & (r_min < distmatrix) & (im>0))
+    num_pix_non0 = len(ids[0])
+    tot_cts_non0 = sum(im[ids])
+    mean_cts_non0 = mean(im[ids])
+    stdev_cts_non0 =std(im[ids])
+
+    maskfrac=double(num_pix_non0)/double(num_pix)
+
+    return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
+
 
 def cal_aper_sum(im, distmatrix, xim, yim, r_aper):
     """

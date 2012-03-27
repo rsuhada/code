@@ -42,7 +42,7 @@ export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
 export BG_REGION_ID=bg-ann-07
-export PS_REGION_ID=ps-man-02
+export PS_REGION_ID=ps-man
 export LINK_BG=1                       # soft link bg annulus
 
 export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
@@ -73,7 +73,6 @@ then
     exit 1
 fi
 
-
 ######################################################################
 # create config files if necessary
 
@@ -100,6 +99,9 @@ if [[ ! -e ${specdir}/conf/${CLNAME}-par-qspec-001.results ]]
 then
     cp ${codedir}/templates/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
 fi
+
+# will need image coordinate point source directory
+cp ${startdir}/${ANALYSIS_DIR}/analysis/${PS_REGION_ID}.im.reg ${specdir}/
 
 ######################################################################
 # get parameters from analysis file
@@ -202,7 +204,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
 
     rpad=$(echo $r | bc -l | xargs printf "%1.0f") # round
     rpad=`printf "%03d" $rpad`                     # zero pad
-    spectrumid="run-$fitid-iter-r-$rpad"                      # identifier for spectral products
+    spectrumid="run-$fitid-iter-r-$rpad"           # identifier for spectral products
 
     coordsystem="wcs"
     regname=${specdir}/${SRC_REGION_ID}-${rpad}.wcs.reg
@@ -428,8 +430,13 @@ mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final
 if [[ $CALCULATE_AREACORR -eq 1 ]]
 then
     cd ${specdir}/${spectrumid}-final
-    area-correction-factors.sh "$r"  # call with 0 parameter = keep
-                                     # current SAS settings
+    if [[ $EXCLUDE_CORE -eq 0 ]]
+    then
+        area-correction-factors.sh "$r"
+    else
+        area-correction-factors.sh "$rcore" "$r"
+    fi
+
 fi
 
 
