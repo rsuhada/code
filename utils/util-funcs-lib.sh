@@ -621,3 +621,39 @@ EOT
 
 fi
 }
+
+function arcsec_2_impix_xmm {
+    # converts arcseconds to image pixels: for XMM-Newton images
+    # uses a hardcoded table
+    # FIXME: add python routine that does this generally
+    #
+    # INPUT:
+    # 1 - XMM image fits file
+    # 2 - length in arc seconds
+    # OUTPUT:
+    # length in image pixels
+
+    image=$1
+    x=$2
+
+    # get image size
+    naxis1=`fkeyprint ${image}+0 NAXIS1 | grep = | awk '{print $3}'`
+
+    case $naxis1 in
+        900)
+            scale=0.4
+            ;;
+        648)
+            scale=0.25
+            ;;
+        *)
+            echo "\*\* error: image size: $naxis1 in image: $image is not in database"
+            echo "\*\*\* error: in script $0"
+            exit 1
+    esac
+
+    x_im=$(echo "scale=6;$x*$scale" | bc)
+
+    # this the output
+    echo $x_im
+}

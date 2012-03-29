@@ -18,8 +18,8 @@ if __name__ == '__main__':
         # gather arguments
 
         imname = sys.argv[1]
-        xim = double(sys.argv[2]) - 1.0
-        yim = double(sys.argv[3]) - 1.0
+        xim = double(sys.argv[2]) - 1.0 # convert to ds9
+        yim = double(sys.argv[3]) - 1.0 # convert to ds9
         r_min = double(sys.argv[4])**2                            # sqare for speedup
         r_max = double(sys.argv[5])**2                            # sqare for speedup
 

@@ -110,13 +110,23 @@ do
     xim=`echo $out | awk '{print $1}'`
     yim=`echo $out | awk '{print $2}'`
 
+
     if [[ $EXCLUDE_CORE -eq 0 ]]
     then
+
+        aperture1_im=`arcsec_2_impix_xmm $image $aperture1`
+
         echo "Getting area correction for non-core excised image"
-        ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture1 $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+        ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture1_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+
     else
+
+        aperture1_im=`arcsec_2_impix_xmm $image $aperture1`
+        aperture2_im=`arcsec_2_impix_xmm $image $aperture2`
+
         echo "Getting area correction for core excised image"
-        ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1 $aperture2 $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+        ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+
     fi
 
     acorr=`grep -i "area correction factor" ${image%.*}-areacorr.txt | awk '{print $5}'`

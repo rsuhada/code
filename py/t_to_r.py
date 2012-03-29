@@ -68,7 +68,6 @@ if __name__ == '__main__':
     # read in the spectrospopy results
 
     parfile = sys.argv[1]
-    # parfile = "/Users/rs/w/xspt/data/SPT-CL-J0205-5829/iter-spec/run-001-iter-r-037/SPT-CL-J0205-5829-iter-r-037-001.result"
 
     results = read_xspec_result_file(parfile)
 

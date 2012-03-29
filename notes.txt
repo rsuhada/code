@@ -3,12 +3,7 @@
 
 General:
 
-- in quick-spec/iter-spec ps removal might be improved if you look at
-  the images in the full band (acutally in pn there can be very bright
-  hot pixels but it seems they are all belove 0.4keV and don't affect
-  results atm)
-
-- check pn-spectra for oot removal (INT format + negaitive bins?)
+- add file output to the scaling relation part of iter-spec
 
 - from pn-spectra extract part that adds the proper ps regions to
   images like *-obj-im-500-2000.fits (ideally automatize extraction
@@ -37,7 +32,6 @@ Imaging:
 - distmatrix needs to pass only shape not full im
 
 Iterator:
-- OOT!!!
 - core PSF spillover?
 - how to stop before running into low s/n?
 - use andersson optimized band for spectroscopy

@@ -1,9 +1,15 @@
 ######################################################################
-# very simple script for pipe testing (export of variables)
+# very simple script for pipe testing (export of variables,
+# unit/integrated testing)
 
 dir=$1
 here=`pwd`
 cd $dir
+
+######################################################################
+# do all the sourceing here
+
+source ${codedir}/utils/util-funcs-lib.sh
 
 ######################################################################
 # run the test
@@ -71,13 +77,7 @@ echo PIPE_TEST $PIPE_TEST
 
 ) > $testlogfile
 
-
-######################################################################
-# exit
-
-cd $here
-
-if [[ ! -e ${dir}/$testlogfile ]]
+if [[ ! -e $testlogfile ]]
 then
     echo -e "\n** error: ${dir}/$testlogfile was not created!"
     echo -e "*** error in $0\n"
@@ -88,11 +88,52 @@ else
     echo "Pipeline test succesful!"
     echo "Log file: ${dir}/$testlogfile"
     echo
-    cat ${dir}/$testlogfile
+    cat $testlogfile
     echo
 fi
 
+######################################################################
+# unit testing
+
+echo "######################################################################"
+echo UNIT TEST
+echo "######################################################################"
+
+echo "current dir:"
+pwd
+echo
+
+####################
+# # image converter
+# # image=pnS003-obj-image-sky.fits
+# image=test.im
+# x_wcs="83.99"
+# x_im=`arcsec_2_impix_xmm $image $x_wcs`
+# echo "Conversion: $x_wcs [\"] is $x_im [pix]"
+
+# ####################
+# # get_cts_stat_annul
+# image=mos1S001-500-2000.exp
+# bgmap=mos1S001-500-2000.exp
+# aperture1_im=1
+# aperture2_im=2
+# pars=(X_IM Y_IM)
+# xim=409.99769
+# yim=439.99936
+# # out=`get_cluster_pars $pars`
+# # xim=`echo $out | awk '{print $1}'`
+# # yim=`echo $out | awk '{print $2}'`
+# ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > test.txt
+# cat test.txt
 
 
+echo "######################################################################"
+echo UNIT TEST
+echo "######################################################################"
+
+######################################################################
+# exit
+
+cd $here
 echo -e "\n$0 in $obsid done!"
 exit 0

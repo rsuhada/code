@@ -16,7 +16,7 @@ dir=$1
 
 export instruments=(m1 m2 pn)
 export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="011"
+export fitid="012"
 
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
@@ -25,15 +25,14 @@ export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-maste
 export r_init=37.1325                  # [arcsec]   test: 37.1325
 # export r_init=80.0                     # [arcsec]   test: 37.1325
 export max_iter=10                      # maximum number of iterations
-# export r_tolerance=2.5                 # [arcsec]
-export r_tolerance=4.0                 # [arcsec]
+export r_tolerance=2.5                 # [arcsec]
+# export r_tolerance=4.0                 # [arcsec]
 
 export EXTRACT_SRC_SPEC=1
 export CALCULATE_BACKSCALE=1
 export CALCULATE_AREACORR=1            # calculate area correction
                                        # factors for flux/luminosity,
                                        # due to ps masking, chipgaps etc.
-
 export MAKE_RMF=1
 export MAKE_ARF=1
 
@@ -42,7 +41,7 @@ export group_min=1
 
 export SRC_REGION_ID=cluster-iter-r
 export BG_REGION_ID=bg-ann-07
-export PS_REGION_ID=ps-man
+export PS_REGION_ID=ps-man-02
 export LINK_BG=1                       # soft link bg annulus
 
 export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
@@ -203,7 +202,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     shape="circle"
 
     rpad=$(echo $r | bc -l | xargs printf "%1.0f") # round
-    rpad=`printf "%03d" $rpad`                     # zero pad
+    export rpad=`printf "%03d" $rpad`                     # zero pad, need export
     spectrumid="run-$fitid-iter-r-$rpad"           # identifier for spectral products
 
     coordsystem="wcs"
@@ -432,17 +431,16 @@ then
     cd ${specdir}/${spectrumid}-final
     if [[ $EXCLUDE_CORE -eq 0 ]]
     then
-        area-correction-factors.sh "$r"
+        area-correction-factors.sh "$r_old"
     else
-        area-correction-factors.sh "$rcore" "$r"
+        rcore_old=$(echo "scale=6;$core_frac*$r_old" | bc)
+        area-correction-factors.sh "$rcore_old" "$r_old"
     fi
 
 fi
 
-
 ######################################################################
 # exit
-
 
 cd $here
 echo -e "\n$0 in $obsid done!"
