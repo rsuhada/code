@@ -7,50 +7,13 @@
 source ${codedir}/utils/util-funcs-lib.sh
 
 ######################################################################
-# input
+# input and basic file name setup
 
 dir=$1
 
-######################################################################
-# settings
-
-export instruments=(m1 m2 pn)
-export fitpars="ta"                    # options: t, ta, taz, tz
-export fitid="012"
-
 export specdir=../iter-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
-export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-master.tab"
-
-export r_init=37.1325                  # [arcsec]   test: 37.1325
-# export r_init=80.0                     # [arcsec]   test: 37.1325
-export max_iter=10                      # maximum number of iterations
-export r_tolerance=2.5                 # [arcsec]
-# export r_tolerance=4.0                 # [arcsec]
-
-export EXTRACT_SRC_SPEC=1
-export CALCULATE_BACKSCALE=1
-export CALCULATE_AREACORR=1            # calculate area correction
-                                       # factors for flux/luminosity,
-                                       # due to ps masking, chipgaps etc.
-export MAKE_RMF=1
-export MAKE_ARF=1
-
-export DO_SPECTROSCOPY=1
-export group_min=1
-
-export SRC_REGION_ID=cluster-iter-r
-export BG_REGION_ID=bg-ann-07
-export PS_REGION_ID=ps-man-02
-export LINK_BG=1                       # soft link bg annulus
-
-export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
-export PS_REGION=${specdir}/${PS_REGION_ID}.phy.reg
-export parfile=${CLNAME}-par-qspec-001.conf
-
-export EXCLUDE_CORE=1                  # exclude the central part from spectroscopy
-export core_frac=0.15                  # what fraction of core to exclude
-export CORE_REGION_ID=cluster-iter-rcore-r
+export parfile=${CLNAME}-par-ispec-001.conf
 
 ######################################################################
 # prepare paths
@@ -61,25 +24,13 @@ cd $dir
 mkdir -p ${specdir}/conf 2> /dev/null
 
 ######################################################################
-# check whether we have a non-conflicting run
-
-if [[ -e $LOG_MASTER_FILE ]]
-then
-    echo -e "\n** error: $LOG_MASTER_FILE exists here!"
-    echo -e "*** error: Consider changing fitid: $fitid, or delete the master to force overwrite"
-    echo -e "*** error: in $0\n"
-    cd $startdir
-    exit 1
-fi
-
-######################################################################
-# create config files if necessary
+# create config and result files if necessary
 
 export config_file=${specdir}/conf/$parfile
 
 if [[ ! -e $config_file ]]
 then
-    cp ${codedir}/templates/template-par-qspec-001.conf $config_file
+    cp ${codedir}/templates/template-par-ispec-001.conf $config_file
 
     if [[ -e $NOTESFILE ]]
     then
@@ -94,13 +45,39 @@ then
     fi
 fi
 
-if [[ ! -e ${specdir}/conf/${CLNAME}-par-qspec-001.results ]]
+if [[ ! -e ${specdir}/conf/${CLNAME}-par-ispec-001.results ]]
 then
-    cp ${codedir}/templates/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
+    cp ${codedir}/templates/template-par-ispec-001.results ${specdir}/conf/${CLNAME}-par-ispec-001.results
 fi
+
+# and now get the parameters
+source $config_file
+
+######################################################################
+# prepare needed file
+
+export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
+export PS_REGION=${specdir}/${PS_REGION_ID}.phy.reg
+export bgid=${BG_REGION_ID}            # FIXME: refactor redundancy
+
+export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-master.tab"
 
 # will need image coordinate point source directory
 cp ${startdir}/${ANALYSIS_DIR}/analysis/${PS_REGION_ID}.im.reg ${specdir}/
+
+echo $LOG_MASTER_FILE
+
+######################################################################
+# check whether we have a non-conflicting run
+
+if [[ -e $LOG_MASTER_FILE ]]
+then
+    echo -e "\n** error: $LOG_MASTER_FILE exists here!"
+    echo -e "*** error: Consider changing fitid: $fitid, or delete the master to force overwrite"
+    echo -e "*** error: in $0\n"
+    cd $startdir
+    exit 1
+fi
 
 ######################################################################
 # get parameters from analysis file
@@ -312,6 +289,10 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     cd $specdir
     echo "doing oot subtraction"
     subtract_oot_spec ${instrument}-${spectrumid}.pha ${instrument}-${spectrumid}-oot.pha
+
+    # comment for debugging
+    rm ${instrument}-${spectrumid}-oot.pha ${instrument}-${spectrumid}-oot.im ${instrument}-${spectrumid}-oot.pha.orig
+
     cd $here
 
     ######################################################################
@@ -376,7 +357,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
         echo ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
         ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
         ${codedir}/quick-spec/gather-quickspec-results.sh ${spectrumid} 1 # overwrites if exists
-        ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid}
+        ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     fi
 
@@ -405,6 +386,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     aper_results=`read_aper_result_file ${spectrumid}/${CLNAME}-${spectrumid}.aper`
 
     echo $fitid $iter $r_old $r $r_diff $aper_results >> $LOG_MASTER_FILE
+    mv formated_pars.out ${CLNAME}-${spectrumid}.fpars
 
     ######################################################################
     # finished iteration step

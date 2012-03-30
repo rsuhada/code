@@ -21,7 +21,6 @@ then
     rm $testlogfile
 fi
 
-
 (
 echo "Options:"
 echo ON_LAPTOP $ON_LAPTOP
