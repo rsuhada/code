@@ -357,7 +357,6 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
         echo ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
         ${codedir}/iter-spec/$specscript $CLNAME conf/$parfile $spectrumid $BG_REGION_ID $group_min
         ${codedir}/quick-spec/gather-quickspec-results.sh ${spectrumid} 1 # overwrites if exists
-        ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     fi
 
@@ -390,6 +389,8 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
 
     ######################################################################
     # finished iteration step
+
+    ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     cd $dir                     # returns to analysis subdir
     pwd

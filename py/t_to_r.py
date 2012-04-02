@@ -76,41 +76,42 @@ def write_par_output(tofile=0):
         f = open(fname, 'w')
         round_to = 1
 
-        f.write('h_0          %f\n' % (round(h_0, round_to)))
-        f.write('omega_m_0    %f\n' % (round(omega_m_0, round_to)))
-        f.write('omega_de_0   %f\n' % (round(omega_de_0, round_to)))
-        f.write('omega_k_0    %f\n' % (round(omega_k_0, round_to)))
+        f.write('h_0          %4.1f\n' % (h_0))
+        f.write('omega_m_0    %5.3f\n' % (omega_m_0))
+        f.write('omega_de_0   %5.3f\n' % (omega_de_0))
+        f.write('omega_k_0    %5.3f\n' % (omega_k_0))
         f.write('')
-        f.write('Ez           %f\n' % (round(ez, round_to)))
+        f.write('Ez           %5.3f\n' % (ez))
         f.write('')
-        # f.write('norm         %f\n' % (round(norm, round_to)))
-        f.write('norm_err_n   %f\n' % (round(norm_err_n, round_to)))
-        f.write('norm_err_p   %f\n' % (round(norm_err_p, round_to)))
-        f.write('t_fit        %f\n' % (round(t, round_to)))
-        f.write('t_fit_err_n  %f\n' % (round(t_err_n, round_to)))
-        f.write('t_fit_err_p  %f\n' % (round(t_err_p, round_to)))
-        f.write('z            %f\n' % (round(z, round_to)))
-        f.write('z_err_n      %f\n' % (round(z_err_n, round_to)))
-        f.write('z_err_p      %f\n' % (round(z_err_p, round_to)))
-        f.write('abund        %f\n' % (round(abund, round_to)))
-        f.write('abund_err_n  %f\n' % (round(abund_err_n, round_to)))
-        f.write('abund_err_p  %f\n' % (round(abund_err_p, round_to)))
+        f.write('norm         %4.2e\n' % (norm))
+        f.write('norm_err_n   %4.2e\n' % (norm_err_n))
+        f.write('norm_err_p   %4.2e\n' % (norm_err_p))
+        f.write('t_fit        %3.1f\n' % (t))
+        f.write('t_fit_err_n  %3.1f\n' % (t_err_n))
+        f.write('t_fit_err_p  %3.1f\n' % (t_err_p))
+        f.write('z            %5.3f\n' % (z))
+        f.write('z_err_n      %5.3f\n' % (z_err_n))
+        f.write('z_err_p      %5.3f\n' % (z_err_p))
+        f.write('abund        %4.2f\n' % (abund))
+        f.write('abund_err_n  %4.2f\n' % (abund_err_n))
+        f.write('abund_err_p  %4.2f\n' % (abund_err_p))
         f.write('')
-        f.write('yx500        %f\n' % (round(yx500, round_to)))
-        f.write('yx500_err    %f\n' % (round(yx500_err, round_to)))
-        f.write('ysz500       %f\n' % (round(ysz500, round_to)))
-        f.write('ysz500_err   %f\n' % (round(ysz500_err, round_to)))
+        f.write('yx500        %4.2e\n' % (yx500))
+        f.write('yx500_err    %4.2e\n' % (yx500_err))
+        f.write('ysz500       %4.2e\n' % (ysz500))
+        f.write('ysz500_err   %4.2e\n' % (ysz500_err))
         f.write('')
-        f.write('t500         %f\n' % (round(t500, round_to)))
-        f.write('t500_err     %f\n' % (round(t500_err, round_to)))
-        f.write('m500         %f\n' % (round(m500, round_to)))
-        f.write('m500_err     %f\n' % (round(m500_err, round_to)))
-        f.write('r500         %f\n' % (round(r500, round_to)))
-        f.write('0.15r500_ang %f\n' % (round(0.15*r500_ang, round_to)))
-        f.write('r500_ang     %f\n' % (round(r500_ang, round_to)))
+        f.write('t500         %3.1f\n' % (t500))
+        f.write('t500_err     %3.1f\n' % (t500_err))
+        f.write('m500         %4.2e\n' % (m500))
+        f.write('m500_err     %4.2e\n' % (m500_err))
+        f.write('r500         %3.1f\n' % (r500))
+        f.write('0.15r500_ang %4.1f\n' % (0.15*r500_ang))
+        f.write('r500_ang     %4.1f\n' % (r500_ang))
         f.write('')
-        f.write('rfit_ang     %f\n' % (round(rfit_ang, round_to)))
+        f.write('rfit_ang     %4.1f\n' % (rfit_ang))
         f.close()
+
 
 if __name__ == '__main__':
     """
@@ -152,21 +153,21 @@ if __name__ == '__main__':
     parfile = sys.argv[1]
     results = read_xspec_result_file(parfile)
 
-    norm = results[0]
-    norm_err_n = results[1]
-    norm_err_p= results[2]
+    norm = float(results[0])
+    norm_err_n = float(results[1])
+    norm_err_p = float(results[2])
 
-    t = results[3]
-    t_err_n = results[4]
-    t_err_p= results[5]
+    t = float(results[3])
+    t_err_n = float(results[4])
+    t_err_p = float(results[5])
 
-    z = results[6]
-    z_err_n = results[7]
-    z_err_p= results[8]
+    z = float(results[6])
+    z_err_n = float(results[7])
+    z_err_p = float(results[8])
 
-    abund = results[9]
-    abund_err_n = results[10]
-    abund_err_p= results[11]
+    abund = float(results[9])
+    abund_err_n = float(results[10])
+    abund_err_p = float(results[11])
 
     t = float(t)
     t_err = 0.5 * (abs(float(t_err_n)) + float(t_err_p))
