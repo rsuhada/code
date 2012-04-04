@@ -256,12 +256,15 @@ log ${fileid}-fx-lx.log
 dummyrsp
 flux 0.5 2
 flux 2 10
+flux 0.5 7.0
+flux 1.1 7.0
 
 newpar 1 0
 cosmo 70 0 0.7
 lumin 0.5 2.0 ${redshift}
 lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
+lumin 0.5 7.0 ${redshift}
 log none
 
 exit
@@ -269,9 +272,6 @@ y
 " > ${fileid}.xspec
 
 xspec < ${fileid}.xspec
-
-
-
 
 ######################################################################
 # extract spectroscopy results
@@ -296,7 +296,6 @@ redshift_err_u=NaN
 normalisation_err_d=`cat   ${fileid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
 normalisation_err_u=`cat  ${fileid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
 
-
 ######################################################################
 # write out report
 
@@ -309,7 +308,6 @@ echo "abundance" ${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee
 echo
 echo
 
-
 ######################################################################
 # not used at the moment
 
@@ -321,8 +319,11 @@ tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
-echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
+######################################################################
+# plot conversions
+convert -density 100 -alpha off -rotate 90 ${fileid}-nice.ps ${fileid}-nice.png
 
+echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 
 # reinstate sas11 DYLD path
 DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib

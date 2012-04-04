@@ -19,6 +19,7 @@ then
     mv *.result       ${dir}/
     mv *uf.ps         ${dir}/
     mv *nice.ps       ${dir}/
+    mv *nice.png      ${dir}/
     mv *data.ps       ${dir}/
     mv *model.xcm     ${dir}/
     mv *session.log   ${dir}/

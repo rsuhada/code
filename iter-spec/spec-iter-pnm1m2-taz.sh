@@ -24,19 +24,68 @@ source $parfile
 fileid=${cluster}-${spectrumid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${spectrumid}.pha m2-${spectrumid}.pha m1.pha m2.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
-grppha infile=m1-${BG_REGION_ID}.pha outfile=m1-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${BG_REGION_ID}.rmf & chkey ANCRFILE m1-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=m2-${BG_REGION_ID}.pha outfile=m2-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${BG_REGION_ID}.rmf & chkey ANCRFILE m2-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=pn-${BG_REGION_ID}.pha outfile=pn-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${BG_REGION_ID}.rmf & chkey ANCRFILE pn-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m1-${BG_REGION_ID}.pha outfile=m1-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1-${BG_REGION_ID}.rmf & chkey ANCRFILE m1-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m2-${BG_REGION_ID}.pha outfile=m2-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2-${BG_REGION_ID}.rmf & chkey ANCRFILE m2-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=pn-${BG_REGION_ID}.pha outfile=pn-${BG_REGION_ID}.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn-${BG_REGION_ID}.rmf & chkey ANCRFILE pn-${BG_REGION_ID}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=m1-${spectrumid}.pha outfile=m1-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${spectrumid}.rmf & chkey ANCRFILE m1-${spectrumid}.arf & chkey BACKFILE m1-${BG_REGION_ID}.grp.pha & exit" clobber=yes
-grppha infile=m2-${spectrumid}.pha outfile=m2-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${spectrumid}.rmf & chkey ANCRFILE m2-${spectrumid}.arf & chkey BACKFILE m2-${BG_REGION_ID}.grp.pha & exit" clobber=yes
-grppha infile=pn-${spectrumid}.pha outfile=pn-${spectrumid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${spectrumid}.rmf & chkey ANCRFILE pn-${spectrumid}.arf & chkey BACKFILE pn-${BG_REGION_ID}.grp.pha & exit" clobber=yes
+grppha infile=m1-${spectrumid}.pha outfile=m1-${spectrumid}.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1-${spectrumid}.rmf & chkey ANCRFILE m1-${spectrumid}.arf & chkey BACKFILE m1-${BG_REGION_ID}.grp.pha & exit" clobber=yes
+grppha infile=m2-${spectrumid}.pha outfile=m2-${spectrumid}.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2-${spectrumid}.rmf & chkey ANCRFILE m2-${spectrumid}.arf & chkey BACKFILE m2-${BG_REGION_ID}.grp.pha & exit" clobber=yes
+grppha infile=pn-${spectrumid}.pha outfile=pn-${spectrumid}.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn-${spectrumid}.rmf & chkey ANCRFILE pn-${spectrumid}.arf & chkey BACKFILE pn-${BG_REGION_ID}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
 
+CONVERT_TO_CTR=1
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in pn-${bgid}.grp.pha pn-${spectrumid}.grp.pha # m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1-${spectrumid}.grp.pha m2-${spectrumid}.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+fi
+
+######################################################################
+# do the fitting
 echo -e "
 data 1:1 pn-${spectrumid}.grp.pha
 data 2:2 m1-${spectrumid}.grp.pha
@@ -47,12 +96,12 @@ abund angr
 
 setp e
 
-ignore 1:1 0.-0.4
-ignore 1:1 10.-**
-ignore 2:2 0.-0.4
-ignore 2:2 10.-**
-ignore 3:3 0.-0.4
-ignore 3:3 10.-**
+ignore 1:1 0.-${fit_band_min}
+ignore 1:1 ${fit_band_max}-**
+ignore 2:2 0.-${fit_band_min}
+ignore 2:2 ${fit_band_max}-**
+ignore 3:3 0.-${fit_band_min}
+ignore 3:3 ${fit_band_max}-**
 ignore bad
 
 model wabs(mekal)
@@ -182,6 +231,8 @@ time off
 hardcopy ${fileid}-data.ps/cps
 exit
 
+plot ldata res
+
 #################################################
 # Nice plot
 
@@ -226,7 +277,6 @@ y
 
 xspec < ${fileid}.xspec
 
-
 ######################################################################
 # extract spectroscopy results
 
@@ -247,7 +297,6 @@ redshift_err_u=`cat  ${fileid}-err.log | grep " 5 " | grep "(" | awk '{gsub("[(]
 normalisation_err_d=`cat   ${fileid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $5}' `
 normalisation_err_u=`cat  ${fileid}-err.log | grep " 7 " | grep "(" | awk '{gsub("[(]",""); gsub("[)]",""); gsub(",","  "); print $6}' `
 
-
 ######################################################################
 # write out report
 
@@ -260,7 +309,6 @@ echo "abundance" ${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee
 echo
 echo
 
-
 ######################################################################
 # not used at the moment
 
@@ -272,8 +320,11 @@ tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
-echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
+######################################################################
+# plot conversions
+convert -density 100 -alpha off -rotate 90 ${fileid}-nice.ps ${fileid}-nice.png
 
+echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 
 # reinstate sas11 DYLD path
 DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
