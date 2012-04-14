@@ -2,6 +2,8 @@
 # run masking software to updated cheese masks after CHEESE_1B/2B
 # after manual inspection
 
+# NOTE: currently not useful!
+
 dir=$1
 here=`pwd`
 cd $dir

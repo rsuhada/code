@@ -255,7 +255,6 @@ function make-im-standard {
 
 }
 
-
 function make-im {
     ######################################################################
     # extracts an image: using the esas settings

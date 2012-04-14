@@ -82,6 +82,16 @@ reglist=pn${prefix}-bkg_region-sky.fits
 
 
 ######################################################################
+# create a reg file if you can
+
+scriptdir=~/data1/sw/scripts/
+
+if [[ -e ${scriptdir}/fcat2reg.sh  ]]
+then
+    fcat2reg.sh emllist-man.fits 10.0 ML_ID_SRC
+fi
+
+######################################################################
 # exit
 
 cd $here

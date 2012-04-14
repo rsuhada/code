@@ -18,26 +18,24 @@ PN_EV_PREFIX=$PN_EV_PREFIX_LIST
 elo=300
 ehi=500
 
-make-im mos${M1_EV_PREFIX}-clean.fits mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im mos${M2_EV_PREFIX}-clean.fits mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im pn${PN_EV_PREFIX}-clean.fits  pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
-
+make-im mos${M1_EV_PREFIX}-clean.fits ${CLNAME}-mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im mos${M2_EV_PREFIX}-clean.fits ${CLNAME}-mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im pn${PN_EV_PREFIX}-clean.fits ${CLNAME}-pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
 
 elo=500
 ehi=2000
 
-make-im mos${M1_EV_PREFIX}-clean.fits mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im mos${M2_EV_PREFIX}-clean.fits mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im pn${PN_EV_PREFIX}-clean.fits  pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
+make-im mos${M1_EV_PREFIX}-clean.fits ${CLNAME}-mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im mos${M2_EV_PREFIX}-clean.fits ${CLNAME}-mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im pn${PN_EV_PREFIX}-clean.fits ${CLNAME}-pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
 
 
 elo=2000
 ehi=7000
 
-make-im mos${M1_EV_PREFIX}-clean.fits mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im mos${M2_EV_PREFIX}-clean.fits mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
-make-im pn${PN_EV_PREFIX}-clean.fits  pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
-
+make-im mos${M1_EV_PREFIX}-clean.fits ${CLNAME}-mos${M1_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im mos${M2_EV_PREFIX}-clean.fits ${CLNAME}-mos${M2_EV_PREFIX}-quick-im-${elo}-${ehi}.fits $elo $ehi
+make-im pn${PN_EV_PREFIX}-clean.fits ${CLNAME}-pn${PN_EV_PREFIX}-quick-im-${elo}-${ehi}.fits  $elo $ehi
 
 ######################################################################
 # exit

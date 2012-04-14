@@ -417,9 +417,11 @@ def plot_minuit_err_ellipse(c1, c2, c3, fname):
     # stop plot enviroment
     ######################################################################
 
-
-
-
 if __name__ == '__main__':
     print "This is a library! Use import sb_plotting_utils in your script to call the subrutines"
+
+
+
+
+
 
