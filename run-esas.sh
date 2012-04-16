@@ -350,6 +350,48 @@ then
 fi
 
 ######################################################################
+# run background/image extraction - custom band (500 - 2000)
+
+if [[ $EXTRACT_BACK_ESAS_PN -eq 1 ]]
+then
+    ${codedir}/extract-back-band-pn.sh ${workdir} 500 2000
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run background/image extraction - custom band (500 - 2000)
+
+if [[ $EXTRACT_BACK_ESAS_M1 -eq 1 ]]
+then
+    ${codedir}/extract-back-band-m1.sh ${workdir} 500 2000
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
+# run background/image extraction - custom band (500 - 2000)
+
+if [[ $EXTRACT_BACK_ESAS_M2 -eq 1 ]]
+then
+    ${codedir}/extract-back-band-m2.sh ${workdir} 500 2000
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+
+######################################################################
 # run product renamig
 
 if [[ $RENAME_SPEC_PRODUCTS -eq 1 ]]

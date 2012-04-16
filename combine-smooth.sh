@@ -13,17 +13,21 @@ M1_EV_PREFIX=$M1_EV_PREFIX_LIST
 M2_EV_PREFIX=$M2_EV_PREFIX_LIST
 PN_EV_PREFIX=$PN_EV_PREFIX_LIST
 
-
 ######################################################################
-# soft band
+# comb combines exposures 0 ps are masked
 
 elow='400'            # detection bands minima [eV]
 ehigh='1250'          # detection bands maxima [eV]
 
+comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
 
-######################################################################
-# use comb once more to combine exposures, this time with point
-# sources masked using the cheese images.
+elow='500'            # detection bands minima [eV]
+ehigh='2000'          # detection bands maxima [eV]
+
+comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
+
+elow='2000'            # detection bands minima [eV]
+ehigh='7200'          # detection bands maxima [eV]
 
 comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
 
@@ -61,28 +65,19 @@ comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 n
 
 # adapt_900 smoothingcounts=10 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=no withsoftcontrol=no withswcxcontrol=0
 
+# adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
+
+elow=400
+ehigh=1250
 adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
 
+elow=500
+ehigh=2000
+adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
 
-######################################################################
-# hard band
-
-elow='2000'            # detection bands minima [eV]
-ehigh='7200'          # detection bands maxima [eV]
-
-
-######################################################################
-# use comb once more to combine exposures, this time with point
-# sources masked using the cheese images.
-
-comb caldb=${esas_caldb} withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0 nbands=1 elowlist=$elow ehighlist=$ehigh mask=1 ndata=3 prefixlist="${M1_EV_PREFIX} ${M2_EV_PREFIX} ${PN_EV_PREFIX}"
-
-
-######################################################################
-# adapt-900 adaptively smooths the images.
-
-# adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=2 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=yes withsoftcontrol=yes withswcxcontrol=0
-
+elow=2000
+ehigh=7200
+adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
 
 ######################################################################
 # exit

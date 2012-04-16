@@ -62,6 +62,10 @@ EXTRACT_SB_PROF=0           # extract image/background/exp profiles
 ######################################################################
 # utilities
 
+export EXTRACT_BACK_BAND_PN=1      # custom bad in run-esas (500-2000)
+export EXTRACT_BACK_BAND_M1=1      # custom bad in run-esas (500-2000)
+export EXTRACT_BACK_BAND_M2=1      # custom bad in run-esas (500-2000)
+
 export PIPE_TEST=0
 export PLT_LC_HIST=0
 export PLT_DIAGNOSTICS=0
