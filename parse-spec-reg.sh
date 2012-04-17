@@ -20,13 +20,21 @@ fi
 if [[ $remove -eq 0 ]]
 then
 
-    egrep circle  $inreg | tr -d "\-circle(" | tr -d ")" | awk '{print "&&! circle("$1",X,Y)"}' | tr '\n' ' ' > ${inreg}.desc
+    egrep "circle"  $inreg | tr -d "\-circle(" | tr -d ")" | awk '{print "&&! circle("$1",X,Y)"}' | tr '\n' ' ' > ${inreg}.desc
+
+    egrep "polygon"  $inreg | tr -d "polygon(" | tr -d ")" | awk '{print "&&! polygon("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
+
+    egrep "polygon"  $inreg | tr -d "\-polygon(" | tr -d ")" | awk '{print "&&! polygon("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
 
 else
 
     egrep "circle"  $inreg | tr -d "\-circle(" | tr -d ")" | awk '{print "circle("$1",X,Y)"}' | tr '\n' ' ' > ${inreg}.desc
 
-    egrep annulus  $inreg | tr -d "\-annulus(" | tr -d ")" | awk '{print "annulus("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
+    egrep "annulus"  $inreg | tr -d "\-annulus(" | tr -d ")" | awk '{print "annulus("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
+
+    egrep "polygon"  $inreg | tr -d "polygon(" | tr -d ")" | awk '{print "&&! polygon("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
+
+    egrep "polygon"  $inreg | tr -d "\-polygon(" | tr -d ")" | awk '{print "&&! polygon("$1",X,Y)"}' | tr '\n' ' ' >> ${inreg}.desc
 
 fi
 

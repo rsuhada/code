@@ -44,39 +44,6 @@ function get_cluster_pars {
 ra=$2
 de=$3
 
-EXTRACT_SRC=1
-EXTRACT_BG=1
-
-MAKE_RMF=1
-MAKE_ARF=1
-
-MAKE_RMF_BG=1
-MAKE_ARF_BG=1
-
-CALCULATE_BACKSCALE=1
-
-# # 0205
-# BG_REGION_ID=bg-ann-07
-# SRC_REGION_ID=cluster-man-02
-# PS_REGION_ID=ps-man-03
-
-# # 0559
-# SRC_REGION_ID=cluster-man-02
-# BG_REGION_ID=bg-ann-03
-# PS_REGION_ID=ps-man-03
-
-
-# # 2332
-# SRC_REGION_ID=cluster-man-01
-# BG_REGION_ID=bg-ann-01
-# PS_REGION_ID=ps-man-02
-
-# 0230-6028
-SRC_REGION_ID=cluster-man
-BG_REGION_ID=bg-ann-01
-PS_REGION_ID=ps-man-01
-
-
 ######################################################################
 # create the spectroscopy dir if it does not exists
 
@@ -108,13 +75,14 @@ then
     cp ${codedir}/templates/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
 fi
 
+source $config_file
+
 ######################################################################
 # check existence of region files
 
 BG_REGION=${BG_REGION_ID}.phy.reg
 SRC_REGION=${SRC_REGION_ID}.phy.reg
 PS_REGION=${PS_REGION_ID}.phy.reg
-
 
 if [[ ! -e $SRC_REGION ]]
 then
