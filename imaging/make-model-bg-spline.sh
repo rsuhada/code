@@ -21,6 +21,15 @@ USE_OOT=0                       # use the oot correction for pn? using
                                 # it causes some small (maybe
                                 # negligible) artefacts
 
+# original: excesssigma=3 mlmin=1 since it should be run with ps
+# alredy masked out the threshold can be increased (even up to point
+# to not remove anything additional) mlmin=20 & excesssigma=5 gives
+# essentially the esas result, while scut=0.002 is bit more
+# conservative (esp. for bright sources) - that's good
+
+mlmin=20.0
+excesssigma=5.0
+scut=0.002
 
 # emledetextsrclist causes segfault now... so using lower level
 # eboxdetect src list
@@ -52,6 +61,11 @@ do
         ${codedir}/imaging/make-exp-map.sh .
     fi
 
+    # original: excesssigma=3 mlmin=1
+    # since it should be run with ps alredy masked out the
+    # threshold can be increased (even up to point to not remove
+    # anything additional)
+
     esplinemap boxlistset=$srclist \
 	    withdetmask=yes detmaskset=$mask \
 	    withexpimage=yes withexpimage2=no \
@@ -62,10 +76,11 @@ do
 	    withcheese=yes withcheesemask=yes \
 	    cheesemaskset=$outcheese \
         withootset=false \
-        scut=0.002 \
+        scut=$scut \
         fitmethod=spline \
         nsplinenodes=13 \
-        excesssigma=3.0 \
+        excesssigma=$excesssigma \
+        mlmin=$mlmin \
         nfitrun=4
 
         # 2xmm uses the flat exposure map here
@@ -100,6 +115,7 @@ do
         # 2xmm use oot here, but it leaves strange residuals - some
         # can be masked out but still the bg has visible tiny stripy
         # artefacts
+
         esplinemap boxlistset=$srclist \
 	        withdetmask=yes detmaskset=$mask \
 	        withexpimage=yes withexpimage2=no \
@@ -111,10 +127,11 @@ do
 	        cheesemaskset=$outcheese \
             withootset=true \
             ooteventset=$ooteventset \
-            scut=0.002 \
+            scut=$scut \
             fitmethod=spline \
             nsplinenodes=13 \
-            excesssigma=3.0 \
+            excesssigma=$excesssigma \
+            mlmin=$mlmin \
             nfitrun=4
 
         # SAS leaves some residuals pixels that shouldn't be there
@@ -132,10 +149,11 @@ do
 	        bkgimageset=$outbg \
 	        withcheese=yes withcheesemask=yes \
 	        cheesemaskset=$outcheese \
-            scut=0.002 \
+            scut=$scut \
             fitmethod=spline \
             nsplinenodes=13 \
-            excesssigma=3.0 \
+            excesssigma=$excesssigma \
+            mlmin=$mlmin \
             nfitrun=4
 
     fi

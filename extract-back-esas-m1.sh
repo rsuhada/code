@@ -23,7 +23,6 @@ dir=$1
 here=`pwd`
 cd $dir
 
-
 ######################################################################
 # extract m1 spectra - soft band
 
@@ -49,12 +48,10 @@ then
     exit 1
 fi
 
-
 ######################################################################
 # rotate background to sky position
 
 rot-im-det-sky prefix="$prefix" mask=0 elow=$elow ehigh=$ehigh mode=1
-
 
 ######################################################################
 # extract m1 spectra - hard band

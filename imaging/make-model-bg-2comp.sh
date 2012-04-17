@@ -12,6 +12,16 @@ cd $dir
 elo="500"
 ehi="2000"
 
+# original: excesssigma=3 mlmin=1 since it should be run with ps
+# alredy masked out the threshold can be increased (even up to point
+# to not remove anything additional) mlmin=20 & excesssigma=5 gives
+# essentially the esas result, while scut=0.002 is bit more
+# conservative (esp. for bright sources) - that's good
+
+mlmin=20.0
+excesssigma=5.0
+scut=0.002
+
 # emledetextsrclist causes segfault now... so using lower level
 # eboxdetect src list
 # srclist=emllist-man.fits
@@ -48,9 +58,11 @@ do
 	    fitmethod=model withexpimage=yes withexpimage2=yes \
 	    expimageset=$vexp expimageset2=$uvexp \
 	    imageset=$image \
-	    scut=0.002 withootset=no pimin=$elo pimax=$ehi \
+	    scut=$scut withootset=no pimin=$elo pimax=$ehi \
 	    bkgimageset=$outbg \
 	    withcheese=yes withcheesemask=yes \
+        excesssigma=$excesssigma \
+        mlmin=$mlmin \
 	    cheesemaskset=$outcheese
 done
 
@@ -74,9 +86,11 @@ do
 	    fitmethod=model withexpimage=yes withexpimage2=yes \
 	    expimageset=$vexp expimageset2=$uvexp \
 	    imageset=$image \
-	    scut=0.002 withootset=no pimin=$elo pimax=$ehi \
+	    scut=$scut withootset=no pimin=$elo pimax=$ehi \
 	    bkgimageset=$outbg \
 	    withcheese=yes withcheesemask=yes \
+        excesssigma=$excesssigma \
+        mlmin=$mlmin \
 	    cheesemaskset=$outcheese
 done
 

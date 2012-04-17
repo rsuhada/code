@@ -14,8 +14,13 @@ ehi="2000"
 emask_thresh1=0.01              # [ defailt = 0.1 ]
 
 # FIXME: file names shouldn't be hardcoded!
-MAN_PS_REG_PHYS=ps-man-01.phy.reg
-MAN_PS_REG=ps-man-01.im.reg
+# MAN_PS_REG_PHYS=ps-man-01.phy.reg
+# MAN_PS_REG=ps-man-01.im.reg
+
+MAN_PS_REG_PHYS=${MAN_PS_REG_ID}.phy.reg
+MAN_CLUSTER_REG_PHYS=${MAN_CLUSTER_REG_ID}.phy.reg
+MAN_PS_REG=${MAN_PS_REG_ID}.im.reg
+EMASK_REG=${MAN_PS_REG_ID}-${MAN_CLUSTER_REG_ID}.im.reg
 
 ######################################################################
 # prepare the region file with the point sources
@@ -34,9 +39,16 @@ then
     ${codedir}/utils/convert-wcs2im-ds9.sh $image $MAN_PS_REG_PHYS
 
     # need to remove the negative sign in front of the shape
-    sed -i .sed.bk 's/-circle/circle/g' $MAN_PS_REG
-    rm ${MAN_PS_REG}.sed.bk
-    ds9tocxc outset=${MAN_PS_REG}.fits < ${MAN_PS_REG}
+    sed 's/-circle/circle/g' $MAN_PS_REG > $EMASK_REG
+
+    # remove also the cluster region if present
+    if [[ -e $MAN_CLUSTER_REG_PHYS ]]
+    then
+        ${codedir}/utils/convert-wcs2im-ds9.sh $image $MAN_CLUSTER_REG_PHYS
+        grep circle ${MAN_CLUSTER_REG_ID}.im.reg >> $EMASK_REG
+    fi
+
+    ds9tocxc outset=${EMASK_REG}.fits < ${EMASK_REG}
 
 else
     echo -e "\n** error: $MAN_PS_REG_PHYS does not exists here!"
@@ -61,7 +73,7 @@ do
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 
     outmask=pn${prefix}-${elo}-${ehi}.mask
-	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${EMASK_REG}.fits
 	emask expimageset=$outexp detmaskset=${outmask}.wps threshold1=$emask_thresh1
 
     outexp=pn${prefix}-${elo}-${ehi}.uv.exp
@@ -95,7 +107,7 @@ do
         usedlimap=no attrebin=4 pimin=${elo} pimax=${ehi}
 
     outmask=mos${prefix}-${elo}-${ehi}.mask
-	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${MAN_PS_REG}.fits
+	emask expimageset=$outexp detmaskset=$outmask threshold1=$emask_thresh1 regionset=${EMASK_REG}.fits
 	emask expimageset=$outexp detmaskset=${outmask}.wps threshold1=$emask_thresh1
 
     outexp=mos${prefix}-${elo}-${ehi}.uv.exp

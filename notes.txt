@@ -3,6 +3,8 @@
 
 General:
 
+- try increaseing the ps removal fraction (0.95-0.98)?
+
 - add file output to the scaling relation part of iter-spec
 
 - from pn-spectra extract part that adds the proper ps regions to
@@ -204,6 +206,14 @@ ecoordconv:-  Region Centre:
 
 # FIXME: adding more elegant solution at the remask step
 
+###############
+# update: Mon Apr 16 15:17:52 2012
+
+- using emllist*reg keep only spurious ps - save list
+- then use the saved list and do in tpc all matches in 1 not 2 with
+  emllist, save as emllist.fits
+
+###############
 ds9 *cheese*
 
 compare this to image - if removal is insufficient:
