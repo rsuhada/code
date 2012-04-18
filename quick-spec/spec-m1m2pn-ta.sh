@@ -65,14 +65,14 @@ fi
 # rebin the spectra
 
 # background spectra
-grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=pn-${bgid}.pha outfile=pn-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn-${bgid}.rmf & chkey ANCRFILE pn-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=pn-${bgid}.pha outfile=pn-${bgid}.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn-${bgid}.rmf & chkey ANCRFILE pn-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
 ######################################################################
 # hack header - grppha overwrites
@@ -334,6 +334,8 @@ zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2
 tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+
+gather-quickspec-results.sh ${fitid}
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
 

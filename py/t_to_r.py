@@ -214,4 +214,3 @@ if __name__ == '__main__':
     write_par_output()
     if (FILE_PAR_OUTPUT==1):
         write_par_output(tofile=1)
-

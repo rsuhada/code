@@ -217,6 +217,39 @@ def LM_vikhlinin09_err(luminosity, luminosity_err, func_ez):
     return outM_err
 
 
+def LM_mantz10(luminosity, luminosity_err, func_ez):
+    """
+    L-M scaling relation of Mantz+10, Eq. 4+5 + Table 7, using the
+    "All data" coeefficients
+
+    Arguments:
+    - `luminosity`: 0.1-2.4 keV band [cgs]
+    - `luminosity_err`: 0.1-2.4 keV band [cgs]
+    - `func_ez`: E(z)
+    """
+
+    # # XLF
+    # blm_0     = 0.82
+    # blm_0_err = 0.11
+    # blm_1     = 1.29
+    # blm_1_err = 0.07
+
+    # All
+    blm_0       = 0.80
+    blm_0_err   = 0.08
+    blm_1       = 1.34
+    blm_1_err   = 0.05
+
+    l = log10(luminosity/(1.0e44 * func_ez))
+
+    m = (l - blm_0) / blm_1
+
+    m500 = 10.0**(m + 15.0) / func_ez
+    m500_err = 999.0            # FIXME: error proapgation
+
+    return (m500, m500_err)
+
+
 #############################################################################################
 # no-evol as given by fassbender10 (x1230 paper)
 

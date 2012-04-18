@@ -26,17 +26,64 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
-grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
-grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m1-${bgid}.pha outfile=m1-${bgid}.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1-${bgid}.rmf & chkey ANCRFILE m1-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
+grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2-${bgid}.rmf & chkey ANCRFILE m2-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
 
+######################################################################
+# hack header - grppha overwrites
 
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poissonian errors applicable" > header.tmp
+for i in m1-${bgid}.grp.pha m2-${bgid}.grp.pha m1.grp.pha m2.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+# sleep 200
+fi
+
+######################################################################
+# do the fitting
 echo -e "
 data 1:1 m1.grp.pha
 data 2:2 m2.grp.pha
@@ -270,5 +317,7 @@ zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2
 tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+
+gather-quickspec-results.sh ${fitid}
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}

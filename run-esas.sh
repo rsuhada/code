@@ -335,7 +335,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # run background/image extraction
 
@@ -352,7 +351,7 @@ fi
 ######################################################################
 # run background/image extraction - custom band (500 - 2000)
 
-if [[ $EXTRACT_BACK_ESAS_PN -eq 1 ]]
+if [[ $EXTRACT_BACK_BAND_PN -eq 1 ]]
 then
     ${codedir}/extract-back-band-pn.sh ${workdir} 500 2000
     if [[ $? -ne 0 ]]
@@ -362,11 +361,10 @@ then
     fi
 fi
 
-
 ######################################################################
 # run background/image extraction - custom band (500 - 2000)
 
-if [[ $EXTRACT_BACK_ESAS_M1 -eq 1 ]]
+if [[ $EXTRACT_BACK_BAND_M1 -eq 1 ]]
 then
     ${codedir}/extract-back-band-m1.sh ${workdir} 500 2000
     if [[ $? -ne 0 ]]
@@ -376,11 +374,10 @@ then
     fi
 fi
 
-
 ######################################################################
 # run background/image extraction - custom band (500 - 2000)
 
-if [[ $EXTRACT_BACK_ESAS_M2 -eq 1 ]]
+if [[ $EXTRACT_BACK_BAND_M2 -eq 1 ]]
 then
     ${codedir}/extract-back-band-m2.sh ${workdir} 500 2000
     if [[ $? -ne 0 ]]
@@ -389,7 +386,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # run product renamig
@@ -404,8 +400,6 @@ then
     fi
 fi
 
-
-
 ######################################################################
 # group spectra
 
@@ -419,7 +413,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # group spectra
 
@@ -432,7 +425,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # combine and smooth images
@@ -512,7 +504,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # utilities

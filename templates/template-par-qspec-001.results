@@ -7,13 +7,7 @@ inst        xmm
 m1          m1.pha
 m2          m2.pha
 pn          pn.pha
-bin_m1      1
-bin_m2      1
-bin_pn      1
 bg          local
-bg_m1       m1-bg-ann-01.pha
-bg_m2       m2-bg-ann-01,pha
-bg_pn       pn-bg-ann-01,pha
 stat        c
 excise_core 0
 

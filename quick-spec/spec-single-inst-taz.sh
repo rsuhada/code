@@ -304,4 +304,6 @@ tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
+gather-quickspec-results.sh ${fitid}
+
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
