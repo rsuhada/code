@@ -193,15 +193,15 @@ fit
 log none
 save ${cluster}-${fitid}-model.xcm
 
-# setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
-# iplot ufspec
-# label f ${cluster}, xmm, ${fitid}
-# csize 1.3
-# lweigh 2
-# lab t
-# time off
-# hardcopy ${cluster}-${fitid}-uf.ps/cps
-# exit
+setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
+iplot ufspec
+label f ${cluster}, xmm, ${fitid}
+csize 1.3
+lweigh 2
+lab t
+time off
+hardcopy ${cluster}-${fitid}-uf.ps/cps
+exit
 
 # plot ufspec
 
@@ -301,13 +301,17 @@ echo
 ######################################################################
 # not used at the moment
 
-terr=`~/data1/sw/calc/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
+terr=`~/data1/sw/calc/ca lc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
 aerr=`~/data1/sw/calc/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
 zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
 
 tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+
+######################################################################
+# plot conversions
+convert -density 100 -alpha off -rotate 90 ${cluster}-${fitid}-nice.ps ${cluster}-${fitid}-nice.png
 
 gather-quickspec-results.sh ${fitid}
 

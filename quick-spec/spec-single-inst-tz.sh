@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# heasoft - sas11 conflict workaround
+export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+
 ######################################################################
 # load in setup
 
@@ -26,6 +29,39 @@ source $parfile
 spectrumid=${cluster}-${fitid}
 
 ######################################################################
+# convert to ctr = cts/s
+
+CONVERT_TO_CTR=0
+
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+
+spec=inspec.pha
+
+for i in ${single_inst}-${bgid}.pha
+do
+mv $i ${spec}
+outspec=${i%.pha}.grp.pha
+
+rm $outspec 2>/dev/null
+
+mathpha <<EOT
+${spec}
+R
+$i
+$spec
+1
+0
+EOT
+
+rm ${spec}
+done
+
+# sleep 200
+
+fi
+
+######################################################################
 # rebin the spectra
 
 # background spectra
@@ -33,6 +69,24 @@ grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha 
 
 # source spectra
 grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
+
+######################################################################
+# hack header - grppha overwrites
+
+CONVERT_TO_CTR=1
+if [[ $CONVERT_TO_CTR -eq 1 ]]
+then
+echo "POISSERR=                    T / Poisson errors appropriate" > header.tmp
+for i in ${single_inst}-${bgid}.grp.pha
+do
+    fmodhead $i header.tmp
+done
+rm header.tmp
+
+fi
+
+######################################################################
+# do the fitting
 
 
 echo -e "
@@ -257,6 +311,10 @@ zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2
 tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+
+######################################################################
+# plot conversions
+convert -density 100 -alpha off -rotate 90 ${cluster}-${fitid}-nice.ps ${cluster}-${fitid}-nice.png
 
 gather-quickspec-results.sh ${fitid}
 

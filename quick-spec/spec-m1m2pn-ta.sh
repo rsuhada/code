@@ -335,6 +335,10 @@ tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
 asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
 zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
 
+######################################################################
+# plot conversions
+convert -density 100 -alpha off -rotate 90 ${cluster}-${fitid}-nice.ps ${cluster}-${fitid}-nice.png
+
 gather-quickspec-results.sh ${fitid}
 
 echo "Spectroscopical analysis done for :" ${cluster} ${fitid}
