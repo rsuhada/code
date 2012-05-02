@@ -18,9 +18,14 @@ ehi="2000"
 # essentially the esas result, while scut=0.002 is bit more
 # conservative (esp. for bright sources) - that's good
 
-mlmin=20.0
+mlmin=10.0
 excesssigma=5.0
 scut=0.002
+
+# this set gives the esas region - might not be enough for the cluster itself!
+# mlmin=20.0
+# excesssigma=5.0
+# scut=0.002
 
 # emledetextsrclist causes segfault now... so using lower level
 # eboxdetect src list

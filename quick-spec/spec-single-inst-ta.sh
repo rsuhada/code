@@ -38,7 +38,7 @@ then
 
 spec=inspec.pha
 
-for i in ${single_inst}-${bgid}.pha ${single_inst}.pha
+for i in ${single_inst}-${bgid}.pha ${single_inst}-${SRC_REGION_ID}.pha
 do
 mv $i ${spec}
 outspec=${i%.pha}.grp.pha
@@ -69,7 +69,7 @@ grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha 
 
 
 # source spectra
-grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=${single_inst}-${SRC_REGION_ID}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${SRC_REGION_ID}.rmf & chkey ANCRFILE ${single_inst}-${SRC_REGION_ID}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
 ######################################################################
 # hack header - grppha overwrites

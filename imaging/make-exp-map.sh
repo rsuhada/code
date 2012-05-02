@@ -13,6 +13,8 @@ elo="500"
 ehi="2000"
 emask_thresh1=0.01              # [ defailt = 0.1 ]
 
+REMOVE_CLUSTER=0                # should I mask out the cluster?
+
 # FIXME: file names shouldn't be hardcoded!
 # MAN_PS_REG_PHYS=ps-man-01.phy.reg
 # MAN_PS_REG=ps-man-01.im.reg
@@ -42,7 +44,7 @@ then
     sed 's/-circle/circle/g' $MAN_PS_REG > $EMASK_REG
 
     # remove also the cluster region if present
-    if [[ -e $MAN_CLUSTER_REG_PHYS ]]
+    if [[ (-e $MAN_CLUSTER_REG_PHYS) && ($REMOVE_CLUSTER -eq 1)  ]]
     then
         ${codedir}/utils/convert-wcs2im-ds9.sh $image $MAN_CLUSTER_REG_PHYS
         grep circle ${MAN_CLUSTER_REG_ID}.im.reg >> $EMASK_REG

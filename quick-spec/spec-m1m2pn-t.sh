@@ -37,7 +37,7 @@ then
 
 spec=inspec.pha
 
-for i in m1-${bgid}.pha m2-${bgid}.pha m1.pha m2.pha # pn.pha pn-{bgid}.pha
+for i in m1-${bgid}.pha m2-${bgid}.pha m1-${SRC_REGION_ID}.pha m2-${SRC_REGION_ID}.pha # pn-${SRC_REGION_ID}.pha pn-{bgid}.pha
 do
 mv $i ${spec}
 outspec=${i%.pha}.grp.pha
@@ -69,9 +69,9 @@ grppha infile=m2-${bgid}.pha outfile=m2-${bgid}.grp.pha chatter=0 comm=" group m
 grppha infile=pn-${bgid}.pha outfile=pn-${bgid}.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn-${bgid}.rmf & chkey ANCRFILE pn-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=m1.pha outfile=m1.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1.rmf & chkey ANCRFILE m1.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=m2.pha outfile=m2.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2.rmf & chkey ANCRFILE m2.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
-grppha infile=pn.pha outfile=pn.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn.rmf & chkey ANCRFILE pn.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m1-${SRC_REGION_ID}.pha outfile=m1.grp.pha chatter=0 comm=" group min ${m1_group_min} & chkey RESPFILE m1-${SRC_REGION_ID}.rmf & chkey ANCRFILE m1-${SRC_REGION_ID}.arf & chkey BACKFILE m1-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=m2-${SRC_REGION_ID}.pha outfile=m2.grp.pha chatter=0 comm=" group min ${m2_group_min} & chkey RESPFILE m2-${SRC_REGION_ID}.rmf & chkey ANCRFILE m2-${SRC_REGION_ID}.arf & chkey BACKFILE m2-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=pn-${SRC_REGION_ID}.pha outfile=pn.grp.pha chatter=0 comm=" group min ${pn_group_min} & chkey RESPFILE pn-${SRC_REGION_ID}.rmf & chkey ANCRFILE pn-${SRC_REGION_ID}.arf & chkey BACKFILE pn-${bgid}.grp.pha & exit" clobber=yes
 
 ######################################################################
 # hack header - grppha overwrites

@@ -32,7 +32,7 @@ spectrumid=${cluster}-${fitid}
 grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${bgid}.rmf & chkey ANCRFILE ${single_inst}-${bgid}.arf & chkey BACKFILE none & exit" clobber=yes
 
 # source spectra
-grppha infile=${single_inst}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}.rmf & chkey ANCRFILE ${single_inst}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
+grppha infile=${single_inst}-${SRC_REGION_ID}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${SRC_REGION_ID}.rmf & chkey ANCRFILE ${single_inst}-${SRC_REGION_ID}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
 
 echo -e "
@@ -244,7 +244,6 @@ echo "redshift = "${redshift_fit} ${redshift_err_d} "+"${redshift_err_u} | tee -
 echo "Fe abundance = "${abundance_fit} ${abundance_err_d} "+"${abundance_err_u} | tee -a ${spectrumid}.result
 echo
 echo
-
 
 ######################################################################
 # not used at the moment

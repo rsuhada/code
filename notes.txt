@@ -3,6 +3,9 @@
 
 General:
 
+- in spec-*.sh the binned spectra use the old naming convetion without
+  the region ID
+
 - try increaseing the ps removal fraction (0.95-0.98)?
 
 - add file output to the scaling relation part of iter-spec

@@ -6,6 +6,16 @@
 # FIXME: implement an ad2xy.pro like solution that doesn't need ds9
 # (parts exist through ecoordconvert)
 
+if [[ $# -lt 2 ]]
+then
+    echo
+    echo "** error in $0"
+    echo "*** Two parameters required: missing one or more!"
+    echo "*** Call example:"
+    echo "*** convert-reg-coords-ds9.sh comb-obj-im-2000-7200.fits cluster-man-01.wcs.reg"
+    exit 0
+fi
+
 im=$1
 region_file=$2
 outreg=${region_file%.*.*}

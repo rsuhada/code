@@ -154,19 +154,19 @@ then
     prefix=$M1_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
-    evselect table=${evlist} withimageset=yes imageset=${specdir}/m1.im \
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/m1-${SRC_REGION_ID}.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/m1.pha \
+        withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=m1-detmap.ds \
+    evselect table=${evlist} withimageset=yes imageset=m1-${SRC_REGION_ID}-detmap.ds \
         xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/m1.pha \
+        withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
@@ -180,19 +180,19 @@ then
     prefix=$M2_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
-    evselect table=${evlist} withimageset=yes imageset=${specdir}/m2.im \
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/m2-${SRC_REGION_ID}.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/m2.pha \
+        withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=m2-detmap.ds \
+    evselect table=${evlist} withimageset=yes imageset=m2-${SRC_REGION_ID}-detmap.ds \
         xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/m2.pha \
+        withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
@@ -206,19 +206,19 @@ then
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean.fits
 
-    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn.im \
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-${SRC_REGION_ID}.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/pn.pha \
+        withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
     # detector map file for arfgen
-    evselect table=${evlist} withimageset=yes imageset=pn-detmap.ds \
+    evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-detmap.ds \
         xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/pn.pha \
+        withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
@@ -232,19 +232,19 @@ then
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean-oot.fits
 
-    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-oot.im \
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-${SRC_REGION_ID}-oot.im \
         xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
         yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-        withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
+        withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
 
     # # detector map file for arfgen
-    # evselect table=${evlist} withimageset=yes imageset=pn-oot-detmap.ds \
+    # evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-oot-detmap.ds \
     #     xcolumn=DETX ycolumn=DETY imagebinning=binSize ximagebinsize=80 \
     #     yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
-    #     withspectrumset=true spectrumset=${specdir}/pn-oot.pha \
+    #     withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}-oot.pha \
     #     withspecranges=true energycolumn=PI specchannelmin=0 \
     #     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
     #     writedss=Y expression="$pnexpr"
@@ -364,28 +364,54 @@ fi
 ######################################################################
 # GETTING RMF:
 
-export detmaptype=psf             # sas for ext sources: flat; esas: psf
+# sas for ext sources: flat; esas: psf; SAS manual: dataset for
+# ultimate precision on extended sources
+
+# export detmaptype=psf
+export detmaptype=flat
+# export detmaptype=dataset
 
 if [[ $MAKE_RMF -ne 0 ]]
 then
-
     echo -e '\nGetting source RMF...'
 
-    rmfgen spectrumset=${specdir}/pn.pha rmfset=${specdir}/pn.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m1.pha rmfset=${specdir}/m1.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m2.pha rmfset=${specdir}/m2.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+    if [[ "$detmaptype" == "flat" || "$detmaptype" == "psf"  ]]
+    then
+        # psf or flat setup
+        rmfgen spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha rmfset=${specdir}/pn-${SRC_REGION_ID}.rmf detmaptype=${detmaptype}
+        rmfgen spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha rmfset=${specdir}/m1-${SRC_REGION_ID}.rmf detmaptype=${detmaptype}
+        rmfgen spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha rmfset=${specdir}/m2-${SRC_REGION_ID}.rmf detmaptype=${detmaptype}
+    fi
 
+    if [[ "$detmaptype" == "dataset" ]]
+    then
+        # "dataset" setting
+        rmfgen spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha rmfset=${specdir}/pn-${SRC_REGION_ID}.rmf detmaptype=${detmaptype} detmaparray=pn-${SRC_REGION_ID}-detmap.ds
+        rmfgen spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha rmfset=${specdir}/m1-${SRC_REGION_ID}.rmf detmaptype=${detmaptype} detmaparray=m1-${SRC_REGION_ID}-detmap.ds
+        rmfgen spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha rmfset=${specdir}/m2-${SRC_REGION_ID}.rmf detmaptype=${detmaptype} detmaparray=m2-${SRC_REGION_ID}-detmap.ds
+    fi
 fi
 
 if [[ $MAKE_RMF_BG -ne 0 ]]
 then
-
     echo -e '\nGetting background RMF...'
-    rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
-    rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} # withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
+    if [[ "$detmaptype" == "flat" || "$detmaptype" == "psf"  ]]
+    then
+        rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype}
+        rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype}
+        rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype}
+    fi
+
+    if [[ "$detmaptype" == "dataset" ]]
+    then
+        # "dataset" setting
+        rmfgen spectrumset=${specdir}/pn-${bgid}.pha rmfset=${specdir}/pn-${bgid}.rmf detmaptype=${detmaptype} detmaparray=pn-${bgid}-detmap.ds
+        rmfgen spectrumset=${specdir}/m1-${bgid}.pha rmfset=${specdir}/m1-${bgid}.rmf detmaptype=${detmaptype} detmaparray=m1-${bgid}-detmap.ds
+        rmfgen spectrumset=${specdir}/m2-${bgid}.pha rmfset=${specdir}/m2-${bgid}.rmf detmaptype=${detmaptype} detmaparray=m2-${bgid}-detmap.ds
+    fi
 fi
+
 
 ######################################################################
 # GETTING ARF:
@@ -405,9 +431,9 @@ then
 
     echo -e '\nGetting source ARFs...'
 
-    arfgen spectrumset=${specdir}/pn.pha  $set rmfset=${specdir}/pn.rmf  arfset=${specdir}/pn.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-detmap.ds
-    arfgen spectrumset=${specdir}/m1.pha  $set rmfset=${specdir}/m1.rmf  arfset=${specdir}/m1.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-detmap.ds
-    arfgen spectrumset=${specdir}/m2.pha  $set rmfset=${specdir}/m2.rmf  arfset=${specdir}/m2.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-detmap.ds
+    arfgen spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha  $set rmfset=${specdir}/pn-${SRC_REGION_ID}.rmf  arfset=${specdir}/pn-${SRC_REGION_ID}.arf badpixlocation=pn${PN_EV_PREFIX_LIST}-clean.fits detmaparray=pn-${SRC_REGION_ID}-detmap.ds
+    arfgen spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha  $set rmfset=${specdir}/m1-${SRC_REGION_ID}.rmf  arfset=${specdir}/m1-${SRC_REGION_ID}.arf badpixlocation=mos${M1_EV_PREFIX_LIST}-clean.fits detmaparray=m1-${SRC_REGION_ID}-detmap.ds
+    arfgen spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha  $set rmfset=${specdir}/m2-${SRC_REGION_ID}.rmf  arfset=${specdir}/m2-${SRC_REGION_ID}.arf badpixlocation=mos${M2_EV_PREFIX_LIST}-clean.fits detmaparray=m2-${SRC_REGION_ID}-detmap.ds
 
 fi
 
@@ -440,15 +466,15 @@ then
 
         prefix=$M1_EV_PREFIX_LIST
         evlist=mos${prefix}-clean.fits
-        backscale spectrumset=${specdir}/m1.pha badpixlocation=$evlist useodfatt=yes
+        backscale spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha badpixlocation=$evlist useodfatt=yes
 
         prefix=$M2_EV_PREFIX_LIST
         evlist=mos${prefix}-clean.fits
-        backscale spectrumset=${specdir}/m2.pha badpixlocation=$evlist useodfatt=yes
+        backscale spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha badpixlocation=$evlist useodfatt=yes
 
         prefix=$PN_EV_PREFIX_LIST
         evlist=pn${prefix}-clean.fits
-        backscale spectrumset=${specdir}/pn.pha badpixlocation=$evlist useodfatt=yes
+        backscale spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha badpixlocation=$evlist useodfatt=yes
 
     fi
 
@@ -486,7 +512,7 @@ source ${codedir}/utils/util-funcs-lib.sh
 if [[ $EXTRACT_SRC -eq 1  ]]
 then
     echo "oot subtraction - source"
-    subtract_oot_spec pn.pha pn-oot.pha
+    subtract_oot_spec pn-${SRC_REGION_ID}.pha pn-${SRC_REGION_ID}-oot.pha
 fi
 
 if [[ $EXTRACT_BG -eq 1 ]]
