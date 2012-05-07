@@ -1,8 +1,18 @@
 ######################################################################
 # extracts coords from existin reg files,
+# - useful e.g. for the analysis-*.log
 # INPUT: region ID (bar wcs id and suffix, standard naming)
 
-# reg=cluster-man-01
+if [[ $# -lt 1 ]]
+then
+    echo
+    echo "** error in $0"
+    echo "*** One parameter required - region id!"
+    echo "*** Call example:"
+    echo "*** $0 cluster-man-01"
+    exit 0
+fi
+
 reg=$1
 
 ######################################################################
@@ -18,6 +28,7 @@ then
     echo
     echo "RA ${RA}"
     echo "DE ${DE}"
+    echo "SINGLE_LINE ${RA} ${DE}"
 
 fi
 

@@ -94,6 +94,17 @@ evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${sp
     writedss=Y expression="$expr"
 
 
+# ESAS type binning - detection coords
+evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}-detmap.ds \
+    xcolumn=DETX ycolumn=DETY withzcolumn=N withzerrorcolumn=N \
+    ximagebinsize=1 yimagebinsize=1 squarepixels=yes \
+    ximagesize=900 yimagesize=900 imagebinning=imageSize \
+    withspectrumset=false spectrumset=${specdir}/${instrument}-${spectrumid}.pha \
+    withspecranges=true energycolumn=PI specchannelmin=0 \
+    specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+    writedss=Y expression="$expr"
+
+
 ######################################################################
 # if pn create also the oot stuff
 

@@ -238,13 +238,16 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     ######################################################################
     # do the rmf extraction
 
+    detmaptype="dataset"        # flat/psf/dataset
+
     if [[ $MAKE_RMF -eq 1 ]]
     then
         for instrument in ${instruments[@]}
         do
             echo 'Getting source RMF...'
-            echo ${codedir}/extract-rmf.sh $instrument $spectrumid $specdir $ra $de
-            ${codedir}/extract-rmf.sh $instrument $spectrumid $specdir $ra $de
+            detmaparray=${specdir}/${instrument}-${spectrumid}-detmap.ds
+            echo ${codedir}/extract-rmf.sh $instrument $spectrumid $specdir $ra $de $detmaptype $detmaparray
+            ${codedir}/extract-rmf.sh $instrument $spectrumid $specdir $ra $de $detmaptype $detmaparray
         done
     else
         for instrument in ${instruments[@]}
@@ -390,7 +393,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     ######################################################################
     # finished iteration step
 
-    ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
+    # ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     cd $dir                     # returns to analysis subdir
     pwd
