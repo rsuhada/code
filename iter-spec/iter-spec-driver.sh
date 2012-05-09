@@ -393,7 +393,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     ######################################################################
     # finished iteration step
 
-    # ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
+    ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     cd $dir                     # returns to analysis subdir
     pwd
@@ -401,8 +401,8 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     iter=$((iter + 1))
 
     echo "Done:"
-    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r
-    echo "######################################################################"
+    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r 2>&1  $aper_results >> $LOG_MASTER_FILE
+    echo "######################################################################" 2>&1  $aper_results >> $LOG_MASTER_FILE
     echo
 
 done
