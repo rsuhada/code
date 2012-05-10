@@ -73,34 +73,33 @@ then
     exit 1
 fi
 
-######################################################################
-# extract m2 spectra - standard band
+# # part refactored to its own script in extract-spec-band
+# ######################################################################
+# # extract m2 spectra - standard band
 
-prefix=$M2_EV_PREFIX_LIST      # mos eventlists
-elow='500'            # detection bands minima [eV]
-ehigh='2000'          # detection bands maxima [eV]
-regfile=$M2_SRC_REGFILE
-ccd1=$M2_CCD1
-ccd2=$M2_CCD2
-ccd3=$M2_CCD3
-ccd4=$M2_CCD4
-ccd5=$M2_CCD5
-ccd6=$M2_CCD6
-ccd7=$M2_CCD7
-
-
-mos-spectra prefix=$prefix caldb=$esas_caldb region=$regfile mask=1 elow=$elow ehigh=$ehigh ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7
+# prefix=$M2_EV_PREFIX_LIST      # mos eventlists
+# elow='500'            # detection bands minima [eV]
+# ehigh='2000'          # detection bands maxima [eV]
+# regfile=$M2_SRC_REGFILE
+# ccd1=$M2_CCD1
+# ccd2=$M2_CCD2
+# ccd3=$M2_CCD3
+# ccd4=$M2_CCD4
+# ccd5=$M2_CCD5
+# ccd6=$M2_CCD6
+# ccd7=$M2_CCD7
 
 
-if [[ $? -ne 0 ]]
-then
-    echo -e "\n** error: mos2 spectral extraction in standard band failed!"
-    echo -e "*** error in script: $0\n"
-    cd $startdir
-    exit 1
-fi
+# mos-spectra prefix=$prefix caldb=$esas_caldb region=$regfile mask=1 elow=$elow ehigh=$ehigh ccd1=$ccd1 ccd2=$ccd2 ccd3=$ccd3 ccd4=$ccd4 ccd5=$ccd5 ccd6=$ccd6 ccd7=$ccd7
 
 
+# if [[ $? -ne 0 ]]
+# then
+#     echo -e "\n** error: mos2 spectral extraction in standard band failed!"
+#     echo -e "*** error in script: $0\n"
+#     cd $startdir
+#     exit 1
+# fi
 
 ######################################################################
 # exit

@@ -10,11 +10,9 @@
 # SP contamination is removed there is likely to be some residual
 # contamination left.
 
-
 dir=$1
 here=`pwd`
 cd $dir
-
 
 ######################################################################
 # pn
@@ -30,13 +28,11 @@ then
     exit 1
 fi
 
-
 ######################################################################
 # mos
 
 echo -e "\nRunning mos filter"
 mos-filter
-
 
 if [[ $? -ne 0 ]]
 then
@@ -46,7 +42,6 @@ then
     exit 1
 fi
 
-
 ######################################################################
 # get prefix list and save the raw eventlists
 
@@ -54,7 +49,6 @@ pnprefix_string="export PN_EV_PREFIX_LIST='"
 m1prefix_string="export M1_EV_PREFIX_LIST='"
 m2prefix_string="export M2_EV_PREFIX_LIST='"
 m3prefix_string="export MOS_EV_PREFIX_LIST='"
-
 
 for evli in mos1????-ori.fits
 do
@@ -66,7 +60,6 @@ do
     echo $m3prefix_string
 
 done
-
 
 for evli in mos2????-ori.fits
 do
@@ -102,25 +95,15 @@ echo $m3prefix_string
 echo
 ) | tee -a $NOTESFILE
 
-
-######################################################################
 # clean up temporary files
-
 rm -f *.FIT
 
-
-######################################################################
 # produce diagnostic quickview plots
-
 ${codedir}/plt-lc-hist.sh .
 
-
-######################################################################
 # write a reminder
-
 echo "REMINDER: inspect light curves"
 echo "REMINDER: select proper eventlist prefixes"
-
 
 ######################################################################
 # exit

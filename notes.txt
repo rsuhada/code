@@ -3,12 +3,16 @@
 
 General:
 
+- add model background not only annulus extraction
+
+- explore why the dataset version of rmf/arf gives different
+  normalizaiton while the same remaining parameters - comapre if esas
+  rmf/arf is used instead
+
 - in spec-*.sh the binned spectra use the old naming convetion without
-  the region ID
+  the region ID (in qspec)
 
 - try increaseing the ps removal fraction (0.95-0.98)?
-
-- add file output to the scaling relation part of iter-spec
 
 - from pn-spectra extract part that adds the proper ps regions to
   images like *-obj-im-500-2000.fits (ideally automatize extraction
@@ -19,9 +23,7 @@ General:
 - in 0205 the pn-man-mask.fits.cheese are merged all 3 (same for m1
   and m2) - rahter than individual... why?
 
-- top level dir handling should be changed - now requires an OBSID dir
-  (or link) so having 2 reductions is cumbersome!
-- imaging pipeline
+- imaging pipeline - PSF fitting
 
 - find out what causes the eveselct change - go through the parameters
 
@@ -33,13 +35,12 @@ General:
   duplicated) and the capitalization convention should be better
 
 Imaging:
-- oot subtraction!
 - distmatrix needs to pass only shape not full im
 
 Iterator:
 - core PSF spillover?
 - how to stop before running into low s/n?
-- use andersson optimized band for spectroscopy
+- use andersson optimized band for spectroscopy?
 - what about the python deprecation warning
 
 Profiles:
@@ -213,7 +214,7 @@ ecoordconv:-  Region Centre:
 # update: Mon Apr 16 15:17:52 2012
 
 - using emllist*reg keep only spurious ps - save list
-- then use the saved list and do in tpc all matches in 1 not 2 with
+- then use the saved list and do in tpc (topcat) all matches in 1 not 2 with
   emllist, save as emllist.fits
 
 ###############

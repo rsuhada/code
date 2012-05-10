@@ -1,7 +1,7 @@
 ######################################################################
 # modules
 
-export PREP_ODF_DIR=1
+export PREP_ODF_DIR=0
 export MAKE_CCF_ODF=0
 export RUN_EV_CHAINS=0
 export RUN_FILTERS=0
@@ -27,12 +27,21 @@ export REMASK_MANUAL_MASK=0         # FIXME: currently a useless mess
 # converted with: /code/convert-reg-wcs-to-det.sh
 
 export DO_EVIGWEIGHT=0
+
 export EXTRACT_SPEC_ESAS_PN=0
-export EXTRACT_SPEC_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_SPEC_ESAS_M2=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_PN=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M1=0                   # !!!! not tested yet
-export EXTRACT_BACK_ESAS_M2=0                   # !!!! not tested yet
+export EXTRACT_SPEC_ESAS_M1=0
+export EXTRACT_SPEC_ESAS_M2=0
+export EXTRACT_BACK_ESAS_PN=0
+export EXTRACT_BACK_ESAS_M1=0
+export EXTRACT_BACK_ESAS_M2=0
+
+export EXTRACT_SPEC_BAND_PN=0      # custom band in run-esas (500-2000)
+export EXTRACT_SPEC_BAND_M1=0      # custom band in run-esas (500-2000)
+export EXTRACT_SPEC_BAND_M2=0      # custom band in run-esas (500-2000)
+export EXTRACT_BACK_BAND_PN=0      # custom band in run-esas (500-2000)
+export EXTRACT_BACK_BAND_M1=0      # custom band in run-esas (500-2000)
+export EXTRACT_BACK_BAND_M2=0      # custom band in run-esas (500-2000)
+
 export GROUP_SPEC=0                             # FIXME - prefixes
 
 # MANUAL STEP: create RASS bg spectrum (see notes)
@@ -61,10 +70,6 @@ EXTRACT_SB_PROF=0           # extract image/background/exp profiles
 
 ######################################################################
 # utilities
-
-export EXTRACT_BACK_BAND_PN=1      # custom bad in run-esas (500-2000)
-export EXTRACT_BACK_BAND_M1=1      # custom bad in run-esas (500-2000)
-export EXTRACT_BACK_BAND_M2=1      # custom bad in run-esas (500-2000)
 
 export PIPE_TEST=0
 export PLT_LC_HIST=0

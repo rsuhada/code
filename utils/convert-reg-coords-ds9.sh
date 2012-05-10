@@ -36,4 +36,6 @@ mv $region_file conversion_tmp.reg
     -region save ${outreg}.wcs60.reg \
     -exit
 
-rm conversion_tmp.reg
+# rather to keep in case you accidentaly overwritten the good region
+# files (if image had regions in header...)
+mv conversion_tmp.reg $region_file

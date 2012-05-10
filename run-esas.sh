@@ -222,7 +222,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # recreate cheese masks after visual inspection - use emllist
 
@@ -235,7 +234,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # evigweight the eventlists
@@ -250,7 +248,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # recreate cheese masks after visual inspection - additional src file
 
@@ -263,7 +260,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # run spectrum/image extraction
@@ -278,7 +274,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # run spectrum/image extraction
 
@@ -291,7 +286,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # run spectrum/image extraction
@@ -306,7 +300,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # run background/image extraction
 
@@ -319,7 +312,6 @@ then
         exit 1
     fi
 fi
-
 
 ######################################################################
 # run background/image extraction
@@ -348,11 +340,62 @@ then
 fi
 
 ######################################################################
+# run spectrum/image extraction  - custom band (500 - 2000)
+
+elo=500
+ehi=2000
+
+if [[ $EXTRACT_SPEC_BAND_PN -eq 1 ]]
+then
+    ${codedir}/extract-spec-band-pn.sh ${workdir} $elo $ehi
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+######################################################################
+# run spectrum/image extraction - custom band (500 - 2000)
+
+elo=500
+ehi=2000
+
+if [[ $EXTRACT_SPEC_BAND_M1 -eq 1 ]]
+then
+    ${codedir}/extract-spec-band-m1.sh ${workdir} $elo $ehi
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+######################################################################
+# run spectrum/image extraction  - custom band (500 - 2000)
+
+elo=500
+ehi=2000
+
+if [[ $EXTRACT_SPEC_BAND_M2 -eq 1 ]]
+then
+    ${codedir}/extract-spec-band-m2.sh ${workdir} $elo $ehi
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
+######################################################################
 # run background/image extraction - custom band (500 - 2000)
+
+elo=500
+ehi=2000
 
 if [[ $EXTRACT_BACK_BAND_PN -eq 1 ]]
 then
-    ${codedir}/extract-back-band-pn.sh ${workdir} 500 2000
+    ${codedir}/extract-back-band-pn.sh ${workdir} $elo $ehi
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -362,10 +405,13 @@ fi
 
 ######################################################################
 # run background/image extraction - custom band (500 - 2000)
+
+elo=500
+ehi=2000
 
 if [[ $EXTRACT_BACK_BAND_M1 -eq 1 ]]
 then
-    ${codedir}/extract-back-band-m1.sh ${workdir} 500 2000
+    ${codedir}/extract-back-band-m1.sh ${workdir} $elo $ehi
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -376,9 +422,12 @@ fi
 ######################################################################
 # run background/image extraction - custom band (500 - 2000)
 
+elo=500
+ehi=2000
+
 if [[ $EXTRACT_BACK_BAND_M2 -eq 1 ]]
 then
-    ${codedir}/extract-back-band-m2.sh ${workdir} 500 2000
+    ${codedir}/extract-back-band-m2.sh ${workdir} $elo $ehi
     if [[ $? -ne 0 ]]
     then
         cd $startdir
