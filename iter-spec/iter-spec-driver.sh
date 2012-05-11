@@ -393,18 +393,17 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     ######################################################################
     # finished iteration step
 
+    echo "Done:"
+    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >>  ${spectrumid}/${CLNAME}-${spectrumid}.aper
+    echo "######################################################################" >> ${spectrumid}/${CLNAME}-${spectrumid}.aper
+    echo
+
     ${codedir}/iter-spec/clean-up-spec.sh ${spectrumid} 2>/dev/null
 
     cd $dir                     # returns to analysis subdir
     pwd
 
     iter=$((iter + 1))
-
-    echo "Done:"
-    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >>  ${spectrumid}/${CLNAME}-${spectrumid}.aper
-    echo "######################################################################" >> ${spectrumid}/${CLNAME}-${spectrumid}.aper
-    echo
-
 done
 
 mv ${specdir}/${spectrumid} ${specdir}/${spectrumid}-final

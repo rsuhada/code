@@ -18,7 +18,13 @@ echo "** warning: check point source removal condition - currently using esas de
 ######################################################################
 # basic source list preselction criterion
 
-expression='(DIST_NN >= 20.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15)'
+# original esas
+expression='(DIST_NN >= 20.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 15 )'
+
+# relaxed condition: it's ok because the cluster related spurioous are
+# hard removed from emllist
+# 5.92 -> 3 sigma:, 4: 9.7, 4.5: 11.9
+expression='(DIST_NN >= 20.0)&&(FLUX >= 0.5e-14)&&(ID_INST == 0)&&(ID_BAND == 0)&&(DET_ML >= 5.92 )'
 
 ######################################################################
 # m1

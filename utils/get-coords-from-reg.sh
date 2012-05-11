@@ -28,7 +28,7 @@ then
     echo
     echo "RA ${RA}"
     echo "DE ${DE}"
-    echo "SINGLE_LINE ${RA} ${DE}"
+    echo "RADE_SINGLE_LINE ${RA} ${DE}"
 
 fi
 

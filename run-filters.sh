@@ -55,6 +55,7 @@ do
     prefix=`echo ${evli:3:5}`
     echo $evli
     echo $prefix
+    ln -s mos${prefix}-obj-im.fits m1-aux.im
     m1prefix_string="${m1prefix_string}${prefix} "
     m3prefix_string="${m3prefix_string}${prefix} "
     echo $m3prefix_string
@@ -66,6 +67,7 @@ do
     prefix=`echo ${evli:3:5}`
     echo $evli
     echo $prefix
+    ln -s mos${prefix}-obj-im.fits m2-aux.im
     m2prefix_string="${m2prefix_string}${prefix} "
     m3prefix_string="${m3prefix_string}${prefix} "
 done
@@ -76,6 +78,7 @@ do
     prefix=`echo ${evli:2:4}`
     echo $evli
     echo $prefix
+    ln -s pn${prefix}-obj-im.fits pn-aux.im
     pnprefix_string="${pnprefix_string}${prefix} "
 done
 
