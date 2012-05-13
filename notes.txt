@@ -3,6 +3,8 @@
 
 General:
 
+- remask has different sets for det and wcs mask - is that ok?
+
 - add model background not only annulus extraction
 
 - explore why the dataset version of rmf/arf gives different
