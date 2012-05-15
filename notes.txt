@@ -3,6 +3,8 @@
 
 General:
 
+- refactor the ds9 usage (use the new DS9_BINARY everywhere)
+
 - remask has different sets for det and wcs mask - is that ok?
 
 - add model background not only annulus extraction

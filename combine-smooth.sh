@@ -80,6 +80,11 @@ ehigh=7200
 adapt_900 smoothingcounts=50 thresholdmasking=0.02 detector=0 binning=1 elow=$elow ehigh=$ehigh withmaskcontrol=no withpartcontrol=1 withsoftcontrol=0 withswcxcontrol=0
 
 ######################################################################
+# add a small convenience script
+
+cp ${codedir}/utils/display-ds9-adapt.sh .
+
+######################################################################
 # exit
 
 cd $here

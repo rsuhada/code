@@ -19,6 +19,10 @@ ehigh=$3          # detection bands maxima [eV]
 here=`pwd`
 cd $dir
 
+# is this running in X-session? if yes make a preliminary region file
+# too (opens ds9)
+HAVE_X_SESSION=0
+
 ######################################################################
 # extract pn spectra - standard band
 
@@ -39,6 +43,27 @@ then
     cd $startdir
     exit 1
 fi
+
+######################################################################
+# prepare a region file (image has it in the header)
+
+if [[ $HAVE_X_SESSION -eq 1 ]]
+then
+    outreg=ps-man-00
+    ${DS9_BINARY} pn${prefix}-obj-im-500-2000.fits \
+        -regions format ds9 \
+	    -regions system image \
+        -region save ${outreg}.im.reg \
+        -regions system physical \
+        -region save ${outreg}.phy.reg \
+        -regions system wcs \
+        -region save ${outreg}.wcs.reg \
+        -regions system wcs \
+        -regions skyformat sexagesimal \
+        -region save ${outreg}.wcs60.reg \
+        -exit
+fi
+
 
 ######################################################################
 # exit
