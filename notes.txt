@@ -3,6 +3,41 @@
 
 General:
 
+- need a final test for T and lx using the 2 Andersson clusters
+
+- check in iter spec the linking of rmf/arf so that it does what you
+  want
+
+- luminosity measurement need core excised and not excised + error
+  estimation (see below, might be better to do this from images also
+  given the area correction)
+
+- is there a systematic shift to lower T in A11 -  see also below need
+  to model background
+
+- problem with fcarith? (not working?)
+
+- rmf/arf problem:
+
+  the most advanced versions:
+  5		unknown		!Users!rs!data1!sw!esaspi!extract-arf.sh.~5~
+  3		unknown		!Users!rs!data1!sw!esaspi!extract-rmf.sh.~3~
+
+  currenntly the state is reverted. The advanced version has extraction
+  from source region but 1. is slow (1 hour iter spec), 2. fails more
+  often than simpler approach. The difference was quite small between
+  the different approaches
+
+- improve geometric refil factor by using the profile information
+
+- think about the xspec lumin error estimation for unabsorbed flux - I
+  think the current solution is pretty good though not completely
+  ideal. ultimately we can rather the outputs of the imaging pipe
+
+- iter spec speadup: error estimation for lx could be done only for
+  the final step/ speedups also possible if the rmf/arf is not
+  constantly recalculated since it makes only little difference
+
 - refactor the ds9 usage (use the new DS9_BINARY everywhere)
 
 - remask has different sets for det and wcs mask - is that ok?

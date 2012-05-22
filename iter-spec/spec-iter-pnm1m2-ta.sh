@@ -185,6 +185,19 @@ fit 100000000
 fit 100000000
 fit 100000000
 
+# write a flux/luminosity log - abosrbed fx/lumin
+log ${fileid}-fx-lx-err.log
+# dummyrsp
+flux 0.5 2 err 1000 68.2689
+flux 2 10 err 1000 68.2689
+flux 0.5 7.0 err 1000 68.2689
+flux 1.1 7.0 err 1000 68.2689
+lumin 0.5 2.0 ${redshift} err 1000 68.2689
+lumin 2.0 10.0 ${redshift} err 1000 68.2689
+lumin 0.001 100.0 ${redshift} err 1000 68.2689
+lumin 0.5 7.0 ${redshift} err 1000 68.2689
+log none
+
 setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
 plot ldata
 

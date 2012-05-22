@@ -256,8 +256,18 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
             echo 'Not creating new RMF...'
             if [[ ! -e ${specdir}/${instrument}-${spectrumid}.rmf ]]
             then
-                echo -e "${specdir}/${instrument}-${spectrumid}.rmf does not exists - linking it"
-                ln -s ${bgspecdir}/${instrument}.rmf ${specdir}/${instrument}-${spectrumid}.rmf
+                echo -e "${specdir}/${instrument}-${spectrumid}.rmf does not exists - linking it to preexisting"
+
+                if [[ ! -e ${specdir}/${instrument}.rmf ]]
+                then
+                    echo -e "\n** error: ${specdir}/${instrument}.rmf does not exists here!"
+                    echo -e "*** error in $0\n"
+                    cd $startdir
+                    exit 1
+                fi
+                ln -s ${specdir}/${instrument}.rmf ${specdir}/${instrument}-${spectrumid}.rmf
+
+                # ln -s ${bgspecdir}/${instrument}.rmf ${specdir}/${instrument}-${spectrumid}.rmf
             fi
         done
     fi
@@ -279,8 +289,17 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
             echo 'Not creating new ARF...'
             if [[ ! -e ${specdir}/${instrument}-${spectrumid}.arf ]]
             then
-                echo -e "${specdir}/${instrument}-${spectrumid}.arf does not exists - linking it"
-                ln -s ${bgspecdir}/${instrument}.arf ${specdir}/${instrument}-${spectrumid}.arf
+                echo -e "${specdir}/${instrument}-${spectrumid}.arf does not exists - linking it to preexisting"
+
+                if [[ ! -e ${specdir}/${instrument}.arf ]]
+                then
+                    echo -e "\n** error: ${specdir}/${instrument}.arf does not exists here!"
+                    echo -e "*** error in $0\n"
+                    cd $startdir
+                    exit 1
+                fi
+                ln -s ${specdir}/${instrument}.arf ${specdir}/${instrument}-${spectrumid}.arf
+                # ln -s ${bgspecdir}/${instrument}.arf ${specdir}/${instrument}-${spectrumid}.arf
             fi
         done
     fi
@@ -402,7 +421,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     iter=$((iter + 1))
 
     echo "Done:"
-    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >>  ${spectrumid}/${CLNAME}-${spectrumid}.aper
+    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >  ${spectrumid}/${CLNAME}-${spectrumid}.aper
     echo "######################################################################" >> ${spectrumid}/${CLNAME}-${spectrumid}.aper
     echo
 
