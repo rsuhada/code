@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # heasoft - sas11 conflict workaround
-export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+if [[ ${ON_LAPTOP} -eq 1 ]]
+then
+    export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+fi
 
 ######################################################################
 # load in setup
@@ -341,13 +344,13 @@ echo
 ######################################################################
 # not used at the moment
 
-terr=`~/data1/sw/calc/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
-aerr=`~/data1/sw/calc/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
-zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
+terr=`${CALC_SCRIPT_DIR}/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
+aerr=`${CALC_SCRIPT_DIR}/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
+zerr=`${CALC_SCRIPT_DIR}/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
 
-tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
-asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
-zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+tsig=`${CALC_SCRIPT_DIR}/calc.pl ${kt_fit} / ${terr}`
+asig=`${CALC_SCRIPT_DIR}/calc.pl ${abundance_fit} / ${aerr}`
+zsig=`${CALC_SCRIPT_DIR}/calc.pl ${redshift_fit} / ${zerr}`
 
 ######################################################################
 # plot conversions

@@ -3,7 +3,10 @@
 
 ######################################################################
 # heasoft vs. sas11 workaround
-export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+if [[ ${ON_LAPTOP} -eq 1 ]]
+    export TMP_DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}
+    export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+fi
 
 ######################################################################
 # load in setup
@@ -281,15 +284,20 @@ echo
 ######################################################################
 # not used at the moment
 
-terr=`~/data1/sw/calc/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
-aerr=`~/data1/sw/calc/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
-zerr=`~/data1/sw/calc/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
+terr=`${CALC_SCRIPT_DIR}/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
+aerr=`${CALC_SCRIPT_DIR}/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
+zerr=`${CALC_SCRIPT_DIR}/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
 
-tsig=`~/data1/sw/calc/calc.pl ${kt_fit} / ${terr}`
-asig=`~/data1/sw/calc/calc.pl ${abundance_fit} / ${aerr}`
-zsig=`~/data1/sw/calc/calc.pl ${redshift_fit} / ${zerr}`
+tsig=`${CALC_SCRIPT_DIR}/calc.pl ${kt_fit} / ${terr}`
+asig=`${CALC_SCRIPT_DIR}/calc.pl ${abundance_fit} / ${aerr}`
+zsig=`${CALC_SCRIPT_DIR}/calc.pl ${redshift_fit} / ${zerr}`
 
 echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 
 # reinstate sas11 DYLD path
-DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+if [[ ${ON_LAPTOP} -eq 1 ]]
+    # export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
+    export DYLD_LIBRARY_PATH=${TMP_DYLD_LIBRARY_PATH}
+fi
+
+

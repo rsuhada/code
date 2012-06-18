@@ -107,7 +107,7 @@ iter-spec:
 - requires vikhlinins calculator # FIXME: refactor to remove this dependency
 
 sb fitter:
-- requires minuit as the fitting package
+- requires minuit as the fitting package (?)
 
 ######################################################################
 # running on a dir
@@ -568,4 +568,13 @@ other references - helpful:
 - also the chipgaps are too larger - check snowden parameters on it - they are the same
 - other methods: arnaud, xmm-LSS, yu-ying, snowden, karl
 
+######################################################################
+# moving to desproc:
 
+1. setting paths at run-esas
+2. currently manual flag notebook/desproc, possibility is to use
+   automatic switch based on host name
+3. the perl path in xspec scripts
+4. the calc path needs to be refactored
+5. ideally setup softlinked dirs to mirror notebook...
+6. check across code ~ vs. hard linked home paths

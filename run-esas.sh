@@ -5,7 +5,6 @@
 # pipeline based on the Snowden & Kuntz analysis method   #
 ###########################################################
 
-
 ######################################################################
 # help
 
@@ -79,8 +78,23 @@ fi
 ######################################################################
 # sas setup
 
+# ON_LAPTOP can be set in config files, but here it is overriden by
+# automatic setting if not commented out
+
+machine=`pwd`
+
+if [[ $machine -eq "Darwin" ]]
+then
+    export ON_LAPTOP=1
+else
+    export ON_LAPTOP=0
+fi
+
 if [[ $ON_LAPTOP -eq 1 ]]
 then
+
+    echo "ON_LAPTOP = " $ON_LAPTOP
+    echo "machine = " $machine
 
     export codedir="/Users/rs/data1/sw/esaspi"
     export esas_caldb="/Users/rs/calib/esas"
@@ -95,21 +109,27 @@ then
     export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
 
     export DS9_BINARY="/Users/rs/bin/ds9/ds9"
+    export CALC_SCRIPT_DIR="/Users/rs/data1/sw/calc/"
 
 else
 
-    # FIXME: - set paths for your machine
-    export codedir="/Users/rs/data1/sw/esaspi"
-    export esas_caldb="/Users/rs/calib/esas"
+    echo "ON_LAPTOP = " $ON_LAPTOP
+    echo "machine = " $machine
 
-    # export SAS_DIR="/utils/xmmsas_11.0.1"
-    # export SAS_PATH="/utils/xmmsas_11.0.1"
-    # export SAS_CCFPATH="/xmm/ccf/public"
-    # export SAS_MEMORY_MODEL=high
-    # export SAS_VERBOSITY=4
+    export codedir="/home/moon/rsuhada/data1/sw/esaspi"
+    export esas_caldb="/home/moon/rsuhada/big/sw/xmm_calib/esas"
+
+    export SAS_DIR="/home/moon/rsuhada/big/sw/sas.11.0.0/xmmsas_20110223_1801"
+    export SAS_PATH="/home/moon/rsuhada/big/sw/sas.11.0.0/xmmsas_20110223_1801"
+    export SAS_CCFPATH="/home/moon/rsuhada/big/xmm_calib/ccf/"
+    export SAS_MEMORY_MODEL=high
+    export SAS_VERBOSITY=4
 
     export SAS_ODF=${startdir}/${ANALYSIS_DIR}/odf
     export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
+
+    export DS9_BINARY=" /home/moon/rsuhada/big/sw/ds9/7.0.1/ds9"
+    export CALC_SCRIPT_DIR="/home/moon/rsuhada/big/sw/calc/"
 
 fi
 
@@ -632,7 +652,6 @@ then
     fi
 fi
 
-
 ######################################################################
 # temporary hot-fix
 
@@ -649,12 +668,10 @@ then
     fi
 fi
 
-
 ######################################################################
 # write finish message
 
 cd $startdir
-
 
 echo -e "\nAnalysis done. You have been using:\n"
 sasversion
