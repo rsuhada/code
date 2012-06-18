@@ -81,9 +81,9 @@ fi
 # ON_LAPTOP can be set in config files, but here it is overriden by
 # automatic setting if not commented out
 
-machine=`pwd`
+machine=`uname`
 
-if [[ $machine -eq "Darwin" ]]
+if [[ $machine == "Darwin" ]]
 then
     export ON_LAPTOP=1
 else

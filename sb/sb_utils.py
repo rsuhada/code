@@ -142,3 +142,86 @@ def arrays2minuit(x, y, y_err):
         minuit_data.append((x[i],y[i],y_err[i]))
 
     return minuit_data
+
+def get_psf_king_pars(instrument, energy, theta):
+    """
+    Provides the rcore and alpha (slope) of a King profile of the PSF
+    for the given instrument based on Ghizzardi 2001 (MOS1 + MOS2,
+    CAL-TN-22) and (PN, CAL-TN-29) from inflight calibration
+    available:
+
+    http://xmm.vilspa.esa.es/external/xmm_sw_cal/calib/documentation.shtml
+
+    Arguments:
+    - 'instrument': "pn", "m1", "m2"
+    - 'energy': energy [keV]
+    - 'theta': offaxis angle []
+    """
+
+    elif (instrument == "m1"):
+        # rcore pars
+        a =
+        a_err =
+        b =
+        b_err =
+        c =
+        c_err =
+        d =
+        d_err =
+
+        # alpha pars
+        x =
+        x_err =
+        y =
+        y_err =
+        z =
+        z_err =
+        w =
+        w_err =
+
+    elif (instrument == "m2"):
+        # rcore pars
+        a =
+        a_err =
+        b =
+        b_err =
+        c =
+        c_err =
+        d =
+        d_err =
+
+        # alpha pars
+        x =
+        x_err =
+        y =
+        y_err =
+        z =
+        z_err =
+        w =
+        w_err =
+
+    elif (instrument == "pn"):
+        # rcore pars
+        a =
+        a_err =
+        b =
+        b_err =
+        c =
+        c_err =
+        d =
+        d_err =
+
+        # alpha pars
+        x =
+        x_err =
+        y =
+        y_err =
+        z =
+        z_err =
+        w =
+        w_err =
+
+    else:
+        print "*** Error: unknown instrument for PSF King model parameter calculation"
+
+    return (rcore, alpha)
