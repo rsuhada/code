@@ -101,6 +101,7 @@ python:
 
 quick-spec:
 - requires vikhlinins calculator # FIXME: refactor to remove this dependency
+- it has to be in your $PATH
 
 iter-spec:
 - requires cosmo_dist.py in the python path
@@ -140,6 +141,17 @@ NOTES:
 3. + 4. -> or change the setups in run-esas.sh
 
 5. -> should be changed to allow multiple reductions per OBSID
+
+######################################################################
+# calls to the pipeline
+
+basic main call example:
+
+dir=SPT-CL-J9999-9999 ; task=QSPEC-01 ; run-esas.sh configs/${dir}.conf configs/${dir}.modules 2>&1 | tee log-${dir}-${task}.log
+
+quick-spec call in cluster/spec/ subdir:
+
+ID=001 ; rm -r $ID; spec-m1m2pn-ta.sh SPT-CL-J9999-9999 ${ID} conf/SPT-CL-J9999-9999-par-qspec-001.conf 2>&1 | tee spec.log
 
 ######################################################################
 # file naming etc.
@@ -571,10 +583,10 @@ other references - helpful:
 ######################################################################
 # moving to desproc:
 
-1. setting paths at run-esas
-2. currently manual flag notebook/desproc, possibility is to use
+1. DONE setting paths at run-esas
+2. DONE currently manual flag notebook/desproc, possibility is to use
    automatic switch based on host name
 3. the perl path in xspec scripts
-4. the calc path needs to be refactored
-5. ideally setup softlinked dirs to mirror notebook...
+4. DONE the calc path needs to be refactored
+5. DONE ideally setup softlinked dirs to mirror notebook...
 6. check across code ~ vs. hard linked home paths

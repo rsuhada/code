@@ -327,13 +327,13 @@ echo
 ######################################################################
 # not used at the moment
 
-terr=`${CALC_SCRIPT_DIR}/calc.pl \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
-aerr=`${CALC_SCRIPT_DIR}/calc.pl \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
-zerr=`${CALC_SCRIPT_DIR}/calc.pl \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
+terr=`calc \(${kt_err_u} + abs\(${kt_err_d}\)\)/2.0`
+aerr=`calc \(${abundance_err_u} + abs\(${abundance_err_d}\)\)/2.0`
+zerr=`calc \(${redshift_err_u} + abs\(${redshift_err_d}\)\)/2.0`
 
-tsig=`${CALC_SCRIPT_DIR}/calc.pl ${kt_fit} / ${terr}`
-asig=`${CALC_SCRIPT_DIR}/calc.pl ${abundance_fit} / ${aerr}`
-zsig=`${CALC_SCRIPT_DIR}/calc.pl ${redshift_fit} / ${zerr}`
+tsig=`calc ${kt_fit} / ${terr}`
+asig=`calc ${abundance_fit} / ${aerr}`
+zsig=`calc ${redshift_fit} / ${zerr}`
 
 ######################################################################
 # plot conversions

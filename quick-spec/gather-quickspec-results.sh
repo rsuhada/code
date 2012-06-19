@@ -23,11 +23,12 @@ then
     mv *data.ps           ${dir}/
     mv *model.xcm         ${dir}/
     mv *session.log       ${dir}/
+    mv *fx-lx.log         ${dir}/
+    mv *fx-lx-err.log     ${dir}/
     mv *gof.log           ${dir}/
     mv *err.log           ${dir}/
     mv *contour.ps        ${dir}/
-    mv *fx-lx.log         ${dir}/
-    mv *fx-lx-err.log     ${dir}/
+
 
     echo
     echo "Results gathered in: " $dir
