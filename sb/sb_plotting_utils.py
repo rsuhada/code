@@ -8,6 +8,7 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
+from sb_utils import *
 
 def plot_cts_profile(r, c1, c2, fname):
     """

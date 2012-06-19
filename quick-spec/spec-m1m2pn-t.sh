@@ -1,7 +1,9 @@
 #!/bin/bash
 
+machine=`uname`
+
 # heasoft - sas11 conflict workaround
-if [[ ${ON_LAPTOP -eq 1} ]]
+if [[ ${machine} == "Darwin" ]]
 then
     export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
 fi

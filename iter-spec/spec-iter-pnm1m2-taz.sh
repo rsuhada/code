@@ -1,7 +1,10 @@
 #!/bin/bash
 
+machine=`uname`
+
 # heasoft vs. sas11 workaround
-if [[ ${ON_LAPTOP} -eq 1 ]]
+if [[ ${machine} == "Darwin" ]]
+then
     export TMP_DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}
     export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
 fi
@@ -343,7 +346,8 @@ convert -density 100 -alpha off -rotate 90 ${fileid}-nice.ps ${fileid}-nice.png
 echo "Spectroscopical analysis done for :" ${cluster} ${spectrumid}
 
 # reinstate sas11 DYLD path
-if [[ ${ON_LAPTOP} -eq 1 ]]
+if [[ ${machine} == "Darwin" ]]
+then
     # export DYLD_LIBRARY_PATH=/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libsys:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/libextra:/Users/rs/data1/sw/sas-11.0.0/xmmsas_20110223_1803/lib:/Users/rs/data1/sw/heasoft-6.11/i386-apple-darwin10.7.0/lib
     export DYLD_LIBRARY_PATH=${TMP_DYLD_LIBRARY_PATH}
 fi

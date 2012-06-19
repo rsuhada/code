@@ -160,68 +160,74 @@ def get_psf_king_pars(instrument, energy, theta):
 
     elif (instrument == "m1"):
         # rcore pars
-        a =
-        a_err =
-        b =
-        b_err =
-        c =
-        c_err =
-        d =
-        d_err =
+        a     =  5.074
+        a_err =  0.001
+        b     = -0.236
+        b_err =  0.001
+        c     =  0.002
+        c_err =  0.001
+        d     = -0.0180
+        d_err =  0.0006
 
         # alpha pars
-        x =
-        x_err =
-        y =
-        y_err =
-        z =
-        z_err =
-        w =
-        w_err =
+        x     =  1.472
+        x_err =  0.003
+        y     = -0.010
+        y_err =  0.001
+        z     = -0.001
+        z_err =  0.002
+        w     = -0.0016
+        w_err =  0.0013
 
     elif (instrument == "m2"):
         # rcore pars
-        a =
-        a_err =
-        b =
-        b_err =
-        c =
-        c_err =
-        d =
-        d_err =
+        a     =  4.759
+        a_err =  0.018
+        b     = -0.203
+        b_err =  0.010
+        c     =  0.014
+        c_err =  0.017
+        d     = -0.0229
+        d_err =  0.0133
 
         # alpha pars
-        x =
-        x_err =
-        y =
-        y_err =
-        z =
-        z_err =
-        w =
-        w_err =
+        x     =  1.411
+        x_err =  0.001
+        y     = -0.005
+        y_err =  0.001
+        z     = -0.001
+        z_err =  0.002
+        w     = -0.0002
+        w_err =  0.0011
 
     elif (instrument == "pn"):
         # rcore pars
-        a =
-        a_err =
-        b =
-        b_err =
-        c =
-        c_err =
-        d =
-        d_err =
+        a     =  6.636
+        a_err =  0.020
+        b     = -0.305
+        b_err =  0.032
+        c     = -0.175
+        c_err =  0.010
+        d     = -0.0067
+        d_err =  0.0185
 
         # alpha pars
-        x =
-        x_err =
-        y =
-        y_err =
-        z =
-        z_err =
-        w =
-        w_err =
+        x     =  1.525
+        x_err =  0.001
+        y     = -0.015
+        y_err =  0.001
+        z     = -0.012
+        z_err =  0.001
+        w     = -0.0010
+        w_err =  0.0004
 
     else:
         print "*** Error: unknown instrument for PSF King model parameter calculation"
+
+    # rcore = 1.0
+    # alpha = 1.0
+
+    rcore = a + b * energy + c * theta + d * energy * theta
+    alpha = x + y * energy + z * theta + w * energy * theta
 
     return (rcore, alpha)

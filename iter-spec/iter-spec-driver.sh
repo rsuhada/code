@@ -253,6 +253,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     else
         for instrument in ${instruments[@]}
         do
+            # FIXME: linking currently broken
             echo 'Not creating new RMF...'
             if [[ ! -e ${specdir}/${instrument}-${spectrumid}.rmf ]]
             then

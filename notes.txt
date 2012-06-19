@@ -3,6 +3,8 @@
 
 General:
 
+- there is a discrepancy in img binning between iter and qspec
+
 - need a final test for T and lx using the 2 Andersson clusters
 
 - check in iter spec the linking of rmf/arf so that it does what you
