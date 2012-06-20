@@ -156,9 +156,13 @@ def get_psf_king_pars(instrument, energy, theta):
     - 'instrument': "pn", "m1", "m2"
     - 'energy': energy [keV]
     - 'theta': offaxis angle []
+
+    Output:
+    - 'rcore': King model core radius [arcsec]
+    - 'alpha': King model slope
     """
 
-    elif (instrument == "m1"):
+    if (instrument == "m1"):
         # rcore pars
         a     =  5.074
         a_err =  0.001

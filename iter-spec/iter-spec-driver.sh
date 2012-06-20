@@ -422,8 +422,8 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     iter=$((iter + 1))
 
     echo "Done:"
-    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >  ${spectrumid}/${CLNAME}-${spectrumid}.aper
-    echo "######################################################################" >> ${spectrumid}/${CLNAME}-${spectrumid}.aper
+    echo "iteration :: " $iter " for r val :: " $r_old " r for the next iteration :: " $r >>  ${specdir}/${spectrumid}/${CLNAME}-${spectrumid}.aper
+    echo "######################################################################" >> ${specdir}/${spectrumid}/${CLNAME}-${spectrumid}.aper
     echo
 
 done
