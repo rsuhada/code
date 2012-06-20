@@ -56,6 +56,7 @@ def get_cts_stat(im, distmatrix, xim, yim, r_aper):
 
     return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
 
+
 def get_cts_stat_annul(im, distmatrix, xim, yim, r_min, r_max):
     """
     Provide basic statistics (total/mean cts etc.) for an input image
