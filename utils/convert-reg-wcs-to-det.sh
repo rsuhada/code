@@ -4,6 +4,7 @@
 # writes out region descriptors needed for the pipeline
 # writes out for convenience also standard ds9 region files in
 # detector coords
+# also added a handy output of offaxis and position angles
 #
 # NOTES:
 # 1. only circle supported atm
@@ -71,17 +72,47 @@ do
         echo $radius
         echo
 
-        # run coordinate conversion: pn
+        echo "###########################################" > ${region_file}.ecoords
+        echo "# ${region_file}" >> ${region_file}.ecoords
+        echo "###########################################" >> ${region_file}.ecoords
+        echo "RA " $ra >> ${region_file}.ecoords
+        echo "DE " $de >> ${region_file}.ecoords
+
+        # RUN coordinate conversion: pn
         ecoordconv_image=`ls -1 pnS???-obj-im.fits`
         tmp=${region_file}.pn.ecoordconv
 
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
+
+            # parse output
             detx=`grep DETX ${region_file}.pn.ecoordconv | awk '{print $3}'`
             dety=`grep DETX ${region_file}.pn.ecoordconv | awk '{print $4}'`
+            theta=`grep Theta ${region_file}.pn.ecoordconv | awk '{print $3}'` # [ arcsec ]
+            phi=`grep Theta ${region_file}.pn.ecoordconv | awk '{print $4}'`
+            phyx=`grep "X: Y:" ${region_file}.pn.ecoordconv | awk '{print $3}'`
+            phyy=`grep "X: Y:" ${region_file}.pn.ecoordconv | awk '{print $4}'`
+            rawx=`grep RAWX ${region_file}.pn.ecoordconv | awk '{print $3}'`
+            rawy=`grep RAWX ${region_file}.pn.ecoordconv | awk '{print $4}'`
+            ccds=`grep CCD\(s\) ${region_file}.pn.ecoordconv`
+
+            # reg file / det coords file
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.reg-pn.txt
             echo "${shape}($detx,$dety,$radius)" >> $pn_det_reg
+
+            # write info file
+            echo >> ${region_file}.ecoords
+            echo "X_DET_PN " $detx  >> ${region_file}.ecoords
+            echo "Y_DET_PN " $dety  >> ${region_file}.ecoords
+            echo "X_PHY_PN " $phyx  >> ${region_file}.ecoords
+            echo "Y_PHY_PN " $phyy  >> ${region_file}.ecoords
+            echo "X_RAW_PN " $rawx  >> ${region_file}.ecoords
+            echo "Y_RAW_PN " $rawy  >> ${region_file}.ecoords
+            echo "THETA_PN " $theta >> ${region_file}.ecoords
+            echo "PHI_PN "   $phi   >> ${region_file}.ecoords
+            echo "CCD_PN "   $ccds  >> ${region_file}.ecoords
+
         else
             echo -e "\n** error: missing pn image!"
             echo -e "*** error in script: $0\n"
@@ -95,10 +126,32 @@ do
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
+            # parse output
             detx=`grep DETX ${region_file}.m1.ecoordconv | awk '{print $3}'`
             dety=`grep DETX ${region_file}.m1.ecoordconv | awk '{print $4}'`
+            theta=`grep Theta ${region_file}.m1.ecoordconv | awk '{print $3}'` # [ arcsec ]
+            phi=`grep Theta ${region_file}.m1.ecoordconv | awk '{print $4}'`
+            phyx=`grep "X: Y:" ${region_file}.m1.ecoordconv | awk '{print $3}'`
+            phyy=`grep "X: Y:" ${region_file}.m1.ecoordconv | awk '{print $4}'`
+            rawx=`grep RAWX ${region_file}.m1.ecoordconv | awk '{print $3}'`
+            rawy=`grep RAWX ${region_file}.m1.ecoordconv | awk '{print $4}'`
+            ccds=`grep CCD\(s\) ${region_file}.m1.ecoordconv`
+
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.reg-m1.txt
             echo "${shape}($detx,$dety,$radius)" >> $m1_det_reg
+
+            # write info file
+            echo >> ${region_file}.ecoords
+            echo "X_DET_M1 " $detx  >> ${region_file}.ecoords
+            echo "Y_DET_M1 " $dety  >> ${region_file}.ecoords
+            echo "X_PHY_M1 " $phyx  >> ${region_file}.ecoords
+            echo "Y_PHY_M1 " $phyy  >> ${region_file}.ecoords
+            echo "X_RAW_M1 " $rawx  >> ${region_file}.ecoords
+            echo "Y_RAW_M1 " $rawy  >> ${region_file}.ecoords
+            echo "THETA_M1 " $theta >> ${region_file}.ecoords
+            echo "PHI_M1 "   $phi   >> ${region_file}.ecoords
+            echo "CCD_M1 "   $ccds  >> ${region_file}.ecoords
+
         else
             echo -e "\n** error: missing m1 image!"
             echo -e "*** error in script: $0\n"
@@ -112,10 +165,32 @@ do
         if [[ -e $ecoordconv_image ]]
         then
             ecoordconv imageset=$ecoordconv_image x=$ra y=$de coordtype=EQPOS > $tmp
+            # parse output
             detx=`grep DETX ${region_file}.m2.ecoordconv | awk '{print $3}'`
             dety=`grep DETX ${region_file}.m2.ecoordconv | awk '{print $4}'`
+            theta=`grep Theta ${region_file}.m2.ecoordconv | awk '{print $3}'`    # [ arcsec ]
+            phi=`grep Theta ${region_file}.m2.ecoordconv | awk '{print $4}'`
+            phyx=`grep "X: Y:" ${region_file}.m2.ecoordconv | awk '{print $3}'`
+            phyy=`grep "X: Y:" ${region_file}.m2.ecoordconv | awk '{print $4}'`
+            rawx=`grep RAWX ${region_file}.m2.ecoordconv | awk '{print $3}'`
+            rawy=`grep RAWX ${region_file}.m2.ecoordconv | awk '{print $4}'`
+            ccds=`grep CCD\(s\) ${region_file}.m2.ecoordconv`
             echo "&&((DETX,DETY) IN ${shape}($detx,$dety,$radius))" >> ${region_file}.reg-m2.txt
             echo "${shape}($detx,$dety,$radius)" >> $m2_det_reg
+
+            # write info file
+            echo >> ${region_file}.ecoords
+            echo "X_DET_M2 " $detx  >> ${region_file}.ecoords
+            echo "Y_DET_M2 " $dety  >> ${region_file}.ecoords
+            echo "X_PHY_M2 " $phyx  >> ${region_file}.ecoords
+            echo "Y_PHY_M2 " $phyy  >> ${region_file}.ecoords
+            echo "X_RAW_M2 " $rawx  >> ${region_file}.ecoords
+            echo "Y_RAW_M2 " $rawy  >> ${region_file}.ecoords
+            echo "THETA_M2 " $theta >> ${region_file}.ecoords
+            echo "PHI_M2 "   $phi   >> ${region_file}.ecoords
+            echo "CCD_M2 "   $ccds  >> ${region_file}.ecoords
+            echo "###########################################" >> ${region_file}.ecoords
+
         else
             echo -e "\n** error: missing m2 image!"
             echo -e "*** error in script: $0\n"
@@ -145,6 +220,13 @@ echo $pn_det_reg
 echo $m1_det_reg
 echo $m2_det_reg
 echo
+
+echo "Coordinate summary list:"
+echo  ${region_file}.ecoords
+
+# add output to analysis note file
+echo >> ${NOTESFILE}
+cat ${region_file}.ecoords | tee -a ${NOTESFILE}
 
 echo -e "\n$0 in $obsid done!"
 exit 0

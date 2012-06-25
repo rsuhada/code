@@ -193,3 +193,4 @@ if __name__ == '__main__':
     plt.show()
     print "Done!"
 
+    # run ~/data1/sw/esaspi/sb/sb-prof-fitter.py sb-prof-pn-111205-001.dat

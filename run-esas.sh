@@ -656,7 +656,7 @@ fi
 # temporary hot-fix
 
 CONVERT_REG_WCS_TO_DET=0
-export wcs_region=big-circ-aux.wcs.reg
+export wcs_region=cluster-man-02.wcs.reg
 
 if [[ $CONVERT_REG_WCS_TO_DET -eq 1 ]]
 then
