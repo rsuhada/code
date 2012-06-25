@@ -6,7 +6,6 @@ def sqdistance(xcen, ycen, x, y):
     """
     return (xcen - x)**2 + (ycen - y)**2
 
-
 def sqdist_matrix(im, xcen, ycen):
     """
     Create a matrix given the squared Euclidean distance of each point
@@ -18,20 +17,6 @@ def sqdist_matrix(im, xcen, ycen):
             outmatrix[i, j] = sqdistance(xcen, ycen, j , i)
 
     return outmatrix
-
-
-def sqdist_matrix2(im, xcen, ycen):
-    """
-    Create a matrix given the squared Euclidean distance of each point
-    wrt the input center.
-    """
-    outmatrix = zeros([im.shape[0], im.shape[1]])
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            outmatrix[i, j] = sqdistance(xcen, ycen, j , i)
-
-    return outmatrix
-
 
 def get_cts_stat(im, distmatrix, xim, yim, r_aper):
     """
@@ -56,7 +41,6 @@ def get_cts_stat(im, distmatrix, xim, yim, r_aper):
 
     return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
 
-
 def get_cts_stat_annul(im, distmatrix, xim, yim, r_min, r_max):
     """
     Provide basic statistics (total/mean cts etc.) for an input image
@@ -80,7 +64,6 @@ def get_cts_stat_annul(im, distmatrix, xim, yim, r_min, r_max):
 
     return (tot_cts, mean_cts, stdev_cts, tot_cts_non0, mean_cts_non0, stdev_cts_non0, num_pix, num_pix-num_pix_non0, double(num_pix-num_pix_non0)/double(num_pix), maskfrac)
 
-
 def cal_aper_sum(im, distmatrix, xim, yim, r_aper):
     """
     NOTE: not used atm.
@@ -92,7 +75,6 @@ def cal_aper_sum(im, distmatrix, xim, yim, r_aper):
     tot_cts = sum(im[ids])
 
     return (tot_cts)
-
 
 def beta_model(pars, r):
     """
@@ -156,7 +138,7 @@ def get_psf_king_pars(instrument, energy, theta):
     Arguments:
     - 'instrument': "pn", "m1", "m2"
     - 'energy': energy [keV]
-    - 'theta': offaxis angle []
+    - 'theta': offaxis angle [arcmin]
 
     Output:
     - 'rcore': King model core radius [arcsec]
@@ -236,3 +218,17 @@ def get_psf_king_pars(instrument, energy, theta):
     alpha = x + y * energy + z * theta + w * energy * theta
 
     return (rcore, alpha)
+
+def king_profile(r, rcore, alpha):
+    """
+    Returns a king profile on the input grid
+
+    Arguments:
+    - `r`: input radii [arcsec]
+    - 'rcore': King model core radius [arcsec]
+    - 'alpha': King model slope
+    """
+
+    y = 1 / ( 1 + (r/rcore)**2 )**alpha
+
+    return y

@@ -5,6 +5,7 @@
 # *.html
 *.pyc
 *.png
+*.fits
 .#*
 # except foo.html which is maintained by hand.
 # !foo.html
