@@ -576,6 +576,8 @@ other references - helpful:
 - needs to extract sub-image for speed -> maybe not: fftconvolve is
   significantly faster then convolve
 
+- but still creating the beta image takes some time
+
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
@@ -588,7 +590,7 @@ other references - helpful:
 1. DONE setting paths at run-esas
 2. DONE currently manual flag notebook/desproc, possibility is to use
    automatic switch based on host name
-3. the perl path in xspec scripts
+3. DONE the perl path in xspec scripts
 4. DONE the calc path needs to be refactored
 5. DONE ideally setup softlinked dirs to mirror notebook...
 6. check across code ~ vs. hard linked home paths
