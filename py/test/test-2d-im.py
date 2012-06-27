@@ -62,11 +62,34 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
 
     return im
 
+def make_2d_beta(imsize, xcen, ycen, rcore, beta):
+    """
+    Creates a 2D image of a beta model
+
+    Arguments:
+    - `imsize`: input 2D array size
+    - `xcen`: x coordinate of the function
+    - `ycen`: y coordinate of the function
+    - 'core': beta model core radius
+    - 'beta': beta model slope
+    """
+
+    # this is pretty fast but maybe you want to do it in polar coords
+    im = zeros(imsize, dtype=double)
+
+    # the dumb method
+    for i in range(imsize[0]):
+        for j in range(imsize[1]):
+            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
+            im[i, j] = (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+
+    return im
+
 def extract_profile_generic(im, xcen, ycen):
     """
     Generic function to extract a 1D profile of a 2D image
     profile[i] plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.
-
+    For plotting and comparison you might want to do r-0.5
     Arguments:
     - `im`: 2D array
     - `xcen`: center x coordinate
@@ -99,6 +122,10 @@ def extract_profile_generic(im, xcen, ycen):
 if __name__ == '__main__':
     print
 
+    theta = 65.8443 / 60.0
+    energy = 1.5
+    instrument = "pn"
+
     ######################################################################
     # PSF testing
 
@@ -117,53 +144,57 @@ if __name__ == '__main__':
     # print "done"
 
     # ######################################################################
-    # # 2D baseimage
-
-    # fname = 'pn-test.im'
-    # hdu = pyfits.open(fname)
-    # hdr = hdu[0].header
-    # dat = hdu[0].data
-
-    # xsize = dat.shape[0]
-    # ysize = dat.shape[1]
-
-    # print "Image size:", xsize, ysize
-
-    ######################################################################
-    # setup sybthetic image
-    # xsize = 900
-    # ysize = 900
-    # xcen = 450
-    # ycen = 450
-
-    xsize = 11
-    ysize = xsize
-    xcen = xsize/2
-    ycen = ysize/2
-
-    theta = 65.8443 / 60.0
-    energy = 1.5
-    instrument = "pn"
-
-    ######################################################################
     # # create dirac function image
+    #
+    # imname = 'dirac.fits'
+    # xsize = 900
+    # ysize = xsize
+    # xcen = xsize/2
+    # ycen = ysize/2
 
     # im_dirac = make_2d_dirac((xsize, ysize), xcen, ycen)
 
     # # make hardcopy
     # hdu = pyfits.PrimaryHDU(im_dirac, hdr)    # extension: array, header
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto('dirac.fits', clobber=True)
+    # hdulist.writeto(imname, clobber=True)
 
     # ######################################################################
     # # create PSF function image
+    #
+    # imname = 'dirac.fits'
+    # xsize = 900
+    # ysize = xsize
+    # xcen = xsize/2
+    # ycen = ysize/2
 
     # im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
 
     # # make hardcopy
     # hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension: array, header
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto('psf.fits', clobber=True)
+    # hdulist.writeto(imname, clobber=True)
+
+    ######################################################################
+    # create beta function image
+
+    imname = 'beta-100.fits'
+    xsize = 100
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    rcore = 15.0                  # [pix]
+    beta = 2.0 / 3.0
+    norm = 1.0
+    beta_pars = [norm, rcore, beta]
+
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
     ######################################################################
     # load from disc
@@ -174,21 +205,43 @@ if __name__ == '__main__':
     im_psf = hdu[0].data
     hdr = hdu[0].header
 
+    xsize = im_psf.shape[0]
+    ysize = im_psf.shape[1]
+    xcen = xsize/2
+    ycen = ysize/2
+
     ######################################################################
     # profile extractor
 
     (r, profile, geometric_area) = extract_profile_generic(im_psf, xcen, ycen)
 
+    # model check
+    (rcore_model, alpha_model) = get_psf_king_pars(instrument, energy, theta)
+
+    r_model = linspace(0.0, r.max(), 100)
+    psf_model = king_profile(r_model, rcore_model, alpha_model)
+
     print "plotting"
     # plt.loglog(r, profile/geometric_area)
     plt.ion()
     plt.clf()
-    plt.plot(r, 14.0*profile/geometric_area)
-    plt.xscale("log")
-    plt.yscale("log")
+    plt.plot(r-0.5, profile/geometric_area)
+    plt.plot(r_model, psf_model,
+        color='black',
+        linestyle='-',              # -/--/-./:
+            linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
+        label=r"data"               # '__nolegend__'
+        )
+
+    plt.xscale("linear")
+    plt.yscale("linear")
     plt.draw()
     plt.show()
-    plt.get_current_fig_manager().window.wm_geometry("+1100+50")
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    # plt.get_current_fig_manager().window.wm_geometry("+640+0")
 
     print "...done!"
 
