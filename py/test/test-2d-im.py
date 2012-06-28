@@ -10,6 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import *
 from sb_utils import *
+from scipy.signal import fftconvolve
 
     ######################################################################
     # stop plot enviroment
@@ -146,6 +147,11 @@ if __name__ == '__main__':
     # ######################################################################
     # # create dirac function image
     #
+    # # get a header
+    # fname = 'pn-test.fits'
+    # hdu = pyfits.open(fname)
+    # hdr = hdu[0].header
+    #
     # imname = 'dirac.fits'
     # xsize = 900
     # ysize = xsize
@@ -161,6 +167,11 @@ if __name__ == '__main__':
 
     # ######################################################################
     # # create PSF function image
+    #
+    # # get a header
+    # fname = 'pn-test.fits'
+    # hdu = pyfits.open(fname)
+    # hdr = hdu[0].header
     #
     # imname = 'dirac.fits'
     # xsize = 900
@@ -178,30 +189,62 @@ if __name__ == '__main__':
     ######################################################################
     # create beta function image
 
-    imname = 'beta-100.fits'
-    xsize = 100
-    ysize = xsize
+    # # get a header
+    # fname = 'pn-test.im'
+    # hdu = pyfits.open(fname)
+    # hdr = hdu[0].header
+
+    # xsize = 100
+    # ysize = xsize
+    # xcen = xsize/2
+    # ycen = ysize/2
+
+    # rcore = 15.0                  # [pix]
+    # beta = 2.0 / 3.0
+    # norm = 1.0
+
+    # im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+
+    # # make hardcopy
+    # hdu = pyfits.PrimaryHDU(im_beta, hdr)# extension: array, header
+    # hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    # hdulist.writeto(imname, clobber=True)
+
+    ######################################################################
+    # model check - dirac
+
+    imname = 'dirac-100.fits'
+    hdu = pyfits.open(imname)
+    im_dirac = hdu[0].data
+    hdr = hdu[0].header
+
+    xsize = im_dirac.shape[0]
+    ysize = im_dirac.shape[1]
     xcen = xsize/2
     ycen = ysize/2
 
-    rcore = 15.0                  # [pix]
-    beta = 2.0 / 3.0
-    norm = 1.0
-    beta_pars = [norm, rcore, beta]
+    (r, profile, geometric_area) = extract_profile_generic(im_dirac, xcen, ycen)
 
-    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    MAKE_PLOT=0
+    if MAKE_PLOT==1:
+        print "plotting dirac"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+        plt.plot(r-0.5, profile/geometric_area)
 
-    # make hardcopy
-    hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension: array, header
-    hdulist = pyfits.HDUList([hdu])          # list all extensions here
-    hdulist.writeto(imname, clobber=True)
+        plt.xscale("linear")
+        plt.yscale("linear")
+        plt.draw()
+        plt.show()
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
 
     ######################################################################
-    # load from disc
+    # model check - PSF
 
-    # fname = 'psf.fits'
-    fname = 'psf-100.fits'
-    hdu = pyfits.open(fname)
+    imname = 'psf-100.fits'
+    hdu = pyfits.open(imname)
     im_psf = hdu[0].data
     hdr = hdu[0].header
 
@@ -210,39 +253,104 @@ if __name__ == '__main__':
     xcen = xsize/2
     ycen = ysize/2
 
-    ######################################################################
-    # profile extractor
-
     (r, profile, geometric_area) = extract_profile_generic(im_psf, xcen, ycen)
-
-    # model check
     (rcore_model, alpha_model) = get_psf_king_pars(instrument, energy, theta)
-
     r_model = linspace(0.0, r.max(), 100)
     psf_model = king_profile(r_model, rcore_model, alpha_model)
 
-    print "plotting"
-    # plt.loglog(r, profile/geometric_area)
-    plt.ion()
-    plt.clf()
-    plt.plot(r-0.5, profile/geometric_area)
-    plt.plot(r_model, psf_model,
-        color='black',
-        linestyle='-',              # -/--/-./:
+    MAKE_PLOT=0
+    if MAKE_PLOT==1:
+        print "plotting psf"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+        plt.plot(r-0.5, profile/geometric_area)
+        plt.plot(r_model, psf_model,
+            color='black',
+            linestyle='-',              # -/--/-./:
             linewidth=1,                # linewidth=1
-        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='black',
-        markersize=0,               # markersize=6
-        label=r"data"               # '__nolegend__'
-        )
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"data"               # '__nolegend__'
+            )
 
-    plt.xscale("linear")
-    plt.yscale("linear")
-    plt.draw()
-    plt.show()
-    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-    # plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.xscale("linear")
+        plt.yscale("linear")
+        plt.draw()
+        plt.show()
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
+
+    ######################################################################
+    # model check - beta
+
+    imname = 'beta-100.fits'
+    hdu = pyfits.open(imname)
+    im_beta = hdu[0].data
+    hdr = hdu[0].header
+
+    xsize = im_beta.shape[0]
+    ysize = im_beta.shape[1]
+    xcen = xsize/2
+    ycen = ysize/2
+
+    (r, profile, geometric_area) = extract_profile_generic(im_beta, xcen, ycen)
+    r_model = linspace(0.0, r.max(), 100)
+
+    # the model
+    rcore = 15.0                  # [pix]
+    beta = 2.0 / 3.0
+    norm = 1.0
+
+    beta_profile = beta_model((1.0, rcore, beta),r_model)
+
+    MAKE_PLOT=0
+    if MAKE_PLOT==1:
+        print "plotting beta"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+        plt.plot(r - 0.5, profile/geometric_area)
+        plt.plot(r_model, beta_profile,
+            color='black',
+            linestyle='-',              # -/--/-./:
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"data"               # '__nolegend__'
+            )
+        plt.xscale("linear")
+        plt.yscale("linear")
+        plt.draw()
+        plt.show()
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
+
+    ######################################################################
+    # do the convolution
+
+    im_dirac_psf = fftconvolve(im_dirac.astype(float), im_psf.astype(float), mode = 'same')
+
+    # make hardcopy
+    imname='dirac_psf-100.fits'
+    hdu = pyfits.PrimaryHDU(im_dirac_psf, hdr)# extension: array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+    max1 = im_dirac_psf.max()
+    max2 = im_dirac.max()
+
+    print shape(im_dirac_psf), shape(im_dirac)
+    print
+
+    id1 = where(im_dirac_psf==max1)
+    id2 = where(im_dirac==max2)
+
+    print id1, id2, im_dirac_psf[id1], im_dirac_psf[id2]
 
     print "...done!"
+
 
 
