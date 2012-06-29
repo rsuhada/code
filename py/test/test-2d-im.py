@@ -198,9 +198,6 @@ def create_gauss():
 
     # first gauss
     imname = 'gauss-a-100.fits'
-    a_sigmax = 15.0               # [pix]
-    a_sigmay = 15.0               # [pix]
-
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
 
     # make hardcopy
@@ -210,9 +207,6 @@ def create_gauss():
 
     # second gauss
     imname = 'gauss-b-100.fits'
-    b_sigmax = 9.0               # [pix]
-    b_sigmay = 9.0               # [pix]
-
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, b_sigmax, b_sigmay)
 
     # make hardcopy
@@ -222,9 +216,6 @@ def create_gauss():
 
     # combined gauss
     imname = 'gauss-c-100.fits'
-    c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
-    c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
-
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, c_sigmax, c_sigmay)
 
     # make hardcopy
@@ -506,10 +497,18 @@ if __name__ == '__main__':
     energy = 1.5
     instrument = "pn"
 
+    # setup for the gaussian test
+    a_sigmax = 15.0               # [pix]
+    a_sigmay = 15.0               # [pix]
+    b_sigmax = 9.0               # [pix]
+    b_sigmay = 9.0               # [pix]
+    c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
+    c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
+
     # test_psf_creation()
 
     # create_dirac()
-    create_gauss()
+    # create_gauss()
     # create_psf()
     # create_beta()
 
@@ -523,6 +522,13 @@ if __name__ == '__main__':
 
     print "...done!"
 
+######################################################################
+# notes
+# Fri Jun 29 16:27:04 2012
+# - check the center shifting
+# - investigate the normalization part (now had to be divided by the
+# - maximum... confirm?)
+######################################################################
 
 
 
