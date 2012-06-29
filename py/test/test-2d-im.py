@@ -31,6 +31,25 @@ def make_2d_dirac(imsize, xcen, ycen):
 
     return im
 
+def make_2d_uncorr_gauss(imsize, xcen, ycen, sigmax, sigmay):
+    """
+    Creates a 2D Gaussian (no correlation)
+
+    Arguments:
+    - `imsize`: input 2D array size
+    - `xcen`: x coordinate of the function
+    - `ycen`: y coordinate of the function
+    - 'sigmax': sigma in x direction
+    - 'sigmay': sigma in y direction
+    """
+
+    im = zeros(imsize, dtype=double)
+    for i in range(imsize[0]):
+        for j in range(imsize[1]):
+            im[i, j] = exp(-1.0 * ((j - xcen)**2/(2.0*sigmax**2))) * exp(-1.0 * ((i - ycen)**2/(2.0*sigmay**2)))
+
+    return im
+
 def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     """
     Creates a 2D image of the PSF
@@ -58,8 +77,8 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     # the dumb method
     for i in range(imsize[0]):
         for j in range(imsize[1]):
-            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
-            im[i, j] = 1 / ( 1 + r2/(rcore)**2 )**alpha
+            r2 = sqdistance(xcen, ycen, j , i) # this is walready squared
+            im[i, j] = 1.0 / ( 1.0 + r2/(rcore)**2 )**alpha
 
     return im
 
@@ -119,100 +138,151 @@ def extract_profile_generic(im, xcen, ycen):
 
     return (rgrid, x, geometric_area)
 
-
-if __name__ == '__main__':
-    print
-
-    theta = 65.8443 / 60.0
-    energy = 1.5
-    instrument = "pn"
+def test_psf_creation():
+    """
+    Test psf parameter calculation for all the instruments
+    """
 
     ######################################################################
     # PSF testing
+    energy = 1.5
+    theta = 0.3
 
-    # energy = 1.5
-    # theta = 0.3
+    instrument=("pn", "m1", "m2")
 
-    # instrument=("pn", "m1", "m2")
+    plot_king_model_psf(energy, theta, instrument)
 
-    # plot_king_model_psf(energy, theta, instrument)
+    for i in instrument:
+        print i
+        (rcore, alpha) = get_psf_king_pars(i, energy, theta)
+        print rcore, alpha
 
-    # for i in instrument:
-    #     print i
-    #     (rcore, alpha) = get_psf_king_pars(i, energy, theta)
-    #     print rcore, alpha
+    print "done"
 
-    # print "done"
+def create_dirac():
+    """
+    Create a dirac 2D, save to fits
+    """
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
 
-    # ######################################################################
-    # # create dirac function image
-    #
-    # # get a header
-    # fname = 'pn-test.fits'
-    # hdu = pyfits.open(fname)
-    # hdr = hdu[0].header
-    #
-    # imname = 'dirac.fits'
-    # xsize = 900
-    # ysize = xsize
-    # xcen = xsize/2
-    # ycen = ysize/2
+    imname = 'dirac.fits'
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
 
-    # im_dirac = make_2d_dirac((xsize, ysize), xcen, ycen)
+    im_dirac = make_2d_dirac((xsize, ysize), xcen, ycen)
 
-    # # make hardcopy
-    # hdu = pyfits.PrimaryHDU(im_dirac, hdr)    # extension: array, header
-    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto(imname, clobber=True)
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_dirac, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
-    # ######################################################################
-    # # create PSF function image
-    #
-    # # get a header
-    # fname = 'pn-test.fits'
-    # hdu = pyfits.open(fname)
-    # hdr = hdu[0].header
-    #
-    # imname = 'dirac.fits'
-    # xsize = 900
-    # ysize = xsize
-    # xcen = xsize/2
-    # ycen = ysize/2
+def create_gauss():
+    """
+    Create two test 2D gauss, save to fits.
+    """
 
-    # im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
 
-    # # make hardcopy
-    # hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension: array, header
-    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto(imname, clobber=True)
+    xsize = 100
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
 
-    ######################################################################
-    # create beta function image
+    # first gauss
+    imname = 'gauss-a-100.fits'
+    a_sigmax = 15.0               # [pix]
+    a_sigmay = 15.0               # [pix]
 
-    # # get a header
-    # fname = 'pn-test.im'
-    # hdu = pyfits.open(fname)
-    # hdr = hdu[0].header
+    im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
 
-    # xsize = 100
-    # ysize = xsize
-    # xcen = xsize/2
-    # ycen = ysize/2
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])           # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
-    # rcore = 15.0                  # [pix]
-    # beta = 2.0 / 3.0
-    # norm = 1.0
+    # second gauss
+    imname = 'gauss-b-100.fits'
+    b_sigmax = 9.0               # [pix]
+    b_sigmay = 9.0               # [pix]
 
-    # im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, b_sigmax, b_sigmay)
 
-    # # make hardcopy
-    # hdu = pyfits.PrimaryHDU(im_beta, hdr)# extension: array, header
-    # hdulist = pyfits.HDUList([hdu])          # list all extensions here
-    # hdulist.writeto(imname, clobber=True)
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])           # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
-    ######################################################################
-    # model check - dirac
+    # combined gauss
+    imname = 'gauss-c-100.fits'
+    c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
+    c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
+    im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, c_sigmax, c_sigmay)
+
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])           # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+def create_def():
+    """
+    Create a 2D psf image, save to fits
+    """
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    imname = 'dirac.fits'
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension: array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+def create_dirac():
+    """
+    Create a 2D beta image, save to fits
+    """
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    xsize = 100
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    rcore = 15.0                  # [pix]
+    beta = 2.0 / 3.0
+    norm = 1.0
+
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+
+    # make hardcopy
+    hdu = pyfits.PrimaryHDU(im_beta, hdr)# extension: array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+def profile_dirac():
+    """
+    Load and plot a 2D dirac
+    """
     imname = 'dirac-100.fits'
     hdu = pyfits.open(imname)
     im_dirac = hdu[0].data
@@ -225,7 +295,7 @@ if __name__ == '__main__':
 
     (r, profile, geometric_area) = extract_profile_generic(im_dirac, xcen, ycen)
 
-    MAKE_PLOT=0
+    MAKE_PLOT=1
     if MAKE_PLOT==1:
         print "plotting dirac"
         plt.figure()
@@ -238,8 +308,12 @@ if __name__ == '__main__':
         plt.draw()
         plt.show()
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.show()
 
+def profile_psf():
+    """
+    Load and plot a 2D psf
+    """
     ######################################################################
     # model check - PSF
 
@@ -258,7 +332,7 @@ if __name__ == '__main__':
     r_model = linspace(0.0, r.max(), 100)
     psf_model = king_profile(r_model, rcore_model, alpha_model)
 
-    MAKE_PLOT=0
+    MAKE_PLOT=1
     if MAKE_PLOT==1:
         print "plotting psf"
         plt.figure()
@@ -280,11 +354,12 @@ if __name__ == '__main__':
         plt.draw()
         plt.show()
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.show()
 
-    ######################################################################
-    # model check - beta
-
+def profile_beta():
+    """
+    Load and plot a 2D beta
+    """
     imname = 'beta-100.fits'
     hdu = pyfits.open(imname)
     im_beta = hdu[0].data
@@ -305,7 +380,7 @@ if __name__ == '__main__':
 
     beta_profile = beta_model((1.0, rcore, beta),r_model)
 
-    MAKE_PLOT=0
+    MAKE_PLOT=1
     if MAKE_PLOT==1:
         print "plotting beta"
         plt.figure()
@@ -326,17 +401,90 @@ if __name__ == '__main__':
         plt.draw()
         plt.show()
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
 
-    ######################################################################
+def test_convolve_psf_gauss():
+    """
+    Test gaussian convolution
+    """
+
+    imname = 'gauss-a-100.fits'
+    hdu = pyfits.open(imname)
+    im_gauss_a = hdu[0].data
+    hdr = hdu[0].header
+
+    imname = 'gauss-b-100.fits'
+    hdu = pyfits.open(imname)
+    im_gauss_b = hdu[0].data
+    hdr = hdu[0].header
+
+    imname = 'gauss-c-100.fits'
+    hdu = pyfits.open(imname)
+    im_gauss_c = hdu[0].data
+    hdr = hdu[0].header
+
+    xsize = im_gauss_a.shape[0]
+    ysize = im_gauss_a.shape[1]
+    xcen = xsize/2
+    ycen = ysize/2
+
     # do the convolution
+    im_conv_gauss = fftconvolve(im_gauss_a.astype(float), im_gauss_b.astype(float), mode = 'same')
+    im_conv_gauss = im_conv_gauss/im_conv_gauss.max()
 
+    # save to a file
+    imname = 'conv-gauss-ab-100.fits'
+    hdu = pyfits.PrimaryHDU(im_conv_gauss, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+    # extract profile
+    (r, profile_a, geometric_area_a)       = extract_profile_generic(im_gauss_a, xcen, ycen)
+    (r, profile_b, geometric_area_b)       = extract_profile_generic(im_gauss_b, xcen, ycen)
+    (r, profile_c, geometric_area_c)       = extract_profile_generic(im_gauss_c, xcen, ycen)
+    (r, profile_conv, geometric_area_conv) = extract_profile_generic(im_conv_gauss, xcen, ycen)
+
+    # do the plot
+    MAKE_PLOT=1
+    if MAKE_PLOT==1:
+        print "plotting gauss"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+
+        plt.plot(r-0.5, profile_a/geometric_area_a, label=r"$\sigma = $"+str(a_sigmax))
+        plt.plot(r-0.5, profile_b/geometric_area_b, label=r"$\sigma = $"+str(b_sigmax))
+        plt.plot(r-0.5, profile_conv/geometric_area_conv, label=r"conv-data")
+
+        plt.plot(r[::10]-0.5, profile_c[::10]/geometric_area_c[::10],
+            color='black',
+            linestyle='',              # -/--/:/-.
+            linewidth=0,                # linewidth=1
+            marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='orange',
+            markersize=6,               # markersize=6
+            label="$\sigma = $"+str(c_sigmax)               # '__nolegend__'
+            )
+
+        plt.xscale("linear")
+        plt.yscale("linear")
+
+        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+        plt.legend(loc=0, prop=prop, numpoints=1)
+
+        plt.draw()
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        plt.show()
+
+def test_convolve_psf_dirac():
+    """
+    Test convolution: dirac x psf
+    """
     im_dirac_psf = fftconvolve(im_dirac.astype(float), im_psf.astype(float), mode = 'same')
 
     # make hardcopy
     imname='dirac_psf-100.fits'
-    hdu = pyfits.PrimaryHDU(im_dirac_psf, hdr)# extension: array, header
-    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdu = pyfits.PrimaryHDU(im_dirac_psf, hdr)  # extension: array, header
+    hdulist = pyfits.HDUList([hdu])             # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
     max1 = im_dirac_psf.max()
@@ -350,7 +498,33 @@ if __name__ == '__main__':
 
     print id1, id2, im_dirac_psf[id1], im_dirac_psf[id2]
 
+if __name__ == '__main__':
+    print
+
+    # setup basic parameters
+    theta = 65.8443 / 60.0
+    energy = 1.5
+    instrument = "pn"
+
+    # test_psf_creation()
+
+    # create_dirac()
+    create_gauss()
+    # create_psf()
+    # create_beta()
+
+    # profile_dirac()
+    # profile_psf()
+    # profile_beta()
+
+    # test_convolve_psf_dirac()
+
+    test_convolve_psf_gauss()
+
     print "...done!"
+
+
+
 
 
 
