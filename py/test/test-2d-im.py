@@ -54,7 +54,7 @@ def make_2d_uncorr_gauss(imsize, xcen, ycen, sigmax, sigmay):
 
 def king_2d_model(x, y, xcen, ycen, rcore, alpha):
     """
-    Returns the value of a king profile at given position (relative to
+    Returns the value of a King profile at given position (relative to
     the center). Function is useful e.g. for  integration.
 
     Arguments:
@@ -66,7 +66,7 @@ def king_2d_model(x, y, xcen, ycen, rcore, alpha):
     - `alpha`: King alpha slope
     """
     r2 = sqdistance(xcen, ycen, x , y) # this is already squared
-    out = 1.0 / ( 1.0 + ( r2/rcore**2 )**alpha
+    out = 1.0 / ( 1.0 + ( r2/rcore**2 )**alpha )
     return out
 
 def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
@@ -85,24 +85,25 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     im = zeros(imsize, dtype=double)
     (rcore, alpha) = get_psf_king_pars(instrument, energy, theta)
 
-    # # make a list of unique radii, expected factor ~12.5 speedup: actually awful speed
-    # imdist = sqrt(sqdist_matrix(im, xcen, ycen))
-    # rlist = unique(sort(squeeze(transpose(imdist.reshape((900*900,1))))))
-    # for r in rlist:
-        # ids = where(imdist == r)
-        # print len(ids[0])
-        # im[ids] = 1 / ( 1 + (r/rcore)**2 )**alpha
-
     # the dumb method
     for i in range(imsize[0]):
         for j in range(imsize[1]):
             r2 = sqdistance(xcen, ycen, j , i) # this is already squared
             im[i, j] = 1.0 / ( 1.0 + r2/rcore**2 )**alpha
 
-    # FIXME: needs normalization:
-    norm = integrate.quad(psf_2d_model, 0.0, Inf, args=(rcore, alpha))[0]
-    print integrate.dblquad(king_2d_model, 0.0, Inf, lambda y:0.0, lambda y:Inf, args=(xcen, ycen, rcore, alpha))[0]
+    # normalization calculation
+    # from model: to inf converges slowly
+    # norm = integrate.dblquad(king_2d_model, 0.0, Inf, lambda y:0.0, lambda y:Inf, args=(xcen, ycen, rcore, alpha))[0]    # to inf - not recommended
+    # print norm
+    #
+    # norm = integrate.dblquad(king_2d_model, 0.0, imsize[0], lambda y:0.0, lambda y:imsize[1], args=(xcen, ycen, rcore, alpha))[0] # to image size
+    # print norm
 
+    # simpler version using the data itself - probably the most
+    # appropriate in this case
+    norm = im.sum()
+
+    im = im / norm
     return im
 
 def make_2d_beta(imsize, xcen, ycen, rcore, beta):
@@ -161,7 +162,7 @@ def extract_profile_generic(im, xcen, ycen):
 
     return (rgrid, x, geometric_area)
 
-def test_psf_creation():
+def test_psf_parameter():
     """
     Test psf parameter calculation for all the instruments
     """
@@ -182,7 +183,7 @@ def test_psf_creation():
 
     print "done"
 
-def create_dirac():
+def test_create_dirac():
     """
     Create a dirac 2D, save to fits
     """
@@ -204,7 +205,7 @@ def create_dirac():
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def create_gauss():
+def test_create_gauss():
     """
     Create two test 2D gauss, save to fits.
     """
@@ -219,44 +220,50 @@ def create_gauss():
     xcen = xsize/2
     ycen = ysize/2
 
-    # first gauss
+    # first gauss - the "source"
     imname = 'gauss-a-100.fits'
-    im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
+    peak_scale = 0.0045         # arbitrary src height - just so that
+                                # it can be conveniently plotted
+
+    im_gauss = peak_scale*make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
+    src_norm = im_gauss.sum()
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
     hdulist = pyfits.HDUList([hdu])           # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-    # second gauss
+    # second gauss - "the PSF" - i.e. normed to 1
     imname = 'gauss-b-100.fits'
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, b_sigmax, b_sigmay)
+    im_gauss = im_gauss / im_gauss.sum()
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
     hdulist = pyfits.HDUList([hdu])           # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-    # combined gauss
+    # combined gauss - for checking - norm to "source"
     imname = 'gauss-c-100.fits'
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, c_sigmax, c_sigmay)
+    im_gauss = src_norm * im_gauss / im_gauss.sum()
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_gauss, hdr)    # extension: array, header
     hdulist = pyfits.HDUList([hdu])           # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def create_psf():
+def test_create_psf():
     """
-    Create a 2D psf image, save to fits
+    Create a 2D psf image, save to fits.
     """
     # get a header
     fname = 'pn-test.fits'
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    imname = 'dirac.fits'
-    xsize = 900
+    imname = 'psf-100.fits'
+    xsize = 100
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
@@ -268,7 +275,7 @@ def create_psf():
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def create_dirac():
+def test_create_dirac():
     """
     Create a 2D beta image, save to fits
     """
@@ -293,7 +300,7 @@ def create_dirac():
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def profile_dirac():
+def test_profile_dirac():
     """
     Load and plot a 2D dirac
     """
@@ -324,7 +331,7 @@ def profile_dirac():
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
         plt.show()
 
-def profile_psf():
+def test_profile_psf():
     """
     Load and plot a 2D psf
     """
@@ -370,7 +377,7 @@ def profile_psf():
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
         plt.show()
 
-def profile_beta():
+def test_profile_beta():
     """
     Load and plot a 2D beta
     """
@@ -441,11 +448,14 @@ def test_convolve_psf_gauss():
     xcen = xsize/2
     ycen = ysize/2
 
-    # do the convolution
+    # do the convolution: test on gaussian convolution showd
+    # normalization conversation to better than 1%, except if PSF is
+    # comparable to the source (3%) and increses if PSF is broader
     im_conv_gauss = fftconvolve(im_gauss_a.astype(float), im_gauss_b.astype(float), mode = 'same')
+    print "norm % diff:", 100.0*(im_gauss_a.sum() - im_conv_gauss.sum()) / im_conv_gauss.sum()
 
     # FIXME: this takes care of the normalization, is it correct?
-    im_conv_gauss = im_conv_gauss/im_conv_gauss.max()
+    # im_conv_gauss = im_conv_gauss/im_conv_gauss.max()
 
     # # FIXME: remove invalid edge
     im_conv_gauss = delete(im_conv_gauss, 0, 0)
@@ -478,7 +488,7 @@ def test_convolve_psf_gauss():
         plt.clf()
 
         plt.plot(r-0.5, profile_a/geometric_area_a, label=r"$\sigma = $"+str(a_sigmax))
-        plt.plot(r-0.5, profile_b/geometric_area_b, label=r"$\sigma = $"+str(b_sigmax))
+        plt.plot(r-0.5, profile_b/geometric_area_b, label=r"$\sigma = $"+str(b_sigmax)+ " (psf)")
         plt.plot(r-0.5, profile_conv/geometric_area_conv, label=r"conv-data")
 
         plt.plot(r[::10]-0.5, profile_c[::10]/geometric_area_c[::10],
@@ -537,35 +547,31 @@ if __name__ == '__main__':
     # setup for the gaussian test
     a_sigmax = 15.0               # [pix]
     a_sigmay = 15.0               # [pix]
-    b_sigmax = 9.0               # [pix]
-    b_sigmay = 9.0               # [pix]
+    b_sigmax = 20.0               # [pix]
+    b_sigmay = 20.0               # [pix]
     c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
-    # test_psf_creation()
+    # parameter calculation test
+    # test_psf_parameter()
 
-    # create_dirac()
-    # create_gauss()
-    # create_psf()
-    # create_beta()
+    # fits image creation tests
+    # test_create_dirac()
+    test_create_gauss()
+    # test_create_psf()
+    # test_create_beta()
 
-    # profile_dirac()
-    # profile_psf()
-    # profile_beta()
+    # profile extration tests
+    # test_profile_dirac()
+    # test_profile_psf()
+    # test_profile_beta()
 
+    # convolution tests
     # test_convolve_psf_dirac()
-
     test_convolve_psf_gauss()
 
     print "...done!"
 
-######################################################################
-# notes
-# Fri Jun 29 16:27:04 2012
-# - check the center shifting
-# - investigate the normalization part (now had to be divided by the
-# - maximum... confirm?)
-######################################################################
 
 
 
