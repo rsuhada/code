@@ -11,6 +11,8 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import *
 from sb_utils import *
 from scipy.signal import fftconvolve
+from scipy import delete
+from scipy import integrate
 
     ######################################################################
     # stop plot enviroment
@@ -50,6 +52,23 @@ def make_2d_uncorr_gauss(imsize, xcen, ycen, sigmax, sigmay):
 
     return im
 
+def king_2d_model(x, y, xcen, ycen, rcore, alpha):
+    """
+    Returns the value of a king profile at given position (relative to
+    the center). Function is useful e.g. for  integration.
+
+    Arguments:
+    - `x`: x coordinate
+    - `y`: y coordinate
+    - `xcen`: x coordinate of the function
+    - `ycen`: y coordinate of the function
+    - `rcore`: King core radius
+    - `alpha`: King alpha slope
+    """
+    r2 = sqdistance(xcen, ycen, x , y) # this is already squared
+    out = 1.0 / ( 1.0 + ( r2/rcore**2 )**alpha
+    return out
+
 def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     """
     Creates a 2D image of the PSF
@@ -77,8 +96,12 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     # the dumb method
     for i in range(imsize[0]):
         for j in range(imsize[1]):
-            r2 = sqdistance(xcen, ycen, j , i) # this is walready squared
-            im[i, j] = 1.0 / ( 1.0 + r2/(rcore)**2 )**alpha
+            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
+            im[i, j] = 1.0 / ( 1.0 + r2/rcore**2 )**alpha
+
+    # FIXME: needs normalization:
+    norm = integrate.quad(psf_2d_model, 0.0, Inf, args=(rcore, alpha))[0]
+    print integrate.dblquad(king_2d_model, 0.0, Inf, lambda y:0.0, lambda y:Inf, args=(xcen, ycen, rcore, alpha))[0]
 
     return im
 
@@ -223,7 +246,7 @@ def create_gauss():
     hdulist = pyfits.HDUList([hdu])           # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def create_def():
+def create_psf():
     """
     Create a 2D psf image, save to fits
     """
@@ -420,7 +443,19 @@ def test_convolve_psf_gauss():
 
     # do the convolution
     im_conv_gauss = fftconvolve(im_gauss_a.astype(float), im_gauss_b.astype(float), mode = 'same')
+
+    # FIXME: this takes care of the normalization, is it correct?
     im_conv_gauss = im_conv_gauss/im_conv_gauss.max()
+
+    # # FIXME: remove invalid edge
+    im_conv_gauss = delete(im_conv_gauss, 0, 0)
+    im_conv_gauss = delete(im_conv_gauss, 0, 1)
+    im_conv_gauss = delete(im_conv_gauss, im_conv_gauss.shape[1]-1, 0)
+    im_conv_gauss = delete(im_conv_gauss, im_conv_gauss.shape[0]-1, 1)
+
+    # print
+    # print where(im_gauss_a == im_gauss_a.max())
+    # print where(im_conv_gauss == im_conv_gauss.max())
 
     # save to a file
     imname = 'conv-gauss-ab-100.fits'
@@ -465,6 +500,8 @@ def test_convolve_psf_gauss():
         plt.draw()
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
         plt.show()
+
+        plt.savefig('psf_conv_test_gauss.png')
 
 def test_convolve_psf_dirac():
     """
