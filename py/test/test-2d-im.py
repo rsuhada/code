@@ -14,10 +14,6 @@ from scipy.signal import fftconvolve
 from scipy import delete
 from scipy import integrate
 
-    ######################################################################
-    # stop plot enviroment
-    ######################################################################
-
 def make_2d_dirac(imsize, xcen, ycen):
     """
     Creates a 2D image of a Dirac funtion
@@ -68,6 +64,22 @@ def king_2d_model(x, y, xcen, ycen, rcore, alpha):
     r2 = sqdistance(xcen, ycen, x , y) # this is already squared
     out = 1.0 / ( 1.0 + ( r2/rcore**2 )**alpha )
     return out
+
+def trim_fftconvolve(image):
+    """
+    Removes invalid rows and columns from a convolved image after
+    fftconvolve with the "same" option.
+
+    Arguments:
+    - `image`: input image for trimming
+    """
+    # remove invalid edge
+    image = delete(image, 0, 0)
+    image = delete(image, 0, 1)
+    image = delete(image, image.shape[1]-1, 0)
+    image = delete(image, image.shape[0]-1, 1)
+
+    return image
 
 def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     """
@@ -275,7 +287,7 @@ def test_create_psf():
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def test_create_dirac():
+def test_create_beta():
     """
     Create a 2D beta image, save to fits
     """
@@ -284,14 +296,11 @@ def test_create_dirac():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
+    imname = 'beta-100.fits'
     xsize = 100
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
-
-    rcore = 15.0                  # [pix]
-    beta = 2.0 / 3.0
-    norm = 1.0
 
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
 
@@ -394,11 +403,6 @@ def test_profile_beta():
     (r, profile, geometric_area) = extract_profile_generic(im_beta, xcen, ycen)
     r_model = linspace(0.0, r.max(), 100)
 
-    # the model
-    rcore = 15.0                  # [pix]
-    beta = 2.0 / 3.0
-    norm = 1.0
-
     beta_profile = beta_model((1.0, rcore, beta),r_model)
 
     MAKE_PLOT=1
@@ -451,21 +455,12 @@ def test_convolve_psf_gauss():
     # do the convolution: test on gaussian convolution showd
     # normalization conversation to better than 1%, except if PSF is
     # comparable to the source (3%) and increses if PSF is broader
+    # NOTE: "valid" range is not working for me
+
     im_conv_gauss = fftconvolve(im_gauss_a.astype(float), im_gauss_b.astype(float), mode = 'same')
     print "norm % diff:", 100.0*(im_gauss_a.sum() - im_conv_gauss.sum()) / im_conv_gauss.sum()
 
-    # FIXME: this takes care of the normalization, is it correct?
-    # im_conv_gauss = im_conv_gauss/im_conv_gauss.max()
-
-    # # FIXME: remove invalid edge
-    im_conv_gauss = delete(im_conv_gauss, 0, 0)
-    im_conv_gauss = delete(im_conv_gauss, 0, 1)
-    im_conv_gauss = delete(im_conv_gauss, im_conv_gauss.shape[1]-1, 0)
-    im_conv_gauss = delete(im_conv_gauss, im_conv_gauss.shape[0]-1, 1)
-
-    # print
-    # print where(im_gauss_a == im_gauss_a.max())
-    # print where(im_conv_gauss == im_conv_gauss.max())
+    im_conv_gauss = trim_fftconvolve(im_conv_gauss)
 
     # save to a file
     imname = 'conv-gauss-ab-100.fits'
@@ -513,28 +508,60 @@ def test_convolve_psf_gauss():
 
         plt.savefig('psf_conv_test_gauss.png')
 
-def test_convolve_psf_dirac():
+def  test_convolve_psf_beta():
     """
-    Test convolution: dirac x psf
+    Test convolution: beta x psf
     """
-    im_dirac_psf = fftconvolve(im_dirac.astype(float), im_psf.astype(float), mode = 'same')
+    imname = 'beta-100.fits'
+    hdu = pyfits.open(imname)
+    im_beta = hdu[0].data
+    hdr = hdu[0].header
 
-    # make hardcopy
-    imname='dirac_psf-100.fits'
-    hdu = pyfits.PrimaryHDU(im_dirac_psf, hdr)  # extension: array, header
-    hdulist = pyfits.HDUList([hdu])             # list all extensions here
-    hdulist.writeto(imname, clobber=True)
+    imname = 'psf-100.fits'
+    hdu = pyfits.open(imname)
+    im_psf = hdu[0].data
+    hdr = hdu[0].header
 
-    max1 = im_dirac_psf.max()
-    max2 = im_dirac.max()
+    xsize = im_beta.shape[0]
+    ysize = im_beta.shape[1]
+    xcen = xsize/2
+    ycen = ysize/2
 
-    print shape(im_dirac_psf), shape(im_dirac)
-    print
+    im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+    im_conv = trim_fftconvolve(im_conv)
 
-    id1 = where(im_dirac_psf==max1)
-    id2 = where(im_dirac==max2)
+    # extract profile
+    (r, profile_source, geometric_area_source) = extract_profile_generic(im_beta, xcen, ycen)
+    (r, profile_psf, geometric_area_psf)       = extract_profile_generic(im_psf, xcen, ycen)
+    (r, profile_conv, geometric_area_conv)     = extract_profile_generic(im_conv, xcen, ycen)
 
-    print id1, id2, im_dirac_psf[id1], im_dirac_psf[id2]
+    profile_source_norm = profile_source/geometric_area_source
+    profile_psf_norm    = profile_psf/geometric_area_psf
+    profile_conv_norm   = profile_conv/geometric_area_conv
+
+    # do the plot
+    MAKE_PLOT=1
+    if MAKE_PLOT==1:
+        print "plotting psf x beta"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+
+        plt.plot(r-0.5, profile_source_norm, label=r"source")
+        plt.plot(r-0.5, profile_psf_norm, label=r"psf")
+        plt.plot(r-0.5, profile_conv_norm, label=r"conv-data")
+
+        plt.xscale("log")
+        plt.yscale("log")
+
+        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+        plt.legend(loc=0, prop=prop, numpoints=1)
+
+        plt.draw()
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        plt.show()
+
+        plt.savefig('psf_conv_test_beta.png')
 
 if __name__ == '__main__':
     print
@@ -547,17 +574,22 @@ if __name__ == '__main__':
     # setup for the gaussian test
     a_sigmax = 15.0               # [pix]
     a_sigmay = 15.0               # [pix]
-    b_sigmax = 20.0               # [pix]
-    b_sigmay = 20.0               # [pix]
+    b_sigmax = 5.0               # [pix]
+    b_sigmay = 5.0               # [pix]
     c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
+
+    # setup for the beta model
+    rcore = 25.0                  # [pix]
+    beta = 2.0 / 3.0
+    norm = 1.0
 
     # parameter calculation test
     # test_psf_parameter()
 
     # fits image creation tests
     # test_create_dirac()
-    test_create_gauss()
+    # test_create_gauss()
     # test_create_psf()
     # test_create_beta()
 
@@ -567,13 +599,6 @@ if __name__ == '__main__':
     # test_profile_beta()
 
     # convolution tests
-    # test_convolve_psf_dirac()
-    test_convolve_psf_gauss()
-
+    # test_convolve_psf_gauss()
+    test_convolve_psf_beta()
     print "...done!"
-
-
-
-
-
-
