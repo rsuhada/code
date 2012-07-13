@@ -508,7 +508,7 @@ def test_convolve_psf_gauss():
 
         plt.savefig('psf_conv_test_gauss.png')
 
-def  test_convolve_psf_beta():
+def test_convolve_psf_beta():
     """
     Test convolution: beta x psf
     """
@@ -530,6 +530,16 @@ def  test_convolve_psf_beta():
     im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
     im_conv = trim_fftconvolve(im_conv)
 
+    # save into a file
+    imname = 'conv-beta-psf-100.fits'
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+
+    print "psf norm : ", im_psf.sum()
+    print "norm % diff:", 100.0*(im_psf.sum() - im_beta.sum()) / im_beta.sum()
+
     # extract profile
     (r, profile_source, geometric_area_source) = extract_profile_generic(im_beta, xcen, ycen)
     (r, profile_psf, geometric_area_psf)       = extract_profile_generic(im_psf, xcen, ycen)
@@ -538,6 +548,8 @@ def  test_convolve_psf_beta():
     profile_source_norm = profile_source/geometric_area_source
     profile_psf_norm    = profile_psf/geometric_area_psf
     profile_conv_norm   = profile_conv/geometric_area_conv
+
+    profile_psf_norm = profile_psf_norm * profile_source_norm.max() / profile_psf_norm.max()
 
     # do the plot
     MAKE_PLOT=1
@@ -551,14 +563,16 @@ def  test_convolve_psf_beta():
         plt.plot(r-0.5, profile_psf_norm, label=r"psf")
         plt.plot(r-0.5, profile_conv_norm, label=r"conv-data")
 
-        plt.xscale("log")
-        plt.yscale("log")
+        plt.xscale("linear")
+        plt.yscale("linear")
+        # plt.ylim(ymin=1e-3,ymax=5e0)
 
         prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
         plt.legend(loc=0, prop=prop, numpoints=1)
 
         plt.draw()
-        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        plt.get_current_fig_manager().window.wm_geometry("+640+0")
         plt.show()
 
         plt.savefig('psf_conv_test_beta.png')
@@ -602,3 +616,8 @@ if __name__ == '__main__':
     # test_convolve_psf_gauss()
     test_convolve_psf_beta()
     print "...done!"
+
+    # FIXME:
+    # Fri Jul 13 16:41:40 2012
+    # - add zero padded borders to trace the counts beyond
+    # in beta case - is there a problem with the inverted profiles
