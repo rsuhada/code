@@ -227,17 +227,29 @@ def test_create_gauss():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    xsize = 100
+    xsize = 300
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
 
-    # first gauss - the "source"
-    imname = 'gauss-a-100.fits'
+    # if zero padded image for testing - this to check normalizations
+    do_zero_pad = 1
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+
+     # first gauss - the "source"
+    imname = 'gauss-a-100-pad.fits'
     peak_scale = 0.0045         # arbitrary src height - just so that
                                 # it can be conveniently plotted
 
     im_gauss = peak_scale*make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
+
+    if do_zero_pad == 1:
+        im_gauss[:, 0:xsize_obj] = 0.0
+        im_gauss[:, xsize-xsize_obj:] = 0.0
+        im_gauss[0:xsize_obj,:] = 0.0
+        im_gauss[xsize-xsize_obj:,:] = 0.0
+
     src_norm = im_gauss.sum()
 
     # make hardcopy
@@ -246,8 +258,14 @@ def test_create_gauss():
     hdulist.writeto(imname, clobber=True)
 
     # second gauss - "the PSF" - i.e. normed to 1
-    imname = 'gauss-b-100.fits'
+    imname = 'gauss-b-100-pad.fits'
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, b_sigmax, b_sigmay)
+    if do_zero_pad == 1:
+        im_gauss[:, 0:xsize_obj] = 0.0
+        im_gauss[:, xsize-xsize_obj:] = 0.0
+        im_gauss[0:xsize_obj,:] = 0.0
+        im_gauss[xsize-xsize_obj:,:] = 0.0
+
     im_gauss = im_gauss / im_gauss.sum()
 
     # make hardcopy
@@ -256,7 +274,7 @@ def test_create_gauss():
     hdulist.writeto(imname, clobber=True)
 
     # combined gauss - for checking - norm to "source"
-    imname = 'gauss-c-100.fits'
+    imname = 'gauss-c-100-pad.fits'
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, c_sigmax, c_sigmay)
     im_gauss = src_norm * im_gauss / im_gauss.sum()
 
@@ -274,13 +292,23 @@ def test_create_psf():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    imname = 'psf-100.fits'
-    xsize = 100
+    imname = 'psf-100-pad.fits'
+    xsize = 900
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
 
+    # if zero padded image for testing - this to check normalizations
+    do_zero_pad = 1
+    xsize_obj = 400
+    ysize_obj = xsize_obj
+
     im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+    if do_zero_pad == 1:
+        im_psf[:, 0:xsize_obj] = 0.0
+        im_psf[:, xsize-xsize_obj:] = 0.0
+        im_psf[0:xsize_obj,:] = 0.0
+        im_psf[xsize-xsize_obj:,:] = 0.0
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension: array, header
@@ -296,13 +324,24 @@ def test_create_beta():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    imname = 'beta-100.fits'
-    xsize = 100
+    imname = 'beta-100-pad.fits'
+    xsize = 900
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
 
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    do_zero_pad = 1
+    xsize_obj = 400
+    ysize_obj = xsize_obj
+
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    if do_zero_pad == 1:
+        im_beta[:, 0:xsize_obj] = 0.0
+        im_beta[:, xsize-xsize_obj:] = 0.0
+        im_beta[0:xsize_obj,:] = 0.0
+        im_beta[xsize-xsize_obj:,:] = 0.0
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_beta, hdr)# extension: array, header
@@ -432,17 +471,17 @@ def test_convolve_psf_gauss():
     Test gaussian convolution
     """
 
-    imname = 'gauss-a-100.fits'
+    imname = 'gauss-a-100-pad.fits'
     hdu = pyfits.open(imname)
     im_gauss_a = hdu[0].data
     hdr = hdu[0].header
 
-    imname = 'gauss-b-100.fits'
+    imname = 'gauss-b-100-pad.fits'
     hdu = pyfits.open(imname)
     im_gauss_b = hdu[0].data
     hdr = hdu[0].header
 
-    imname = 'gauss-c-100.fits'
+    imname = 'gauss-c-100-pad.fits'
     hdu = pyfits.open(imname)
     im_gauss_c = hdu[0].data
     hdr = hdu[0].header
@@ -452,9 +491,10 @@ def test_convolve_psf_gauss():
     xcen = xsize/2
     ycen = ysize/2
 
-    # do the convolution: test on gaussian convolution showd
-    # normalization conversation to better than 1%, except if PSF is
-    # comparable to the source (3%) and increses if PSF is broader
+    print "size:", xsize
+
+    # do the convolution: test on gaussian convolution, works very
+    # good assuming large enough aperture/trimming
     # NOTE: "valid" range is not working for me
 
     im_conv_gauss = fftconvolve(im_gauss_a.astype(float), im_gauss_b.astype(float), mode = 'same')
@@ -512,12 +552,12 @@ def test_convolve_psf_beta():
     """
     Test convolution: beta x psf
     """
-    imname = 'beta-100.fits'
+    imname = 'beta-100-pad.fits'
     hdu = pyfits.open(imname)
     im_beta = hdu[0].data
     hdr = hdu[0].header
 
-    imname = 'psf-100.fits'
+    imname = 'psf-100-pad.fits'
     hdu = pyfits.open(imname)
     im_psf = hdu[0].data
     hdr = hdu[0].header
@@ -533,9 +573,8 @@ def test_convolve_psf_beta():
     # save into a file
     imname = 'conv-beta-psf-100.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
-
 
     print "psf norm : ", im_psf.sum()
     print "norm % diff:", 100.0*(im_psf.sum() - im_beta.sum()) / im_beta.sum()
@@ -588,13 +627,13 @@ if __name__ == '__main__':
     # setup for the gaussian test
     a_sigmax = 15.0               # [pix]
     a_sigmay = 15.0               # [pix]
-    b_sigmax = 5.0               # [pix]
-    b_sigmay = 5.0               # [pix]
+    b_sigmax = 20.0               # [pix]
+    b_sigmay = 20.0               # [pix]
     c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
     # setup for the beta model
-    rcore = 25.0                  # [pix]
+    rcore = 8.0                  # [pix]
     beta = 2.0 / 3.0
     norm = 1.0
 
@@ -604,8 +643,8 @@ if __name__ == '__main__':
     # fits image creation tests
     # test_create_dirac()
     # test_create_gauss()
-    # test_create_psf()
-    # test_create_beta()
+    test_create_psf()
+    test_create_beta()
 
     # profile extration tests
     # test_profile_dirac()
@@ -616,8 +655,3 @@ if __name__ == '__main__':
     # test_convolve_psf_gauss()
     test_convolve_psf_beta()
     print "...done!"
-
-    # FIXME:
-    # Fri Jul 13 16:41:40 2012
-    # - add zero padded borders to trace the counts beyond
-    # in beta case - is there a problem with the inverted profiles
