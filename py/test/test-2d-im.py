@@ -152,6 +152,9 @@ def extract_profile_generic(im, xcen, ycen):
     - `ycen`: center y coordinate
     """
 
+    # FIXME: 1. rmax as argument, 2. look at speed improvement in
+    # sqdist
+
     distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
     rgrid = arange(1, distmatrix.max()+1, 1.0)
     n = len(rgrid)
@@ -170,7 +173,6 @@ def extract_profile_generic(im, xcen, ycen):
         ids = where((distmatrix <= rgrid[i]) & (distmatrix >= (rgrid[i-1])))
         geometric_area[i] = len(ids[0])      # [pix]
         x[i] = sum(im[ids])
-        # print i, rgrid[i-1], rgrid[i], geometric_area[i], profile[i]
 
     return (rgrid, x, geometric_area)
 
@@ -300,7 +302,7 @@ def test_create_psf():
 
     # if zero padded image for testing - this to check normalizations
     do_zero_pad = 1
-    xsize_obj = 400
+    xsize_obj = 100
     ysize_obj = xsize_obj
 
     im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
@@ -312,7 +314,7 @@ def test_create_psf():
 
     # make hardcopy
     hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension: array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist = pyfits.HDUList([hdu])         # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
 def test_create_beta():
@@ -333,7 +335,7 @@ def test_create_beta():
     # if zero padded image for testing - this to check normalizations
     # - works fine
     do_zero_pad = 1
-    xsize_obj = 400
+    xsize_obj = 100
     ysize_obj = xsize_obj
 
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
@@ -576,9 +578,12 @@ def test_convolve_psf_beta():
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
+    ######################################################################
+    # test part
     print "psf norm : ", im_psf.sum()
-    print "norm % diff:", 100.0*(im_psf.sum() - im_beta.sum()) / im_beta.sum()
+    print "norm % diff:", 100.0*(im_beta.sum() - im_conv.sum()) / im_beta.sum()
 
+    ######################################################################
     # extract profile
     (r, profile_source, geometric_area_source) = extract_profile_generic(im_beta, xcen, ycen)
     (r, profile_psf, geometric_area_psf)       = extract_profile_generic(im_psf, xcen, ycen)
@@ -602,16 +607,16 @@ def test_convolve_psf_beta():
         plt.plot(r-0.5, profile_psf_norm, label=r"psf")
         plt.plot(r-0.5, profile_conv_norm, label=r"conv-data")
 
-        plt.xscale("linear")
-        plt.yscale("linear")
+        plt.xscale("log")
+        plt.yscale("log")
         # plt.ylim(ymin=1e-3,ymax=5e0)
 
         prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
         plt.legend(loc=0, prop=prop, numpoints=1)
 
         plt.draw()
-        # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-        plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        # plt.get_current_fig_manager().window.wm_geometry("+640+0")
         plt.show()
 
         plt.savefig('psf_conv_test_beta.png')
