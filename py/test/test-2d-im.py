@@ -13,6 +13,7 @@ from sb_utils import *
 from scipy.signal import fftconvolve
 from scipy import delete
 from scipy import integrate
+from scipy.stats import poisson
 
 def make_2d_dirac(imsize, xcen, ycen):
     """
@@ -301,7 +302,7 @@ def test_create_psf():
     ycen = ysize/2
 
     # if zero padded image for testing - this to check normalizations
-    do_zero_pad = 1
+    do_zero_pad = 0
     xsize_obj = 100
     ysize_obj = xsize_obj
 
@@ -334,7 +335,7 @@ def test_create_beta():
 
     # if zero padded image for testing - this to check normalizations
     # - works fine
-    do_zero_pad = 1
+    do_zero_pad = 0
     xsize_obj = 100
     ysize_obj = xsize_obj
 
@@ -621,6 +622,61 @@ def test_convolve_psf_beta():
 
         plt.savefig('psf_conv_test_beta.png')
 
+def test_create_cluster_im():
+    """
+    Creates a PSF convolved beta model image with poissonizations
+    """
+    poissonize_image = 1        # poissonize image?
+
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    imname = 'cluster_image.fits'
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    do_zero_pad = 0
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+
+    # create beta
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    if do_zero_pad == 1:
+        im_beta[:, 0:xsize_obj] = 0.0
+        im_beta[:, xsize-xsize_obj:] = 0.0
+        im_beta[0:xsize_obj,:] = 0.0
+        im_beta[xsize-xsize_obj:,:] = 0.0
+
+    # create psf
+    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+    if do_zero_pad == 1:
+        im_psf[:, 0:xsize_obj] = 0.0
+        im_psf[:, xsize-xsize_obj:] = 0.0
+        im_psf[0:xsize_obj,:] = 0.0
+        im_psf[xsize-xsize_obj:,:] = 0.0
+
+    # convolve
+    im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+    im_conv = trim_fftconvolve(im_conv)
+
+    # normalization and poissonization
+    im_conv = num_cts * im_conv/im_conv.sum()
+    im_conv = poisson.rvs(im_conv)
+    print "poisson sum:", im_conv.sum()
+
+    # write the output
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
+
+
 if __name__ == '__main__':
     print
 
@@ -638,6 +694,7 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
     # setup for the beta model
+    num_cts = 2000.0            # will be the normalization
     rcore = 8.0                  # [pix]
     beta = 2.0 / 3.0
     norm = 1.0
@@ -648,8 +705,9 @@ if __name__ == '__main__':
     # fits image creation tests
     # test_create_dirac()
     # test_create_gauss()
-    test_create_psf()
-    test_create_beta()
+    # test_create_psf()
+    # test_create_beta()
+    test_create_cluster_im()
 
     # profile extration tests
     # test_profile_dirac()
@@ -658,5 +716,6 @@ if __name__ == '__main__':
 
     # convolution tests
     # test_convolve_psf_gauss()
-    test_convolve_psf_beta()
+    # test_convolve_psf_beta()
+
     print "...done!"
