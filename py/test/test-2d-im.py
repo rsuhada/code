@@ -622,6 +622,44 @@ def test_convolve_psf_beta():
 
         plt.savefig('psf_conv_test_beta.png')
 
+def load_exposure_map():
+    """
+    Auxiliarly map to load an exposure map
+    """
+    fname = 'pn-test-exp.fits'
+    hdu = pyfits.open(fname)
+    exp_map = trim_fftconvolve(hdu[0].data)
+
+    # remove too low exp regions (max/10)
+    exp_thresh_factor = 10.0
+    ids_trim = (exp_map<exp_map.max()/exp_thresh_factor)
+    exp_map[ids_trim] = 0.0
+
+    return exp_map
+
+def load_background_map():
+    """
+    Auxiliarly map to load an background map
+    """
+    fname = 'pn-test-bg-2cp.fits'
+    hdu = pyfits.open(fname)
+    background_map = trim_fftconvolve(hdu[0].data)
+
+    return background_map
+
+def create_background_mask(background_map):
+    """
+    Creates a background mask with ps and artifacts removed
+    """
+    # create mask - need to remove all kinds of articats
+    # getting rid of an artifact value - only at this ste because
+    # there is a bug in poisson that crashes on 0 valued input
+    artifact=1.0e-5
+    background_map[background_map==artifact] = 0.0
+    image_mask = background_map / background_map
+    image_mask[where(negative(isfinite(image_mask)))] = 0.0
+    return image_mask
+
 def test_create_cluster_im():
     """
     Creates a PSF convolved beta model image with poissonizations
@@ -639,6 +677,7 @@ def test_create_cluster_im():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
+    # image setup
     xsize = 900
     ysize = xsize
     xcen = xsize/2
@@ -685,30 +724,19 @@ def test_create_cluster_im():
     # add background - preliminary approach with bit fudging
     # (background not psf-ized)
     if ADD_BACKGROUND:
-        fname = 'pn-test-bg-2cp.fits'
-        hdu = pyfits.open(fname)
-        background_map = trim_fftconvolve(hdu[0].data)
-
-        fname = 'pn-test-exp.fits'
-        hdu = pyfits.open(fname)
-        exp_map = trim_fftconvolve(hdu[0].data)
+        background_map = load_background_map()
+        exp_map = load_exposure_map()
 
         # poissonize
         print "poisson sum:", background_map.sum()
         if POISSONIZE_IMAGE:
-            background_map = poisson.rvs(background_map)
+            background_map_poi = poisson.rvs(background_map)
 
         # add to the image
-        im_conv = im_conv + background_map
+        im_conv = im_conv + background_map_poi
 
-        # # apply source masking
-        image_mask = exp_map / exp_map
-
-        hdu = pyfits.PrimaryHDU(image_mask, hdr)    # extension - array, header
-        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-        hdulist.writeto('mask.fits', clobber=True)
-
-        # im_conv = im_conv * image_mask
+    image_mask = create_background_mask(background_map)
+    im_conv = im_conv * image_mask
 
     # write the output
     imname = 'cluster_image_cts.fits'
@@ -716,41 +744,26 @@ def test_create_cluster_im():
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
+    # hdu = pyfits.PrimaryHDU(image_mask, hdr)    # extension - array, header
+    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    # hdulist.writeto('mask.fits', clobber=True)
+
+    # import os
+    # os.system("/Applications/SAOImage\ DS9.app/Contents/MacOS/ds9 mask.fits")
+
     # apply exposure map
     if APPLY_EXPOSURE_MAP:
         if not(ADD_BACKGROUND):
-            # I do not yet have the exp map in memory
-            fname = 'pn-test-exp.fits'
-            hdu = pyfits.open(fname)
-            exp_map = trim_fftconvolve(hdu[0].data)
-
-        # remove too low exp regions (max/10)
-        exp_thresh_factor = 10.0
-        ids_trim = (exp_map<exp_map.max()/exp_thresh_factor)
-        exp_map[ids_trim] = 0.0
+            exp_map = load_exposure_map()
 
         im_conv_ctr = im_conv / exp_map           # create an ctr image
-
-        # im_conv_ctr = im_conv * exp_map    # trying to get rid of artifacts
-        # im_conv_ctr = im_conv_ctr / exp_map**2           # create an ctr image
-
         im_conv_ctr[where(negative(isfinite(im_conv_ctr)))] = 0.0
-        # im_conv_ctr = nan_to_num(im_conv_ctr)
 
         # write the output
         imname = 'cluster_image_ctr.fits'
         hdu = pyfits.PrimaryHDU(im_conv_ctr, hdr)    # extension - array, header
         hdulist = pyfits.HDUList([hdu])                  # list all extensions here
         hdulist.writeto(imname, clobber=True)
-
-        # coords = im_conv_ctr.max(out=coords)
-        coords = unravel_index(im_conv_ctr.argmax(),shape(im_conv_ctr))
-
-        # print coords, max(im_conv_ctr)
-        print im_conv_ctr[coords], coords
-
-    # import os
-    # os.system("/Applications/SAOImage\ DS9.app/Contents/MacOS/ds9 "+str(imname))
 
     # do the fitting
 
