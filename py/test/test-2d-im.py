@@ -626,14 +626,18 @@ def test_create_cluster_im():
     """
     Creates a PSF convolved beta model image with poissonizations
     """
-    poissonize_image = 1        # poissonize image?
+    # settings
+    POISSONIZE_IMAGE = True            # poissonize image?
+    APPLY_EXPOSURE_MAP = True           # add exposure map
+
+    # FIXME: add background, realistic exposure map + decide how to
+    # treat for modeling work
 
     # get a header
     fname = 'pn-test.fits'
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    imname = 'cluster_image.fits'
     xsize = 900
     ysize = xsize
     xcen = xsize/2
@@ -667,15 +671,56 @@ def test_create_cluster_im():
 
     # normalization and poissonization
     im_conv = num_cts * im_conv/im_conv.sum()
-    im_conv = poisson.rvs(im_conv)
-    print "poisson sum:", im_conv.sum()
+
+    if POISSONIZE_IMAGE:
+        im_conv = poisson.rvs(im_conv)
+        print "poisson sum:", im_conv.sum()
 
     # write the output
+    imname = 'cluster_image_cts.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
+    # apply exposure map
+    if APPLY_EXPOSURE_MAP:
+        fname = 'pn-test-exp.fits'
+        hdu = pyfits.open(fname)
+        exp_map = trim_fftconvolve(hdu[0].data)
 
+        # remove too low exp regions (max/10)
+        exp_thresh_factor = 10.0
+        ids_trim = (exp_map<exp_map.max()/exp_thresh_factor)
+        exp_map[ids_trim] = 0.0
+
+        im_conv_ctr = im_conv / exp_map           # create an ctr image
+
+        # im_conv_ctr = im_conv * exp_map    # trying to get rid of artifacts
+        # im_conv_ctr = im_conv_ctr / exp_map**2           # create an ctr image
+
+        im_conv_ctr[where(negative(isfinite(im_conv_ctr)))] = 0.0
+        # im_conv_ctr = nan_to_num(im_conv_ctr)
+
+        # write the output
+        imname = 'cluster_image_ctr.fits'
+        hdu = pyfits.PrimaryHDU(im_conv_ctr, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto(imname, clobber=True)
+
+        # coords = im_conv_ctr.max(out=coords)
+        coords = unravel_index(im_conv_ctr.argmax(),shape(im_conv_ctr))
+
+        # print coords, max(im_conv_ctr)
+        print im_conv_ctr[coords], coords
+
+    # import os
+    # os.system("/Applications/SAOImage\ DS9.app/Contents/MacOS/ds9 "+str(imname))
+
+    # do the fitting
+
+######################################################################
+######################################################################
+######################################################################
 
 if __name__ == '__main__':
     print
@@ -694,10 +739,10 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
     # setup for the beta model
-    num_cts = 2000.0            # will be the normalization
-    rcore = 8.0                  # [pix]
-    beta = 2.0 / 3.0
-    norm = 1.0
+    num_cts  = 2000.0 # will be the normalization
+    rcore    = 8.0    # [pix]
+    beta     = 2.0 / 3.0
+    norm     = 1.0
 
     # parameter calculation test
     # test_psf_parameter()
