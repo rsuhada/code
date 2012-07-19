@@ -629,6 +629,7 @@ def test_create_cluster_im():
     # settings
     POISSONIZE_IMAGE = True            # poissonize image?
     APPLY_EXPOSURE_MAP = True           # add exposure map
+    ADD_BACKGROUND = True
 
     # FIXME: add background, realistic exposure map + decide how to
     # treat for modeling work
@@ -665,6 +666,11 @@ def test_create_cluster_im():
         im_psf[0:xsize_obj,:] = 0.0
         im_psf[xsize-xsize_obj:,:] = 0.0
 
+    # FIXME: this needs bit reorganizing so that the proper number of
+    # source cts can be assured (while a realistc s/n is kept)
+    # note: also needs exp map correction
+    # add background model (pre-PSF application)
+
     # convolve
     im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
     im_conv = trim_fftconvolve(im_conv)
@@ -676,6 +682,34 @@ def test_create_cluster_im():
         im_conv = poisson.rvs(im_conv)
         print "poisson sum:", im_conv.sum()
 
+    # add background - preliminary approach with bit fudging
+    # (background not psf-ized)
+    if ADD_BACKGROUND:
+        fname = 'pn-test-bg-2cp.fits'
+        hdu = pyfits.open(fname)
+        background_map = trim_fftconvolve(hdu[0].data)
+
+        fname = 'pn-test-exp.fits'
+        hdu = pyfits.open(fname)
+        exp_map = trim_fftconvolve(hdu[0].data)
+
+        # poissonize
+        print "poisson sum:", background_map.sum()
+        if POISSONIZE_IMAGE:
+            background_map = poisson.rvs(background_map)
+
+        # add to the image
+        im_conv = im_conv + background_map
+
+        # # apply source masking
+        image_mask = exp_map / exp_map
+
+        hdu = pyfits.PrimaryHDU(image_mask, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('mask.fits', clobber=True)
+
+        # im_conv = im_conv * image_mask
+
     # write the output
     imname = 'cluster_image_cts.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -684,9 +718,11 @@ def test_create_cluster_im():
 
     # apply exposure map
     if APPLY_EXPOSURE_MAP:
-        fname = 'pn-test-exp.fits'
-        hdu = pyfits.open(fname)
-        exp_map = trim_fftconvolve(hdu[0].data)
+        if not(ADD_BACKGROUND):
+            # I do not yet have the exp map in memory
+            fname = 'pn-test-exp.fits'
+            hdu = pyfits.open(fname)
+            exp_map = trim_fftconvolve(hdu[0].data)
 
         # remove too low exp regions (max/10)
         exp_thresh_factor = 10.0
@@ -739,8 +775,8 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
     # setup for the beta model
-    num_cts  = 2000.0 # will be the normalization
-    rcore    = 8.0    # [pix]
+    num_cts  = 2.0e3             # will be the normalization
+    rcore    = 8.0               # [pix]
     beta     = 2.0 / 3.0
     norm     = 1.0
 
