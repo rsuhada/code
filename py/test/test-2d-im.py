@@ -660,6 +660,38 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
+def plot_synthetic_fit():
+    """
+    Do a simple profile plot of the synthetic image.
+    """
+    print cluster_profile
+
+    # cluster_profile_norm = cluster_profile / cluster_geometric_area
+
+    # do the plot
+    MAKE_PLOT=0
+    if MAKE_PLOT==1:
+        print "plotting psf x beta"
+        plt.figure()
+        plt.ion()
+        plt.clf()
+
+        plt.plot(r_cluster-0.5, cluster_profile_norm, label=r"source")
+
+        plt.xscale("log")
+        plt.yscale("log")
+        # plt.ylim(ymin=1e-3,ymax=5e0)
+
+        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+        plt.legend(loc=0, prop=prop, numpoints=1)
+
+        plt.draw()
+        # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+        plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.show()
+
+        # plt.savefig('psf_conv_test_beta.png')
+
 def test_create_cluster_im():
     """
     Creates a PSF convolved beta model image with poissonizations
@@ -767,6 +799,14 @@ def test_create_cluster_im():
 
     # do the fitting
 
+    (r, cluster_profile, cluster_geometric_area) = extract_profile_generic(im_conv_ctr, xcen, ycen)
+    r_cluster = linspace(0.0, r.max(), 100)
+
+    plot_synthetic_fit()
+
+
+
+
 ######################################################################
 ######################################################################
 ######################################################################
@@ -801,7 +841,6 @@ if __name__ == '__main__':
     # test_create_gauss()
     # test_create_psf()
     # test_create_beta()
-    test_create_cluster_im()
 
     # profile extration tests
     # test_profile_dirac()
@@ -811,5 +850,10 @@ if __name__ == '__main__':
     # convolution tests
     # test_convolve_psf_gauss()
     # test_convolve_psf_beta()
+
+
+    # the fitting suite
+    # test_create_cluster_im()
+    plot_synthetic_fit()
 
     print "...done!"
