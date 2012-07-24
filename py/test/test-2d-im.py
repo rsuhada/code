@@ -660,38 +660,6 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
-def plot_synthetic_fit():
-    """
-    Do a simple profile plot of the synthetic image.
-    """
-    print cluster_profile
-
-    # cluster_profile_norm = cluster_profile / cluster_geometric_area
-
-    # do the plot
-    MAKE_PLOT=0
-    if MAKE_PLOT==1:
-        print "plotting psf x beta"
-        plt.figure()
-        plt.ion()
-        plt.clf()
-
-        plt.plot(r_cluster-0.5, cluster_profile_norm, label=r"source")
-
-        plt.xscale("log")
-        plt.yscale("log")
-        # plt.ylim(ymin=1e-3,ymax=5e0)
-
-        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
-        plt.legend(loc=0, prop=prop, numpoints=1)
-
-        plt.draw()
-        # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-        plt.get_current_fig_manager().window.wm_geometry("+640+0")
-        plt.show()
-
-        # plt.savefig('psf_conv_test_beta.png')
-
 def test_create_cluster_im():
     """
     Creates a PSF convolved beta model image with poissonizations
@@ -797,13 +765,51 @@ def test_create_cluster_im():
         hdulist = pyfits.HDUList([hdu])                  # list all extensions here
         hdulist.writeto(imname, clobber=True)
 
+def plot_synthetic_fit():
+    """
+    Do a simple profile plot of the synthetic image.
+    """
+    fname = 'cluster_image_cts.fits'
+    hdu = pyfits.open(fname)
+    im_conv = hdu[0].data
+    hdr = hdu[0].header
+
+    # image setup
+    xsize = im_conv.shape[0]
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
     # do the fitting
+    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
+    r_model = linspace(0.0, r.max(), 100)
+    beta_profile = beta_model((1.0, rcore, beta), r_model)
 
-    (r, cluster_profile, cluster_geometric_area) = extract_profile_generic(im_conv_ctr, xcen, ycen)
-    r_cluster = linspace(0.0, r.max(), 100)
+    profile_norm = profile / geometric_area
 
-    plot_synthetic_fit()
+    # do the plot
+    MAKE_PLOT=1
+    if MAKE_PLOT==1:
+        print "plotting psf x beta"
+        plt.figure()
+        plt.ion()
+        plt.clf()
 
+        plt.plot(r-0.5, profile_norm, label=r"source")
+        plt.plot(r_model-0.5, beta_profile, label=r"model")
+
+        plt.xscale("log")
+        plt.yscale("log")
+        # plt.ylim(ymin=1e-3,ymax=5e0)
+
+        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+        plt.legend(loc=0, prop=prop, numpoints=1)
+
+        plt.draw()
+        plt.get_current_fig_manager().window.wm_geometry("+640+0")
+        plt.show()
+
+        # plt.savefig('psf_conv_test_beta.png')
 
 
 
