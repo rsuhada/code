@@ -788,58 +788,53 @@ def test_create_cluster_im():
         hdulist = pyfits.HDUList([hdu])                  # list all extensions here
         hdulist.writeto(imname, clobber=True)
 
-def fit_model_miuit():
+def minuit_beta_model(r, norm, rcore, beta):
+    """
+    Return 1D beta model in a minuit compatible way.
+
+    Arguments:
+    - 'norm': normalization of the model
+    - `rcore`: core radius
+    - `beta`: beta exponent
+    - `r`: radius
+    """
+
+    out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
+    return out
+
+def minuit_beta_model_likelihood(norm, rcore, beta):
+    """
+    Chi**2 likelihood function for the beta model fitting in a
+    minuit compatible way.
+
+    Arguments:
+    - 'norm': normalization of the model
+    - `rcore`: core radius
+    - `beta`: beta exponent
+    - `r`: radius
+    """
+    l = 0.0
+
+    for r, sb_src, sb_src_err in data:
+        l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
+
+    return l
+
+def fit_model_miuit(r, sb_src, sb_src_err):
     """
     Carry out the fitting using minuit
     """
-    ######################################################################
-    # simple beta fit
-
-    p0 = [5.0e-5, 10.0, 2.0/3.0]
-    rgrid = linspace(0.0, 100.0, 100)
 
     ######################################################################
     # minuit fit
 
     data = arrays2minuit(r, sb_src, sb_src_err)
 
-    def minuit_beta_model(r, norm, rcore, beta):
-        """
-        Return 2D beta model in a minuit compatible way.
-
-        Arguments:
-        - 'norm': normalization of the model
-        - `rcore`: core radius
-        - `beta`: beta exponent
-        - `r`: radius
-        """
-
-        out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
-        return out
-
-    def minuit_beta_model_likelihood(norm, rcore, beta):
-        """
-        Chi**2 likelihood function for the beta model fitting in a
-        minuit compatible way.
-
-        Arguments:
-        - 'norm': normalization of the model
-        - `rcore`: core radius
-        - `beta`: beta exponent
-        - `r`: radius
-        """
-        l = 0.0
-
-        for r, sb_src, sb_src_err in data:
-            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
-
-        return l
-
     ######################################################################
     # init parameters and fit limits
 
     norm0  = median(sb_src)
-    rcore0 = 18.0               # [arcsec]
+    rcore0 = 10.0               # [arcsec]
     beta0  = 2.0/3.0
 
     limit_norm  = (sb_src.min(), sb_src.max())
@@ -850,7 +845,6 @@ def fit_model_miuit():
 
     ######################################################################
     # the fit
-
     # setup
     model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
                                norm=norm0, rcore=rcore0, beta=beta0,
@@ -886,6 +880,7 @@ def fit_model_miuit():
 
     # sb_plotting_utils.plot_minuit_err_ellipse(ell1, ell2, ell3, fname)
 
+    return (par_fitted, errors_fitted)
 
 def plot_synthetic_fit():
     """
@@ -909,16 +904,18 @@ def plot_synthetic_fit():
     (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
     profile_norm = profile / geometric_area
 
+
+    # do the fitting
+
+
+
+
     # build the model
     model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy)
-
     model_2d = 2000.0 * model_2d/model_2d.sum()
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
     profile_norm_model = profile_model / geometric_area_model
-
-    # model = beta_model((1.0, rcore, beta), r_model)
-    # # do the fitting
 
     # do the plot
     MAKE_PLOT=1
@@ -1005,7 +1002,6 @@ if __name__ == '__main__':
     # convolution tests
     # test_convolve_psf_gauss()
     # test_convolve_psf_beta()
-
 
     # the fitting suite
     # test_create_cluster_im()
