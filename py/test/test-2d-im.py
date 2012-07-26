@@ -157,7 +157,8 @@ def extract_profile_generic(im, xcen, ycen):
     # sqdist
 
     distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
-    rgrid = arange(1, distmatrix.max()+1, 1.0)
+    # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
+    rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
     n = len(rgrid)
 
     x = zeros(n, dtype=float)   # profile
@@ -432,7 +433,7 @@ def test_profile_beta():
     """
     Load and plot a 2D beta
     """
-    imname = 'beta-100.fits'
+    imname = 'beta-100-pad.fits'
     hdu = pyfits.open(imname)
     im_beta = hdu[0].data
     hdr = hdu[0].header
@@ -443,7 +444,7 @@ def test_profile_beta():
     ycen = ysize/2
 
     (r, profile, geometric_area) = extract_profile_generic(im_beta, xcen, ycen)
-    r_model = linspace(0.0, r.max(), 100)
+    r_model = linspace(0.0, r.max(), 1000)
 
     beta_profile = beta_model((1.0, rcore, beta),r_model)
 
@@ -453,18 +454,18 @@ def test_profile_beta():
         plt.figure()
         plt.ion()
         plt.clf()
-        plt.plot(r - 0.5, profile/geometric_area)
+        plt.plot(r - 0.5, profile/geometric_area, marker='o')
         plt.plot(r_model, beta_profile,
             color='black',
             linestyle='-',              # -/--/-./:
             linewidth=1,                # linewidth=1
-            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
             markerfacecolor='black',
             markersize=0,               # markersize=6
             label=r"data"               # '__nolegend__'
             )
-        plt.xscale("linear")
-        plt.yscale("linear")
+        plt.xscale("log")
+        plt.yscale("log")
         plt.draw()
         plt.show()
         plt.get_current_fig_manager().window.wm_geometry("+1100+0")
@@ -660,12 +661,49 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
+def build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy):
+    """
+    Build a surface brighness model for fitting/plotting.
+    """
+    APPLY_PSF = True
+    DO_ZERO_PAD = True
+
+    print xsize, ysize, xcen, ycen, rcore, beta, instrument, theta, energy
+
+    # create beta
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    if DO_ZERO_PAD == 1:
+        im_beta[:, 0:xsize_obj] = 0.0
+        im_beta[:, xsize-xsize_obj:] = 0.0
+        im_beta[0:xsize_obj,:] = 0.0
+        im_beta[xsize-xsize_obj:,:] = 0.0
+
+    # create psf
+    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+    if DO_ZERO_PAD == 1:
+        im_psf[:, 0:xsize_obj] = 0.0
+        im_psf[:, xsize-xsize_obj:] = 0.0
+        im_psf[0:xsize_obj,:] = 0.0
+        im_psf[xsize-xsize_obj:,:] = 0.0
+
+    # FIXME: this needs bit reorganizing so that the proper number of
+    # source cts can be assured (while a realistc s/n is kept)
+    # note: also needs exp map correction
+    # add background model (pre-PSF application)
+
+    # convolve
+    im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+    im_conv = trim_fftconvolve(im_conv)
+
+    return im_conv
+
 def test_create_cluster_im():
     """
     Creates a PSF convolved beta model image with poissonizations
     """
     # settings
     POISSONIZE_IMAGE = True            # poissonize image?
+    DO_ZERO_PAD = True
     APPLY_EXPOSURE_MAP = True           # add exposure map
     ADD_BACKGROUND = True
 
@@ -685,34 +723,16 @@ def test_create_cluster_im():
 
     # if zero padded image for testing - this to check normalizations
     # - works fine
-    do_zero_pad = 0
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    # create beta
-    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
-    if do_zero_pad == 1:
-        im_beta[:, 0:xsize_obj] = 0.0
-        im_beta[:, xsize-xsize_obj:] = 0.0
-        im_beta[0:xsize_obj,:] = 0.0
-        im_beta[xsize-xsize_obj:,:] = 0.0
+    im_conv = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy)
 
-    # create psf
-    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-    if do_zero_pad == 1:
-        im_psf[:, 0:xsize_obj] = 0.0
-        im_psf[:, xsize-xsize_obj:] = 0.0
-        im_psf[0:xsize_obj,:] = 0.0
-        im_psf[xsize-xsize_obj:,:] = 0.0
-
-    # FIXME: this needs bit reorganizing so that the proper number of
-    # source cts can be assured (while a realistc s/n is kept)
-    # note: also needs exp map correction
-    # add background model (pre-PSF application)
-
-    # convolve
-    im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-    im_conv = trim_fftconvolve(im_conv)
+    # write the simple model output, no noise/background
+    imname = 'cluster_image_cts_model.fits'
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
     # normalization and poissonization
     im_conv = num_cts * im_conv/im_conv.sum()
@@ -720,6 +740,12 @@ def test_create_cluster_im():
     if POISSONIZE_IMAGE:
         im_conv = poisson.rvs(im_conv)
         print "poisson sum:", im_conv.sum()
+
+    # write the un-masked, no-bg output
+    imname = 'cluster_image_cts_poiss.fits'
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
     # add background - preliminary approach with bit fudging
     # (background not psf-ized)
@@ -738,7 +764,7 @@ def test_create_cluster_im():
     image_mask = create_background_mask(background_map)
     im_conv = im_conv * image_mask
 
-    # write the output
+    # write the masked output
     imname = 'cluster_image_cts.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
@@ -747,9 +773,6 @@ def test_create_cluster_im():
     # hdu = pyfits.PrimaryHDU(image_mask, hdr)    # extension - array, header
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     # hdulist.writeto('mask.fits', clobber=True)
-
-    # import os
-    # os.system("/Applications/SAOImage\ DS9.app/Contents/MacOS/ds9 mask.fits")
 
     # apply exposure map
     if APPLY_EXPOSURE_MAP:
@@ -765,11 +788,111 @@ def test_create_cluster_im():
         hdulist = pyfits.HDUList([hdu])                  # list all extensions here
         hdulist.writeto(imname, clobber=True)
 
+def fit_model_miuit():
+    """
+    Carry out the fitting using minuit
+    """
+    ######################################################################
+    # simple beta fit
+
+    p0 = [5.0e-5, 10.0, 2.0/3.0]
+    rgrid = linspace(0.0, 100.0, 100)
+
+    ######################################################################
+    # minuit fit
+
+    data = arrays2minuit(r, sb_src, sb_src_err)
+
+    def minuit_beta_model(r, norm, rcore, beta):
+        """
+        Return 2D beta model in a minuit compatible way.
+
+        Arguments:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+        - `r`: radius
+        """
+
+        out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
+        return out
+
+    def minuit_beta_model_likelihood(norm, rcore, beta):
+        """
+        Chi**2 likelihood function for the beta model fitting in a
+        minuit compatible way.
+
+        Arguments:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+        - `r`: radius
+        """
+        l = 0.0
+
+        for r, sb_src, sb_src_err in data:
+            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
+
+        return l
+
+    ######################################################################
+    # init parameters and fit limits
+
+    norm0  = median(sb_src)
+    rcore0 = 18.0               # [arcsec]
+    beta0  = 2.0/3.0
+
+    limit_norm  = (sb_src.min(), sb_src.max())
+    limit_rcore = (pixscale, r.max())
+    limit_beta  = (0.35, 3.0)         # (0.35, 3.0) - generous bounds
+                                      # for uncostrained fit of
+                                      # Alshino+10
+
+    ######################################################################
+    # the fit
+
+    # setup
+    model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
+                               norm=norm0, rcore=rcore0, beta=beta0,
+                               limit_norm=limit_norm,
+                               limit_rcore=limit_rcore,
+                               limit_beta=limit_beta,
+                               fix_norm=False,
+                               fix_rcore=False,
+                               fix_beta=False
+                               )
+    # fit
+    model_fit.migrad()
+
+    # model_fit.simplex()      # gradient-independent, but no goodness-of-fit eval/errors - check also starting point dependance
+
+    # errors around best fit
+    # model_fit.hesse()
+    # model_fit.minos()    # non-linear error estimation if the likelihood is non-parabolic around best-fit (on a ~1 sigma scale)
+
+    par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
+    errors_fitted = model_fit.errors
+
+    print "results: ", model_fit.values
+    print "errors:  ", errors_fitted
+
+    # # error ellipses
+    # ell_points = 500            # num. of samples for the surface
+    # fname = intab+'.err-ellipse.png'
+
+    # ell1 = sort(array(model_fit.contour("beta", "rcore", 1, ell_points)))
+    # ell2 = sort(array(model_fit.contour("beta", "rcore", 2, 2*ell_points)))
+    # ell3 = sort(array(model_fit.contour("beta", "rcore", 3, 3*ell_points)))
+
+    # sb_plotting_utils.plot_minuit_err_ellipse(ell1, ell2, ell3, fname)
+
+
 def plot_synthetic_fit():
     """
     Do a simple profile plot of the synthetic image.
     """
-    fname = 'cluster_image_cts.fits'
+    # fname = 'cluster_image_cts_poiss.fits'
+    fname = 'cluster_image_cts_poiss.fits'
     hdu = pyfits.open(fname)
     im_conv = hdu[0].data
     hdr = hdu[0].header
@@ -780,12 +903,22 @@ def plot_synthetic_fit():
     xcen = xsize/2
     ycen = ysize/2
 
-    # do the fitting
-    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
-    r_model = linspace(0.0, r.max(), 100)
-    beta_profile = beta_model((1.0, rcore, beta), r_model)
+    xsize_obj = 100
+    ysize_obj = xsize_obj
 
+    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
     profile_norm = profile / geometric_area
+
+    # build the model
+    model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy)
+
+    model_2d = 2000.0 * model_2d/model_2d.sum()
+
+    (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
+    profile_norm_model = profile_model / geometric_area_model
+
+    # model = beta_model((1.0, rcore, beta), r_model)
+    # # do the fitting
 
     # do the plot
     MAKE_PLOT=1
@@ -795,8 +928,25 @@ def plot_synthetic_fit():
         plt.ion()
         plt.clf()
 
-        plt.plot(r-0.5, profile_norm, label=r"source")
-        plt.plot(r_model-0.5, beta_profile, label=r"model")
+        plt.plot(r-0.5, profile_norm,
+            color='black',
+            linestyle='',              # -/--/:/-.
+            linewidth=0,                # linewidth=1
+            marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=4,               # markersize=6
+            label=r"source"               # '__nolegend__'
+            )
+
+        plt.plot(r_model-0.5, profile_norm_model,
+            color='red',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"model"               # '__nolegend__'
+            )
 
         plt.xscale("log")
         plt.yscale("log")
@@ -809,8 +959,7 @@ def plot_synthetic_fit():
         plt.get_current_fig_manager().window.wm_geometry("+640+0")
         plt.show()
 
-        # plt.savefig('psf_conv_test_beta.png')
-
+        plt.savefig('model_2d_vs_poi_data.png')
 
 
 ######################################################################
