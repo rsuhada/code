@@ -14,6 +14,7 @@ from scipy.signal import fftconvolve
 from scipy import delete
 from scipy import integrate
 from scipy.stats import poisson
+import minuit
 
 def make_2d_dirac(imsize, xcen, ycen):
     """
@@ -119,7 +120,7 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     im = im / norm
     return im
 
-def make_2d_beta(imsize, xcen, ycen, rcore, beta):
+def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     """
     Creates a 2D image of a beta model
 
@@ -138,7 +139,7 @@ def make_2d_beta(imsize, xcen, ycen, rcore, beta):
     for i in range(imsize[0]):
         for j in range(imsize[1]):
             r2 = sqdistance(xcen, ycen, j , i) # this is already squared
-            im[i, j] = (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+            im[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
 
     return im
 
@@ -340,7 +341,7 @@ def test_create_beta():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
     if do_zero_pad == 1:
         im_beta[:, 0:xsize_obj] = 0.0
         im_beta[:, xsize-xsize_obj:] = 0.0
@@ -661,17 +662,15 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
-def build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy):
+def build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
     Build a surface brighness model for fitting/plotting.
     """
     APPLY_PSF = True
     DO_ZERO_PAD = True
 
-    print xsize, ysize, xcen, ycen, rcore, beta, instrument, theta, energy
-
     # create beta
-    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, rcore, beta)
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
     if DO_ZERO_PAD == 1:
         im_beta[:, 0:xsize_obj] = 0.0
         im_beta[:, xsize-xsize_obj:] = 0.0
@@ -802,24 +801,6 @@ def minuit_beta_model(r, norm, rcore, beta):
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
 
-def minuit_beta_model_likelihood(norm, rcore, beta):
-    """
-    Chi**2 likelihood function for the beta model fitting in a
-    minuit compatible way.
-
-    Arguments:
-    - 'norm': normalization of the model
-    - `rcore`: core radius
-    - `beta`: beta exponent
-    - `r`: radius
-    """
-    l = 0.0
-
-    for r, sb_src, sb_src_err in data:
-        l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
-
-    return l
-
 def fit_model_miuit(r, sb_src, sb_src_err):
     """
     Carry out the fitting using minuit
@@ -834,17 +815,40 @@ def fit_model_miuit(r, sb_src, sb_src_err):
     # init parameters and fit limits
 
     norm0  = median(sb_src)
-    rcore0 = 10.0               # [arcsec]
+    rcore0 = 10.0               # [pix]
     beta0  = 2.0/3.0
 
     limit_norm  = (sb_src.min(), sb_src.max())
-    limit_rcore = (pixscale, r.max())
+    limit_rcore = (1.0, r.max())
     limit_beta  = (0.35, 3.0)         # (0.35, 3.0) - generous bounds
                                       # for uncostrained fit of
                                       # Alshino+10
 
     ######################################################################
     # the fit
+
+    def minuit_beta_model_likelihood(norm, rcore, beta):
+        """
+        Chi**2 likelihood function for the beta model fitting in a
+        minuit compatible way.
+
+        Arguments:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+        - `r`: radius
+        """
+        # FIXME: it seems that "data" can'the be passed and therefore
+        # likelihood calucalation and the fitting have to be at the
+        # same level/namespace
+        l = 0.0
+
+        for r, sb_src, sb_src_err in data:
+            # fixme - needs to add the proper model for fitting
+            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
+
+        return l
+
     # setup
     model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
                                norm=norm0, rcore=rcore0, beta=beta0,
@@ -860,27 +864,21 @@ def fit_model_miuit(r, sb_src, sb_src_err):
 
     # model_fit.simplex()      # gradient-independent, but no goodness-of-fit eval/errors - check also starting point dependance
 
-    # errors around best fit
+    # # errors around best fit
     # model_fit.hesse()
     # model_fit.minos()    # non-linear error estimation if the likelihood is non-parabolic around best-fit (on a ~1 sigma scale)
 
-    par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
-    errors_fitted = model_fit.errors
-
-    print "results: ", model_fit.values
-    print "errors:  ", errors_fitted
-
     # # error ellipses
-    # ell_points = 500            # num. of samples for the surface
-    # fname = intab+'.err-ellipse.png'
+    # ell_points = 100            # num. of samples for the surface
+    # fname = 'beta-rcore-err-ellipse.png'
 
     # ell1 = sort(array(model_fit.contour("beta", "rcore", 1, ell_points)))
     # ell2 = sort(array(model_fit.contour("beta", "rcore", 2, 2*ell_points)))
     # ell3 = sort(array(model_fit.contour("beta", "rcore", 3, 3*ell_points)))
 
-    # sb_plotting_utils.plot_minuit_err_ellipse(ell1, ell2, ell3, fname)
+    # plot_minuit_err_ellipse(ell1, ell2, ell3, fname)
 
-    return (par_fitted, errors_fitted)
+    return (model_fit.values, model_fit.errors)
 
 def plot_synthetic_fit():
     """
@@ -903,16 +901,38 @@ def plot_synthetic_fit():
 
     (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
     profile_norm = profile / geometric_area
-
+    profile_norm_err = sqrt(profile_norm)
+    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
     # do the fitting
+    (par_fitted, errors_fitted) = fit_model_miuit(r, profile_norm, profile_norm_err)
 
+    norm_fit  = par_fitted["norm"]
+    rcore_fit = par_fitted["rcore"]
+    beta_fit  = par_fitted["beta"]
 
+    norm_fit_err  = errors_fitted["norm"]
+    rcore_fit_err = errors_fitted["rcore"]
+    beta_fit_err  = errors_fitted["beta"]
 
+    # par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
+    # errors_fitted = model_fit.errors
+
+    # print results
+    print
+    print "beta true: ", beta
+    print "rcore true: ", rcore
+    print
+    print "beta: ", beta_fit, beta_fit_err
+    print "rcore: ", rcore_fit, rcore_fit_err
+    print "norm: ", norm_fit, norm_fit_err
+    print
+
+    # norm_fit = 1.0
 
     # build the model
-    model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy)
-    model_2d = 2000.0 * model_2d/model_2d.sum()
+    model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
+    # model_2d = 2000.0 * model_2d/model_2d.sum()
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
     profile_norm_model = profile_model / geometric_area_model
