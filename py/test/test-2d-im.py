@@ -801,7 +801,7 @@ def minuit_beta_model(r, norm, rcore, beta):
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
 
-def fit_model_miuit(r, sb_src, sb_src_err):
+def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
     Carry out the fitting using minuit
     """
@@ -824,9 +824,6 @@ def fit_model_miuit(r, sb_src, sb_src_err):
                                       # for uncostrained fit of
                                       # Alshino+10
 
-    ######################################################################
-    # the fit
-
     def minuit_beta_model_likelihood(norm, rcore, beta):
         """
         Chi**2 likelihood function for the beta model fitting in a
@@ -838,9 +835,6 @@ def fit_model_miuit(r, sb_src, sb_src_err):
         - `beta`: beta exponent
         - `r`: radius
         """
-        # FIXME: it seems that "data" can'the be passed and therefore
-        # likelihood calucalation and the fitting have to be at the
-        # same level/namespace
         l = 0.0
 
         for r, sb_src, sb_src_err in data:
@@ -849,17 +843,96 @@ def fit_model_miuit(r, sb_src, sb_src_err):
 
         return l
 
-    # setup
-    model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
-                               norm=norm0, rcore=rcore0, beta=beta0,
-                               limit_norm=limit_norm,
-                               limit_rcore=limit_rcore,
-                               limit_beta=limit_beta,
+    ######################################################################
+    # the fit likelihood
+    def minuit_sb_model_likelihood(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+        """
+        Chi**2 likelihood function for the surface brightness model
+        fitting in a minuit compatible way (psf x beta).
+
+        Arguments:
+        See arguments of build_sb_model. The data is passed
+        implicitely (and therefore likelihood calucalation and the
+        fitting have to be at the same level/namespace).
+        """
+
+        l = 0.0
+
+        # build the model
+        model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
+        (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
+        profile_norm_model = profile_model / geometric_area_model
+
+        for r, sb_src, sb_src_err in data:
+            # calculate the likelihood
+            l += (profile_norm_model - sb_src)**2 / sb_src_err**2
+
+        return l
+
+    # setup model
+    model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
+                               #
+                               norm=norm0,
                                fix_norm=False,
+                               limit_norm=limit_norm,
+                               #
+                               rcore=rcore0,
                                fix_rcore=False,
-                               fix_beta=False
+                               limit_rcore=limit_rcore,
+                               #
+                               beta=beta0,
+                               fix_beta=False,
+                               limit_beta=limit_beta,
+                               #
+                               xsize=xsize,
+                               fix_xsize=True,
+                               limit_xsize=None,
+                               #
+                               ysize=ysize,
+                               fix_ysize=True,
+                               limit_ysize=None,
+                               #
+                               xsize_obj=xsize_obj,
+                               fix_xsize_obj=True,
+                               limit_xsize_obj=None,
+                               #
+                               ysize_obj=ysize_obj,
+                               fix_ysize_obj=True,
+                               limit_ysize_obj=None,
+                               #
+                               xcen=xcen,
+                               fix_xcen=True,
+                               limit_xcen=None,
+                               #
+                               ycen=ycen,
+                               fix_ycen=True,
+                               limit_ycen=None,
+                               #
+                               instrument=instrument,
+                               fix_instrument=True,
+                               limit_instrument=None,
+                               #
+                               theta=theta,
+                               fix_theta=True,
+                               limit_theta=None,
+                               #
+                               energy=energy,
+                               fix_energy=True,
+                               limit_energy=None
                                )
-    # fit
+
+    # # fit simple beta
+    # model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
+    #                            norm=norm0, rcore=rcore0, beta=beta0,
+    #                            limit_norm=limit_norm,
+    #                            limit_rcore=limit_rcore,
+    #                            limit_beta=limit_beta,
+    #                            fix_norm=False,
+    #                            fix_rcore=False,
+    #                            fix_beta=False
+    #                            )
+
+    # fit model
     model_fit.migrad()
 
     # model_fit.simplex()      # gradient-independent, but no goodness-of-fit eval/errors - check also starting point dependance
@@ -899,15 +972,16 @@ def plot_synthetic_fit():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
+
     (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
     profile_norm = profile / geometric_area
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
     # do the fitting
-    (par_fitted, errors_fitted) = fit_model_miuit(r, profile_norm, profile_norm_err)
+    (par_fitted, errors_fitted) = fit_model_miuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
-    norm_fit  = par_fitted["norm"]
+    norm  = par_fitted["norm"]
     rcore_fit = par_fitted["rcore"]
     beta_fit  = par_fitted["beta"]
 
@@ -1000,10 +1074,10 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [piy]
 
     # setup for the beta model
-    num_cts  = 2.0e3             # will be the normalization
-    rcore    = 8.0               # [pix]
-    beta     = 2.0 / 3.0
-    norm     = 1.0
+    num_cts       = 2.0e3             # will be the normalization
+    rcore         = 8.0               # [pix]
+    beta          = 2.0 / 3.0
+    normalization = 1.0
 
     # parameter calculation test
     # test_psf_parameter()
