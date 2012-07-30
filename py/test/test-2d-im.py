@@ -857,7 +857,7 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
         """
 
         l = 0.0
-
+        energy=1.5
         # build the model
         model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
@@ -886,39 +886,45 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
                                #
                                xsize=xsize,
                                fix_xsize=True,
-                               limit_xsize=None,
+                               # limit_xsize=None,
                                #
                                ysize=ysize,
                                fix_ysize=True,
-                               limit_ysize=None,
+                               # limit_ysize=None,
                                #
                                xsize_obj=xsize_obj,
                                fix_xsize_obj=True,
-                               limit_xsize_obj=None,
+                               # limit_xsize_obj=None,
                                #
                                ysize_obj=ysize_obj,
                                fix_ysize_obj=True,
-                               limit_ysize_obj=None,
+                               # limit_ysize_obj=None,
                                #
                                xcen=xcen,
                                fix_xcen=True,
-                               limit_xcen=None,
+                               # limit_xcen=None,
                                #
                                ycen=ycen,
                                fix_ycen=True,
-                               limit_ycen=None,
+                               # limit_ycen=None,
                                #
                                instrument=instrument,
                                fix_instrument=True,
-                               limit_instrument=None,
+                               # limit_instrument=None,
                                #
                                theta=theta,
                                fix_theta=True,
-                               limit_theta=None,
+                               # limit_theta=None,
                                #
                                energy=energy,
-                               fix_energy=True,
-                               limit_energy=None
+                               fix_energy=False,
+                               # limit_energy=None
+
+                               # FIXME: Mon Jul 30 14:32:19 2012:
+                               # problem with parameter passing -
+                               # debug by expanding minuit_beta_model
+                               # below
+
                                )
 
     # # fit simple beta
