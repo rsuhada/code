@@ -924,7 +924,6 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
                                # problem with parameter passing -
                                # debug by expanding minuit_beta_model
                                # below
-
                                )
 
     # # fit simple beta
