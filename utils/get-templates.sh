@@ -21,8 +21,8 @@ echo ${name} ${obsid}
 
 # conf file
 cp ~/data1/sw/esaspi/templates/template.conf configs/${name}.conf
-sed -i .bk "s/1XXXXXXXXXX/${obsid}/g" configs/${name}.conf ; rm configs/${name}.conf
-sed -i .bk "s/2XXXXXXXXXXXXXXXXX/${name}/g" configs/${name}.conf ; rm configs/${name}.conf
+sed -i.bk "s/1XXXXXXXXXX/${obsid}/g" configs/${name}.conf ; rm configs/${name}.conf.bk
+sed -i.bk "s/2XXXXXXXXXXXXXXXXX/${name}/g" configs/${name}.conf ; rm configs/${name}.conf.bk
 
 # modules file
 cp ~/data1/sw/esaspi/templates/template.modules configs/${name}.modules

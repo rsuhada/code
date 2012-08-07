@@ -604,4 +604,4 @@ heainit
 sas11
 # should be now able to run everything
 # path settings are in run-esaspi.sh and should be automatically
-# recognized
+# recognize
