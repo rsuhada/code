@@ -45,9 +45,9 @@ print $2 "@@@" $1 "@@@" $11 "@@@" $3 "@@@" $9 "@@@" $10 "@@@" $17 "@@@" $12    #
 }' ${tab}.tmp > ${outtab}
 
 # fix spaces/comment strings
-sed -i "" 's/ /_/g' ${outtab}    # remove spaces
-sed -i "" 's/@@@/ /g' ${outtab}  # add spaces where they should be
-sed -i "" 's/-/-/g' ${outtab} # fix encoding inconsitency
+sed -i .bk 's/ /_/g' ${outtab} ; rm ${outtab}.bk    # remove spaces
+sed -i .bk 's/@@@/ /g' ${outtab} ; rm ${outtab}.bk  # add spaces where they should be
+sed -i .bk 's/-/-/g' ${outtab} ; rm ${outtab}.bk    # fix encoding inconsitency
 
 # prepand the output table with header info
 echo "# xsa_obj_name obsid obs_on_time ra60 de60 obs_start obs_end expiry_date pi_name" |cat - ${outtab} >> /tmp/out && mv /tmp/out ${outtab}

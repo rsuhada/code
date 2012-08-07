@@ -594,3 +594,14 @@ other references - helpful:
 4. DONE the calc path needs to be refactored
 5. DONE ideally setup softlinked dirs to mirror notebook...
 6. check across code ~ vs. hard linked home paths
+
+######################################################################
+# running on depsroc
+
+# sync esaspi
+source ~/bin/setup_desproc_paths.sh
+heainit
+sas11
+# should be now able to run everything
+# path settings are in run-esaspi.sh and should be automatically
+# recognized
