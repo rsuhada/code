@@ -19,6 +19,7 @@ fi
 # main
 
 tab=$1
+outtab=${tab}.parsed
 
 if [[ ! -e $tab  ]]
 then
@@ -40,17 +41,18 @@ gsub(/s /,"@@@", $3)
 gsub(/d/,":", $3)
 gsub("[:'"'"']",":", $3)
 gsub(/"/,"", $3)
-print $2 "@@@" $1 "@@@" $11 "@@@" $3 "@@@" $9 "@@@" $10 "@@@" $17 "@@@" $12
-}' ${tab}.tmp > ${tab}.parsed
+print $2 "@@@" $1 "@@@" $11 "@@@" $3 "@@@" $9 "@@@" $10 "@@@" $17 "@@@" $12    # @@@ is a format placeholder
+}' ${tab}.tmp > ${outtab}
 
 # fix spaces/comment strings
-sed -i "" 's/ /_/g' ${tab}.parsed    # remove spaces
-sed -i "" 's/@@@/ /g' ${tab}.parsed  # add spaces where they should be
+sed -i "" 's/ /_/g' ${outtab}    # remove spaces
+sed -i "" 's/@@@/ /g' ${outtab}  # add spaces where they should be
+sed -i "" 's/-/-/g' ${outtab} # fix encoding inconsitency
 
 # prepand the output table with header info
-echo "# obj_name obsid obs_on_time ra60 de60 obs_start obs_end expiry_date pi_name" |cat - ${tab}.parsed >> /tmp/out && mv /tmp/out ${tab}.parsed
+echo "# xsa_obj_name obsid obs_on_time ra60 de60 obs_start obs_end expiry_date pi_name" |cat - ${outtab} >> /tmp/out && mv /tmp/out ${outtab}
 
 rm ${tab}.tmp
 
 echo "...done! Output written to:"
-echo ${tab}.parsed
+echo ${outtab}
