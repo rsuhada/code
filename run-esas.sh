@@ -121,7 +121,7 @@ else
 
     export SAS_DIR="/home/moon/rsuhada/big/sw/sas.11.0.0/xmmsas_20110223_1801"
     export SAS_PATH="/home/moon/rsuhada/big/sw/sas.11.0.0/xmmsas_20110223_1801"
-    export SAS_CCFPATH="/home/moon/rsuhada/big/xmm_calib/ccf/"
+    export SAS_CCFPATH="/home/moon/rsuhada/big/sw/xmm_calib/ccf/"
     export SAS_MEMORY_MODEL=high
     export SAS_VERBOSITY=4
 
