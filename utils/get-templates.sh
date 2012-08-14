@@ -27,4 +27,4 @@ sed -i.bk "s/2XXXXXXXXXXXXXXXXX/${name}/g" configs/${name}.conf ; rm configs/${n
 # modules file
 cp ~/data1/sw/esaspi/templates/template.modules configs/${name}.modules
 
-
+# the analysis file: note that it might be rewriten by prep-odf-dir.sh and/or can have a different name as defined by $NOTESFILE in the main pipe

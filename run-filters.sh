@@ -89,14 +89,16 @@ m3prefix_string=${m3prefix_string%?}"'"
 
 echo
 echo "Prefixes:"
-(
+
 echo
 echo $pnprefix_string
 echo $m1prefix_string
 echo $m2prefix_string
 echo $m3prefix_string
 echo
-) | tee -a $NOTESFILE
+
+sed -i.bk "s/prefixes/prefixes\n${pnprefix_string}\n${m1prefix_string}\n${m2prefix_string}\n${m3prefix_string}/g" ${NOTESFILE} ; rm ${NOTESFILE}.bk
+
 
 # clean up temporary files
 rm -f *.FIT
