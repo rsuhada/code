@@ -676,25 +676,75 @@ def build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, 
         im_beta[:, xsize-xsize_obj:] = 0.0
         im_beta[0:xsize_obj,:] = 0.0
         im_beta[xsize-xsize_obj:,:] = 0.0
+    im_conv = im_beta
 
+    if APPLY_PSF:
     # create psf
-    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-    if DO_ZERO_PAD == 1:
-        im_psf[:, 0:xsize_obj] = 0.0
-        im_psf[:, xsize-xsize_obj:] = 0.0
-        im_psf[0:xsize_obj,:] = 0.0
-        im_psf[xsize-xsize_obj:,:] = 0.0
+        im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+        if DO_ZERO_PAD == 1:
+            im_psf[:, 0:xsize_obj] = 0.0
+            im_psf[:, xsize-xsize_obj:] = 0.0
+            im_psf[0:xsize_obj,:] = 0.0
+            im_psf[xsize-xsize_obj:,:] = 0.0
 
     # FIXME: this needs bit reorganizing so that the proper number of
     # source cts can be assured (while a realistc s/n is kept)
     # note: also needs exp map correction
     # add background model (pre-PSF application)
 
-    # convolve
-    im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-    im_conv = trim_fftconvolve(im_conv)
+        # convolve
+        im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+        im_conv = trim_fftconvolve(im_conv)
 
     return im_conv
+
+def test_create_beta_im():
+    """
+    Create a simple testimage - poissonized beta model no psf
+    """
+    # settings
+    POISSONIZE_IMAGE = False            # poissonize image?
+    DO_ZERO_PAD = True
+    APPLY_EXPOSURE_MAP = True           # add exposure map
+    ADD_BACKGROUND = True
+
+    # get a header
+    fname = 'pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    # image setup
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+
+    # create beta
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, normalization, rcore, beta)
+
+    im_beta = num_cts * im_beta/im_beta.sum()
+
+    if POISSONIZE_IMAGE:
+        im_beta = poisson.rvs(im_beta)
+        print "poisson sum:", im_beta.sum()
+
+    if DO_ZERO_PAD == 1:
+        im_beta[:, 0:xsize_obj] = 0.0
+        im_beta[:, xsize-xsize_obj:] = 0.0
+        im_beta[0:xsize_obj,:] = 0.0
+        im_beta[xsize-xsize_obj:,:] = 0.0
+
+    # poissonized beta model image [counts] - no background/mask
+    imname = 'beta_image_cts.fits'
+    hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
 
 def test_create_cluster_im():
     """
@@ -725,12 +775,12 @@ def test_create_cluster_im():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    im_conv = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, rcore, beta, instrument, theta, energy)
+    im_conv = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
-    # write the simple model output, no noise/background
+    # smooth model - beta x PSF, no noise/background/mask
     imname = 'cluster_image_cts_model.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
     # normalization and poissonization
@@ -740,7 +790,7 @@ def test_create_cluster_im():
         im_conv = poisson.rvs(im_conv)
         print "poisson sum:", im_conv.sum()
 
-    # write the un-masked, no-bg output
+    # poissonized model -  beta x PSF, poissonized, no background/mask
     imname = 'cluster_image_cts_poiss.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
@@ -763,7 +813,7 @@ def test_create_cluster_im():
     image_mask = create_background_mask(background_map)
     im_conv = im_conv * image_mask
 
-    # write the masked output
+    # poissonized model with masking and background -  beta x PSF, poissonized, has background and masked ps
     imname = 'cluster_image_cts.fits'
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
@@ -801,7 +851,7 @@ def minuit_beta_model(r, norm, rcore, beta):
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
 
-def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
     Carry out the fitting using minuit
     """
@@ -827,6 +877,7 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
         """
         Chi**2 likelihood function for the beta model fitting in a
         minuit compatible way.
+        Model: beta model
 
         Arguments:
         - 'norm': normalization of the model
@@ -837,7 +888,6 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
         l = 0.0
 
         for r, sb_src, sb_src_err in data:
-            # fixme - needs to add the proper model for fitting
             l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
 
         return l
@@ -848,6 +898,8 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
         """
         Chi**2 likelihood function for the surface brightness model
         fitting in a minuit compatible way (psf x beta).
+
+        Model: beta x psf
 
         Arguments:
         See arguments of build_sb_model. The data is passed
@@ -865,11 +917,9 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
         for r, sb_src, sb_src_err in data:
             # calculate the likelihood
             l += (profile_norm_model - sb_src)**2 / sb_src_err**2
-
         return l
 
     ######################################################################
-
     # # setup sb model
     # model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
     #                            #
@@ -959,7 +1009,8 @@ def plot_synthetic_fit():
     Do a simple profile plot of the synthetic image.
     """
     # fname = 'cluster_image_cts_poiss.fits'
-    fname = 'cluster_image_cts_poiss.fits'
+    # fname = 'beta_image_poi_cts.fits'
+    fname = 'beta_image_cts.fits'
     hdu = pyfits.open(fname)
     im_conv = hdu[0].data
     hdr = hdu[0].header
@@ -973,14 +1024,13 @@ def plot_synthetic_fit():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-
     (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
     profile_norm = profile / geometric_area
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
     # do the fitting
-    (par_fitted, errors_fitted) = fit_model_miuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+    (par_fitted, errors_fitted) = fit_model_minuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
     norm_fit  = par_fitted["norm"]
     rcore_fit = par_fitted["rcore"]
@@ -1076,8 +1126,8 @@ if __name__ == '__main__':
 
     # setup for the beta model
     num_cts       = 2.0e3             # will be the normalization
-    rcore         = 8.0               # [pix]
-    beta          = 2.0 / 3.0
+    rcore         = 18.0               # [pix]
+    beta          = 4.0 / 3.0
     normalization = 1.0
 
     # parameter calculation test
@@ -1099,6 +1149,7 @@ if __name__ == '__main__':
     # test_convolve_psf_beta()
 
     # the fitting suite
+    test_create_beta_im()
     # test_create_cluster_im()
     plot_synthetic_fit()
 
