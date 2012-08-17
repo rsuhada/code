@@ -808,7 +808,6 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
 
     ######################################################################
     # minuit fit
-
     data = arrays2minuit(r, sb_src, sb_src_err)
 
     ######################################################################
@@ -869,73 +868,70 @@ def fit_model_miuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, x
 
         return l
 
-    # setup model
-    model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
-                               #
-                               norm=norm0,
-                               fix_norm=False,
-                               limit_norm=limit_norm,
-                               #
-                               rcore=rcore0,
-                               fix_rcore=False,
-                               limit_rcore=limit_rcore,
-                               #
-                               beta=beta0,
-                               fix_beta=False,
-                               limit_beta=limit_beta,
-                               #
-                               xsize=xsize,
-                               fix_xsize=True,
-                               # limit_xsize=None,
-                               #
-                               ysize=ysize,
-                               fix_ysize=True,
-                               # limit_ysize=None,
-                               #
-                               xsize_obj=xsize_obj,
-                               fix_xsize_obj=True,
-                               # limit_xsize_obj=None,
-                               #
-                               ysize_obj=ysize_obj,
-                               fix_ysize_obj=True,
-                               # limit_ysize_obj=None,
-                               #
-                               xcen=xcen,
-                               fix_xcen=True,
-                               # limit_xcen=None,
-                               #
-                               ycen=ycen,
-                               fix_ycen=True,
-                               # limit_ycen=None,
-                               #
-                               instrument=instrument,
-                               fix_instrument=True,
-                               # limit_instrument=None,
-                               #
-                               theta=theta,
-                               fix_theta=True,
-                               # limit_theta=None,
-                               #
-                               energy=energy,
-                               fix_energy=False,
-                               # limit_energy=None
+    ######################################################################
 
-                               # FIXME: Mon Jul 30 14:32:19 2012:
-                               # problem with parameter passing -
-                               # debug by expanding minuit_beta_model
-                               # below
-                               )
-
-    # # fit simple beta
-    # model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
-    #                            norm=norm0, rcore=rcore0, beta=beta0,
-    #                            limit_norm=limit_norm,
-    #                            limit_rcore=limit_rcore,
-    #                            limit_beta=limit_beta,
+    # # setup sb model
+    # model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
+    #                            #
+    #                            norm=norm0,
     #                            fix_norm=False,
+    #                            limit_norm=limit_norm,
+    #                            #
+    #                            rcore=rcore0,
     #                            fix_rcore=False,
-    #                            fix_beta=False
-    #                            )
+    #                            limit_rcore=limit_rcore,
+    #                            #
+    #                            beta=beta0,
+    #                            fix_beta=False,
+    #                            limit_beta=limit_beta,
+    #                            #
+    #                            xsize=xsize,
+    #                            fix_xsize=True,
+    #                            # limit_xsize=None,
+    #                            #
+    #                            ysize=ysize,
+    #                            fix_ysize=True,
+    #                            # limit_ysize=None,
+    #                            #
+    #                            xsize_obj=xsize_obj,
+    #                            fix_xsize_obj=True,
+    #                            # limit_xsize_obj=None,
+    #                            #
+    #                            ysize_obj=ysize_obj,
+    #                            fix_ysize_obj=True,
+    #                            # limit_ysize_obj=None,
+    #                            #
+    #                            xcen=xcen,
+    #                            fix_xcen=True,
+    #                            # limit_xcen=None,
+    #                            #
+    #                            ycen=ycen,
+    #                            fix_ycen=True,
+    #                            # limit_ycen=None,
+    #                            #
+    #                            instrument=instrument,
+    #                            fix_instrument=True,
+    #                            # limit_instrument=None,
+    #                            #
+    #                            theta=theta,
+    #                            fix_theta=True,
+    #                            # limit_theta=None,
+    #                            #
+    #                            energy=energy,
+    #                            fix_energy=False,
+    #                            # limit_energy=None
+                               # )
+
+    # fit simple beta
+    model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
+                               norm=norm0, rcore=rcore0, beta=beta0,
+                               limit_norm=limit_norm,
+                               limit_rcore=limit_rcore,
+                               limit_beta=limit_beta,
+                               fix_norm=False,
+                               fix_rcore=False,
+                               fix_beta=False
+                               )
 
     # fit model
     model_fit.migrad()
@@ -986,7 +982,7 @@ def plot_synthetic_fit():
     # do the fitting
     (par_fitted, errors_fitted) = fit_model_miuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
-    norm  = par_fitted["norm"]
+    norm_fit  = par_fitted["norm"]
     rcore_fit = par_fitted["rcore"]
     beta_fit  = par_fitted["beta"]
 
