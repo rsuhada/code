@@ -1,4 +1,47 @@
 from numpy import *
+import pyfits
+
+######################################################################
+# library collecting misc. utility functions for the surface
+# brightness pipeline
+######################################################################
+
+def zero_pad_image(image, keep_radius):
+    """
+    Zero pad image - remove borders of a 2D array
+    # FIXME: currently assumes image centered (maybe want to have a general approach?)
+
+    Arguments:
+    - `image`: 2d numpy array
+    - `keep_radius`:
+    """
+    xsize = image.shape[0]
+
+    image[:, 0:keep_radius]      = 0.0
+    image[:, xsize-keep_radius:] = 0.0
+    image[0:keep_radius,:]       = 0.0
+    image[xsize-keep_radius:,:]  = 0.0
+
+    return image
+
+
+def load_fits_im(file_name='', extension=0):
+    """
+    Load an image from fits file extension, return also header.
+    Only really useful if you want an image from single extension.
+
+    Arguments:
+    - 'file_name': fits file name
+    - 'extension': number of extension to get image from
+    """
+    # FIXME: add file existence check
+
+    # hdu   = fopen(file_name)
+    hdu   = pyfits.open(file_name)
+    image = hdu[extension].data
+    hdr   = hdu[extension].header
+
+    return image, hdr
 
 def sqdistance(xcen, ycen, x, y):
     """

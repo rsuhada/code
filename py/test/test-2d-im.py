@@ -238,7 +238,7 @@ def test_create_gauss():
     ycen = ysize/2
 
     # if zero padded image for testing - this to check normalizations
-    do_zero_pad = 1
+    DO_ZERO_PAD = True
     xsize_obj = 100
     ysize_obj = xsize_obj
 
@@ -249,7 +249,7 @@ def test_create_gauss():
 
     im_gauss = peak_scale*make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, a_sigmax, a_sigmay)
 
-    if do_zero_pad == 1:
+    if DO_ZERO_PAD:
         im_gauss[:, 0:xsize_obj] = 0.0
         im_gauss[:, xsize-xsize_obj:] = 0.0
         im_gauss[0:xsize_obj,:] = 0.0
@@ -265,7 +265,7 @@ def test_create_gauss():
     # second gauss - "the PSF" - i.e. normed to 1
     imname = 'gauss-b-100-pad.fits'
     im_gauss = make_2d_uncorr_gauss((xsize, ysize), xcen, ycen, b_sigmax, b_sigmay)
-    if do_zero_pad == 1:
+    if DO_ZERO_PAD:
         im_gauss[:, 0:xsize_obj] = 0.0
         im_gauss[:, xsize-xsize_obj:] = 0.0
         im_gauss[0:xsize_obj,:] = 0.0
@@ -304,12 +304,12 @@ def test_create_psf():
     ycen = ysize/2
 
     # if zero padded image for testing - this to check normalizations
-    do_zero_pad = 0
+    DO_ZERO_PAD = False
     xsize_obj = 100
     ysize_obj = xsize_obj
 
     im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-    if do_zero_pad == 1:
+    if DO_ZERO_PAD:
         im_psf[:, 0:xsize_obj] = 0.0
         im_psf[:, xsize-xsize_obj:] = 0.0
         im_psf[0:xsize_obj,:] = 0.0
@@ -337,12 +337,12 @@ def test_create_beta():
 
     # if zero padded image for testing - this to check normalizations
     # - works fine
-    do_zero_pad = 0
+    DO_ZERO_PAD = False
     xsize_obj = 100
     ysize_obj = xsize_obj
 
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
-    if do_zero_pad == 1:
+    if DO_ZERO_PAD:
         im_beta[:, 0:xsize_obj] = 0.0
         im_beta[:, xsize-xsize_obj:] = 0.0
         im_beta[0:xsize_obj,:] = 0.0
@@ -671,17 +671,19 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
 
     # create beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
-    if DO_ZERO_PAD == 1:
-        im_beta[:, 0:xsize_obj] = 0.0
-        im_beta[:, xsize-xsize_obj:] = 0.0
-        im_beta[0:xsize_obj,:] = 0.0
-        im_beta[xsize-xsize_obj:,:] = 0.0
-    im_conv = im_beta
+    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
+
+        # im_beta[:, 0:xsize_obj] = 0.0
+        # im_beta[:, xsize-xsize_obj:] = 0.0
+        # im_beta[0:xsize_obj,:] = 0.0
+        # im_beta[xsize-xsize_obj:,:] = 0.0
+
+    im_output = im_beta
 
     if APPLY_PSF:
     # create psf
         im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-        if DO_ZERO_PAD == 1:
+        if DO_ZERO_PAD:
             im_psf[:, 0:xsize_obj] = 0.0
             im_psf[:, xsize-xsize_obj:] = 0.0
             im_psf[0:xsize_obj,:] = 0.0
@@ -693,10 +695,10 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
     # add background model (pre-PSF application)
 
         # convolve
-        im_conv = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-        im_conv = trim_fftconvolve(im_conv)
+        im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+        im_output = trim_fftconvolve(im_conv)
 
-    return im_conv
+    return im_output
 
 def test_create_beta_im():
     """
@@ -705,8 +707,8 @@ def test_create_beta_im():
     # settings
     POISSONIZE_IMAGE   = True            # poissonize image?
     DO_ZERO_PAD        = True
-    APPLY_EXPOSURE_MAP = True           # add exposure map
-    ADD_BACKGROUND     = True
+    APPLY_EXPOSURE_MAP = False
+    ADD_BACKGROUND     = False
 
     # get a header
     fname = 'pn-test.fits'
@@ -743,7 +745,6 @@ def test_create_beta_im():
     hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
-
 
 def test_create_cluster_im():
     """
@@ -849,6 +850,62 @@ def minuit_beta_model(r, norm, rcore, beta):
 
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
+
+def fit_model_minuit_2d(im_conv, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+    """
+    Carry out the fitting using minuit - in 2d
+    """
+
+    ######################################################################
+    # minuit fit
+    data = arrays2minuit(r, sb_src, sb_src_err)
+
+    ######################################################################
+    # init parameters and fit limits
+
+    norm0  = median(sb_src)
+    rcore0 = 10.0               # [pix]
+    beta0  = 2.0/3.0
+
+    limit_norm  = (sb_src.min(), sb_src.max())
+    limit_rcore = (1.0, r.max())
+    limit_beta  = (0.35, 3.0)         # (0.35, 3.0) - generous bounds
+                                      # for uncostrained fit of
+                                      # Alshino+10
+
+    def minuit_beta_model_likelihood(norm, rcore, beta):
+        """
+        Chi**2 likelihood function for the beta model fitting in a
+        minuit compatible way.
+        Model: beta model
+
+        Arguments:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+        - `r`: radius
+        """
+        l = 0.0
+
+        for r, sb_src, sb_src_err in data:
+            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
+
+        return l
+
+    # fit simple beta
+    model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
+                               norm=norm0, rcore=rcore0, beta=beta0,
+                               limit_norm=limit_norm,
+                               limit_rcore=limit_rcore,
+                               limit_beta=limit_beta,
+                               fix_norm=False,
+                               fix_rcore=False,
+                               fix_beta=False
+                               )
+
+    # fit model
+    model_fit.migrad()
+    return (model_fit.values, model_fit.errors)
 
 def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
@@ -1004,23 +1061,6 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
     return (model_fit.values, model_fit.errors)
 
 
-def load_fits_im(file_name='', extension=0):
-    """
-    Load an image from fits file extension, return also header.
-    Only really useful if you want an image from single extension.
-
-    Arguments:
-    - 'file_name': fits file name
-    - 'extension': number of extension to get image from
-    """
-    # FIXME: add file existence check
-    hdu = pyfits.open(file_name)
-    image = hdu[extension].data
-    hdr = hdu[extension].header
-
-    return image, hdr
-
-
 def plot_synthetic_fit():
     """
     Do a simple profile plot of the synthetic image.
@@ -1029,27 +1069,32 @@ def plot_synthetic_fit():
     # fname = 'beta_image_poi_cts.fits'
     fname = 'beta_image_cts.fits'
 
-    im_conv, hdr = load_fits_im(fname)
+    input_im, hdr = load_fits_im(fname)
 
     # image setup
-    xsize = im_conv.shape[0]
+    xsize = input_im.shape[0]
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
 
     xsize_obj = 100
     ysize_obj = xsize_obj
+    r_aper = xsize_obj          # aperture for the fitting
 
-    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen, ycen)
+    (r, profile, geometric_area) = extract_profile_generic(input_im, xcen, ycen)
     profile_norm = profile / geometric_area
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
 
     ######################################################################
-    # do the fitting
+    # do the fitting - fit 1d profile
     (par_fitted, errors_fitted) = fit_model_minuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
+    # (par_fitted, errors_fitted) = fit_model_minuit_2d(r_aper, input_im, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+
+    ######################################################################
+    # extract results
     norm_fit  = par_fitted["norm"]
     rcore_fit = par_fitted["rcore"]
     beta_fit  = par_fitted["beta"]
@@ -1143,7 +1188,7 @@ if __name__ == '__main__':
 
     # setup for the beta model
     num_cts       = 2.0e3             # will be the normalization
-    rcore         = 12.0               # [pix]
+    rcore         = 10.0               # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0
 
@@ -1171,3 +1216,7 @@ if __name__ == '__main__':
     plot_synthetic_fit()
 
     print "...done!"
+
+    # FIXME:
+    # refactor code using load_fits_image
+    # refactor code using zero_pad_image
