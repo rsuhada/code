@@ -29,7 +29,6 @@ then
     mv *err.log           ${dir}/
     mv *contour.ps        ${dir}/
 
-
     echo
     echo "Results gathered in: " $dir
     echo

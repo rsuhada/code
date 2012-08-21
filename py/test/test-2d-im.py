@@ -662,11 +662,11 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
-def build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
     Build a surface brighness model for fitting/plotting.
     """
-    APPLY_PSF = True
+    APPLY_PSF = False
     DO_ZERO_PAD = True
 
     # create beta
@@ -703,10 +703,10 @@ def test_create_beta_im():
     Create a simple testimage - poissonized beta model no psf
     """
     # settings
-    POISSONIZE_IMAGE = False            # poissonize image?
-    DO_ZERO_PAD = True
+    POISSONIZE_IMAGE   = True            # poissonize image?
+    DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = True           # add exposure map
-    ADD_BACKGROUND = True
+    ADD_BACKGROUND     = True
 
     # get a header
     fname = 'pn-test.fits'
@@ -726,14 +726,13 @@ def test_create_beta_im():
 
     # create beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, normalization, rcore, beta)
-
     im_beta = num_cts * im_beta/im_beta.sum()
 
     if POISSONIZE_IMAGE:
         im_beta = poisson.rvs(im_beta)
         print "poisson sum:", im_beta.sum()
 
-    if DO_ZERO_PAD == 1:
+    if DO_ZERO_PAD:
         im_beta[:, 0:xsize_obj] = 0.0
         im_beta[:, xsize-xsize_obj:] = 0.0
         im_beta[0:xsize_obj,:] = 0.0
@@ -775,7 +774,7 @@ def test_create_cluster_im():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    im_conv = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+    im_conv = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
     # smooth model - beta x PSF, no noise/background/mask
     imname = 'cluster_image_cts_model.fits'
@@ -902,7 +901,7 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
         Model: beta x psf
 
         Arguments:
-        See arguments of build_sb_model. The data is passed
+        See arguments of build_sb_model_beta. The data is passed
         implicitely (and therefore likelihood calucalation and the
         fitting have to be at the same level/namespace).
         """
@@ -910,7 +909,7 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
         l = 0.0
         energy=1.5
         # build the model
-        model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
+        model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
         profile_norm_model = profile_model / geometric_area_model
 
@@ -1004,6 +1003,24 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
 
     return (model_fit.values, model_fit.errors)
 
+
+def load_fits_im(file_name='', extension=0):
+    """
+    Load an image from fits file extension, return also header.
+    Only really useful if you want an image from single extension.
+
+    Arguments:
+    - 'file_name': fits file name
+    - 'extension': number of extension to get image from
+    """
+    # FIXME: add file existence check
+    hdu = pyfits.open(file_name)
+    image = hdu[extension].data
+    hdr = hdu[extension].header
+
+    return image, hdr
+
+
 def plot_synthetic_fit():
     """
     Do a simple profile plot of the synthetic image.
@@ -1011,9 +1028,8 @@ def plot_synthetic_fit():
     # fname = 'cluster_image_cts_poiss.fits'
     # fname = 'beta_image_poi_cts.fits'
     fname = 'beta_image_cts.fits'
-    hdu = pyfits.open(fname)
-    im_conv = hdu[0].data
-    hdr = hdu[0].header
+
+    im_conv, hdr = load_fits_im(fname)
 
     # image setup
     xsize = im_conv.shape[0]
@@ -1029,6 +1045,8 @@ def plot_synthetic_fit():
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
+
+    ######################################################################
     # do the fitting
     (par_fitted, errors_fitted) = fit_model_minuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
@@ -1043,6 +1061,7 @@ def plot_synthetic_fit():
     # par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
     # errors_fitted = model_fit.errors
 
+    ######################################################################
     # print results
     print
     print "beta true: ", beta
@@ -1053,15 +1072,13 @@ def plot_synthetic_fit():
     print "norm: ", norm_fit, norm_fit_err
     print
 
-    # norm_fit = 1.0
-
     # build the model
-    model_2d = build_sb_model(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
-    # model_2d = 2000.0 * model_2d/model_2d.sum()
+    model_2d =build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
     profile_norm_model = profile_model / geometric_area_model
 
+    ######################################################################
     # do the plot
     MAKE_PLOT=1
     if MAKE_PLOT==1:
@@ -1087,7 +1104,7 @@ def plot_synthetic_fit():
             marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
             markerfacecolor='black',
             markersize=0,               # markersize=6
-            label=r"model"               # '__nolegend__'
+            label=r"model fit"          # '__nolegend__'
             )
 
         plt.xscale("log")
@@ -1126,8 +1143,8 @@ if __name__ == '__main__':
 
     # setup for the beta model
     num_cts       = 2.0e3             # will be the normalization
-    rcore         = 18.0               # [pix]
-    beta          = 4.0 / 3.0
+    rcore         = 12.0               # [pix]
+    beta          = 2.0 / 3.0
     normalization = 1.0
 
     # parameter calculation test
