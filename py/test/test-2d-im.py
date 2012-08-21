@@ -1149,7 +1149,7 @@ if __name__ == '__main__':
     # test_convolve_psf_beta()
 
     # the fitting suite
-    test_create_beta_im()
+    # test_create_beta_im()
     # test_create_cluster_im()
     plot_synthetic_fit()
 
