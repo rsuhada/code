@@ -851,9 +851,12 @@ def minuit_beta_model(r, norm, rcore, beta):
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
 
-def fit_model_minuit_2d(im_conv, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+def fit_model_minuit_beta(r, sb_src, sb_src_err, norm, rcore, beta, instrument, theta, energy):
     """
-    Carry out the fitting using minuit - in 2d
+    Carry out the fitting using minuit: beta model, optionally with
+    psf convolution. Please note: the fits itself is done on 1D arrays
+    - this is a limitation imposed by pymiuit (i.e. 2D model is
+    constantly being refolded to a profile)
     """
 
     ######################################################################
@@ -907,9 +910,13 @@ def fit_model_minuit_2d(im_conv, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen,
     model_fit.migrad()
     return (model_fit.values, model_fit.errors)
 
-def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+
+def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
     """
-    Carry out the fitting using minuit
+    Carry out the fitting using minuit: beta model, optionally with
+    psf convolution. Please note: the fits itself is done on 1D arrays
+    - this is a limitation imposed by pymiuit (i.e. 2D model is
+    constantly being refolded to a profile)
     """
 
     ######################################################################
@@ -929,27 +936,9 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
                                       # for uncostrained fit of
                                       # Alshino+10
 
-    def minuit_beta_model_likelihood(norm, rcore, beta):
-        """
-        Chi**2 likelihood function for the beta model fitting in a
-        minuit compatible way.
-        Model: beta model
-
-        Arguments:
-        - 'norm': normalization of the model
-        - `rcore`: core radius
-        - `beta`: beta exponent
-        - `r`: radius
-        """
-        l = 0.0
-
-        for r, sb_src, sb_src_err in data:
-            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
-
-        return l
-
     ######################################################################
     # the fit likelihood
+    # FIXME: get this working
     def minuit_sb_model_likelihood(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
         """
         Chi**2 likelihood function for the surface brightness model
@@ -975,61 +964,8 @@ def fit_model_minuit(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, 
             l += (profile_norm_model - sb_src)**2 / sb_src_err**2
         return l
 
-    ######################################################################
-    # # setup sb model
-    # model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
-    #                            #
-    #                            norm=norm0,
-    #                            fix_norm=False,
-    #                            limit_norm=limit_norm,
-    #                            #
-    #                            rcore=rcore0,
-    #                            fix_rcore=False,
-    #                            limit_rcore=limit_rcore,
-    #                            #
-    #                            beta=beta0,
-    #                            fix_beta=False,
-    #                            limit_beta=limit_beta,
-    #                            #
-    #                            xsize=xsize,
-    #                            fix_xsize=True,
-    #                            # limit_xsize=None,
-    #                            #
-    #                            ysize=ysize,
-    #                            fix_ysize=True,
-    #                            # limit_ysize=None,
-    #                            #
-    #                            xsize_obj=xsize_obj,
-    #                            fix_xsize_obj=True,
-    #                            # limit_xsize_obj=None,
-    #                            #
-    #                            ysize_obj=ysize_obj,
-    #                            fix_ysize_obj=True,
-    #                            # limit_ysize_obj=None,
-    #                            #
-    #                            xcen=xcen,
-    #                            fix_xcen=True,
-    #                            # limit_xcen=None,
-    #                            #
-    #                            ycen=ycen,
-    #                            fix_ycen=True,
-    #                            # limit_ycen=None,
-    #                            #
-    #                            instrument=instrument,
-    #                            fix_instrument=True,
-    #                            # limit_instrument=None,
-    #                            #
-    #                            theta=theta,
-    #                            fix_theta=True,
-    #                            # limit_theta=None,
-    #                            #
-    #                            energy=energy,
-    #                            fix_energy=False,
-    #                            # limit_energy=None
-                               # )
-
     # fit simple beta
-    model_fit =  minuit.Minuit(minuit_beta_model_likelihood,
+    model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
                                norm=norm0, rcore=rcore0, beta=beta0,
                                limit_norm=limit_norm,
                                limit_rcore=limit_rcore,
@@ -1089,9 +1025,8 @@ def plot_synthetic_fit():
 
     ######################################################################
     # do the fitting - fit 1d profile
-    (par_fitted, errors_fitted) = fit_model_minuit(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+    (par_fitted, errors_fitted) = fit_model_minuit_beta(r, profile_norm, profile_norm_err, normalization, rcore, beta, instrument, theta, energy)
 
-    # (par_fitted, errors_fitted) = fit_model_minuit_2d(r_aper, input_im, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
     ######################################################################
     # extract results

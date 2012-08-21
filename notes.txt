@@ -605,3 +605,61 @@ sas11
 # should be now able to run everything
 # path settings are in run-esaspi.sh and should be automatically
 # recognize
+
+
+######################################################################
+# tmp code dump
+
+# Tue Aug 21 16:35:34 2012 - fitter
+    ######################################################################
+    # # setup sb model
+    # model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
+    #                            #
+    #                            norm=norm0,
+    #                            fix_norm=False,
+    #                            limit_norm=limit_norm,
+    #                            #
+    #                            rcore=rcore0,
+    #                            fix_rcore=False,
+    #                            limit_rcore=limit_rcore,
+    #                            #
+    #                            beta=beta0,
+    #                            fix_beta=False,
+    #                            limit_beta=limit_beta,
+    #                            #
+    #                            xsize=xsize,
+    #                            fix_xsize=True,
+    #                            # limit_xsize=None,
+    #                            #
+    #                            ysize=ysize,
+    #                            fix_ysize=True,
+    #                            # limit_ysize=None,
+    #                            #
+    #                            xsize_obj=xsize_obj,
+    #                            fix_xsize_obj=True,
+    #                            # limit_xsize_obj=None,
+    #                            #
+    #                            ysize_obj=ysize_obj,
+    #                            fix_ysize_obj=True,
+    #                            # limit_ysize_obj=None,
+    #                            #
+    #                            xcen=xcen,
+    #                            fix_xcen=True,
+    #                            # limit_xcen=None,
+    #                            #
+    #                            ycen=ycen,
+    #                            fix_ycen=True,
+    #                            # limit_ycen=None,
+    #                            #
+    #                            instrument=instrument,
+    #                            fix_instrument=True,
+    #                            # limit_instrument=None,
+    #                            #
+    #                            theta=theta,
+    #                            fix_theta=True,
+    #                            # limit_theta=None,
+    #                            #
+    #                            energy=energy,
+    #                            fix_energy=False,
+    #                            # limit_energy=None
+                               # )
