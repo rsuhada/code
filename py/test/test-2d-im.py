@@ -662,22 +662,15 @@ def create_background_mask(background_map):
     image_mask[where(negative(isfinite(image_mask)))] = 0.0
     return image_mask
 
-def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy, APPLY_PSF):
     """
     Build a surface brighness model for fitting/plotting.
     """
-    APPLY_PSF = False
     DO_ZERO_PAD = True
 
     # create beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
     if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
-
-        # im_beta[:, 0:xsize_obj] = 0.0
-        # im_beta[:, xsize-xsize_obj:] = 0.0
-        # im_beta[0:xsize_obj,:] = 0.0
-        # im_beta[xsize-xsize_obj:,:] = 0.0
-
     im_output = im_beta
 
     if APPLY_PSF:
@@ -755,6 +748,7 @@ def test_create_cluster_im():
     DO_ZERO_PAD = True
     APPLY_EXPOSURE_MAP = True           # add exposure map
     ADD_BACKGROUND = True
+    APPLY_PSF = True
 
     # FIXME: add background, realistic exposure map + decide how to
     # treat for modeling work
@@ -775,7 +769,7 @@ def test_create_cluster_im():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    im_conv = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+    im_conv = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF)
 
     # smooth model - beta x PSF, no noise/background/mask
     imname = 'cluster_image_cts_model.fits'
@@ -900,7 +894,7 @@ def minuit_beta_model(r, norm, rcore, beta):
     out = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
     return out
 
-def fit_model_minuit_beta(r, sb_src, sb_src_err, norm, rcore, beta, instrument, theta, energy):
+def fit_model_minuit_beta(r, sb_src, sb_src_err, instrument, theta, energy):
     """
     Carry out the fitting using minuit: beta model, optionally with
     psf convolution. Please note: the fits itself is done on 1D arrays
@@ -960,7 +954,7 @@ def fit_model_minuit_beta(r, sb_src, sb_src_err, norm, rcore, beta, instrument, 
     return (model_fit.values, model_fit.errors)
 
 
-def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instrument, theta, energy):
     """
     Carry out the fitting using minuit: beta model, optionally with
     psf convolution. Please note: the fits itself is done on 1D arrays
@@ -1001,8 +995,9 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         """
 
         l = 0.0
+        APPLY_PSF = False
         # build the model
-        model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
+        model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy, APPLY_PSF)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
         profile_norm_model = profile_model / geometric_area_model
 
@@ -1045,9 +1040,10 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
 
 def test_fit_beta():
     """
-    Simple fit to the data using a simple beta model
+    Simple fit to the data using a simple beta model (no psf/bg)
     """
     fname = 'beta_image_cts.fits'
+    APPLY_PSF = False
 
     input_im, hdr = load_fits_im(fname)
 
@@ -1069,7 +1065,7 @@ def test_fit_beta():
     ######################################################################
     # do the fitting - fit 1d profile
     # remoe useless passes
-    (par_fitted, errors_fitted) = fit_model_minuit_beta(r, profile_norm, profile_norm_err, normalization, rcore, beta, instrument, theta, energy)
+    (par_fitted, errors_fitted) = fit_model_minuit_beta(r, profile_norm, profile_norm_err, instrument, theta, energy)
 
 
     ######################################################################
@@ -1097,7 +1093,7 @@ def test_fit_beta():
     print
 
     # build the model
-    model_2d =build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
+    model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy, APPLY_PSF)
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
     profile_norm_model = profile_model / geometric_area_model
@@ -1116,6 +1112,7 @@ def test_fit_beta_psf():
     """
     # fname = 'cluster_image_cts_poiss.fits'
     fname = 'beta_image_cts.fits'
+    APPLY_PSF = True
 
     input_im, hdr = load_fits_im(fname)
 
@@ -1136,7 +1133,7 @@ def test_fit_beta_psf():
 
     ######################################################################
     # do the fitting - fit 1d profile
-    (par_fitted, errors_fitted) = fit_model_minuit_beta_psf(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
+    (par_fitted, errors_fitted) = fit_model_minuit_beta_psf(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instrument, theta, energy)
 
     ######################################################################
     # extract results
@@ -1164,7 +1161,7 @@ def test_fit_beta_psf():
 
     ######################################################################
     # build the model
-    model_2d =build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
+    model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy, APPLY_PSF)
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
     profile_norm_model = profile_model / geometric_area_model
@@ -1229,10 +1226,11 @@ if __name__ == '__main__':
     ######################################################################
     # fit and plot
     test_fit_beta()
-    test_fit_beta_psf()
+    # test_fit_beta_psf()
 
     print "...done!"
 
     # FIXME:
-    # refactor code using load_fits_image
+    # refactor code using load_fits_im
     # refactor code using zero_pad_image
+

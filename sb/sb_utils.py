@@ -275,3 +275,4 @@ def king_profile(r, rcore, alpha):
     y = 1 / ( 1 + (r/rcore)**2 )**alpha
 
     return y
+
