@@ -837,6 +837,55 @@ def test_create_cluster_im():
         hdulist = pyfits.HDUList([hdu])                  # list all extensions here
         hdulist.writeto(imname, clobber=True)
 
+
+def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_figure):
+    """
+    Simple plot of a profile: data vs model
+
+    Arguments:
+    - `r_data`: radial grid for data
+    - `profile_data`: profile data
+    - `r_model`: radial grid for model
+    - `profile_norm_model`: profile model
+    - `ouputname`:
+    """
+    plt.figure()
+    plt.ion()
+    plt.clf()
+
+    plt.plot(r_data-0.5, profile_data,
+        color='black',
+        linestyle='',              # -/--/:/-.
+        linewidth=0,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=4,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+
+    plt.plot(r_model-0.5, profile_model,
+        color='red',
+        linestyle='-',              # -/--/:/-.
+        linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
+        label=r"model fit"          # '__nolegend__'
+        )
+
+    plt.xscale("log")
+    plt.yscale("log")
+    # plt.ylim(ymin=1e-3,ymax=5e0)
+
+    prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+    plt.legend(loc=0, prop=prop, numpoints=1)
+
+    plt.draw()
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    plt.show()
+    plt.savefig(output_figure)
+
+
 def minuit_beta_model(r, norm, rcore, beta):
     """
     Return 1D beta model in a minuit compatible way.
@@ -925,7 +974,6 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
 
     ######################################################################
     # init parameters and fit limits
-
     norm0  = median(sb_src)
     rcore0 = 10.0               # [pix]
     beta0  = 2.0/3.0
@@ -953,7 +1001,6 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         """
 
         l = 0.0
-        energy=1.5
         # build the model
         model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
@@ -996,13 +1043,10 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
 
     return (model_fit.values, model_fit.errors)
 
-
-def plot_synthetic_fit():
+def test_fit_beta():
     """
-    Do a simple profile plot of the synthetic image.
+    Simple fit to the data using a simple beta model
     """
-    # fname = 'cluster_image_cts_poiss.fits'
-    # fname = 'beta_image_poi_cts.fits'
     fname = 'beta_image_cts.fits'
 
     input_im, hdr = load_fits_im(fname)
@@ -1022,9 +1066,9 @@ def plot_synthetic_fit():
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
-
     ######################################################################
     # do the fitting - fit 1d profile
+    # remoe useless passes
     (par_fitted, errors_fitted) = fit_model_minuit_beta(r, profile_norm, profile_norm_err, normalization, rcore, beta, instrument, theta, energy)
 
 
@@ -1062,44 +1106,76 @@ def plot_synthetic_fit():
     # do the plot
     MAKE_PLOT=1
     if MAKE_PLOT==1:
-        print "plotting psf x beta"
-        plt.figure()
-        plt.ion()
-        plt.clf()
+        output_figure="fit_beta.png"
+        plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
+        print "plotting model"
 
-        plt.plot(r-0.5, profile_norm,
-            color='black',
-            linestyle='',              # -/--/:/-.
-            linewidth=0,                # linewidth=1
-            marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-            markerfacecolor='black',
-            markersize=4,               # markersize=6
-            label=r"source"               # '__nolegend__'
-            )
+def test_fit_beta_psf():
+    """
+    Simple fit to the data using a simple beta model x psf
+    """
+    # fname = 'cluster_image_cts_poiss.fits'
+    fname = 'beta_image_cts.fits'
 
-        plt.plot(r_model-0.5, profile_norm_model,
-            color='red',
-            linestyle='-',              # -/--/:/-.
-            linewidth=1,                # linewidth=1
-            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-            markerfacecolor='black',
-            markersize=0,               # markersize=6
-            label=r"model fit"          # '__nolegend__'
-            )
+    input_im, hdr = load_fits_im(fname)
 
-        plt.xscale("log")
-        plt.yscale("log")
-        # plt.ylim(ymin=1e-3,ymax=5e0)
+    # image setup
+    xsize = input_im.shape[0]
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
 
-        prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
-        plt.legend(loc=0, prop=prop, numpoints=1)
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+    r_aper = xsize_obj          # aperture for the fitting
 
-        plt.draw()
-        plt.get_current_fig_manager().window.wm_geometry("+640+0")
-        plt.show()
+    (r, profile, geometric_area) = extract_profile_generic(input_im, xcen, ycen)
+    profile_norm = profile / geometric_area
+    profile_norm_err = sqrt(profile_norm)
+    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
-        plt.savefig('model_2d_vs_poi_data.png')
+    ######################################################################
+    # do the fitting - fit 1d profile
+    (par_fitted, errors_fitted) = fit_model_minuit_beta_psf(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, normalization, rcore, beta, instrument, theta, energy)
 
+    ######################################################################
+    # extract results
+    norm_fit  = par_fitted["norm"]
+    rcore_fit = par_fitted["rcore"]
+    beta_fit  = par_fitted["beta"]
+
+    norm_fit_err  = errors_fitted["norm"]
+    rcore_fit_err = errors_fitted["rcore"]
+    beta_fit_err  = errors_fitted["beta"]
+
+    # par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
+    # errors_fitted = model_fit.errors
+
+    ######################################################################
+    # print results
+    print
+    print "beta true: ", beta
+    print "rcore true: ", rcore
+    print
+    print "beta: ", beta_fit, beta_fit_err
+    print "rcore: ", rcore_fit, rcore_fit_err
+    print "norm: ", norm_fit, norm_fit_err
+    print
+
+    ######################################################################
+    # build the model
+    model_2d =build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy)
+
+    (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
+    profile_norm_model = profile_model / geometric_area_model
+
+    ######################################################################
+    # do the plot
+    MAKE_PLOT=1
+    if MAKE_PLOT==1:
+        print "plotting model"
+        output_figure="fit_beta_psf.png"
+        plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
 
 ######################################################################
 ######################################################################
@@ -1145,10 +1221,15 @@ if __name__ == '__main__':
     # test_convolve_psf_gauss()
     # test_convolve_psf_beta()
 
-    # the fitting suite
+    ######################################################################
+    # images for fitting tests
     # test_create_beta_im()
     # test_create_cluster_im()
-    plot_synthetic_fit()
+
+    ######################################################################
+    # fit and plot
+    test_fit_beta()
+    test_fit_beta_psf()
 
     print "...done!"
 
