@@ -663,3 +663,13 @@ sas11
     #                            fix_energy=False,
     #                            # limit_energy=None
                                # )
+
+
+# results
+
+beta true:  0.666666666667
+rcore true:  10.0
+
+beta:  0.674940199813 0.187876144339
+rcore:  10.1513293223 5.33226054116
+norm:  3.31932610478 1.00144036795

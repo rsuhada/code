@@ -16,6 +16,40 @@ from scipy import integrate
 from scipy.stats import poisson
 import minuit
 
+def get_instrument_id(instrument):
+    """
+    Return an instrument id number. Needed because of minuit.
+
+    Arguments:
+    - `instrument`: string
+    """
+
+    instrument_list = {
+        'pn':0,
+        'm1':1,
+        'm2':2,
+        'chandra':3
+        }
+
+    return instrument_list[instrument]
+
+def resolve_instrument_id(instrument_id):
+    """
+    Return an instrument given the id number. Needed because of minuit.
+
+    Arguments:
+    - `instrument`: string
+    """
+
+    instrument_list = (
+        "pn",
+        "m1",
+        "m2",
+        "chandra"
+        )
+
+    return instrument_list[instrument_id]
+
 def make_2d_dirac(imsize, xcen, ycen):
     """
     Creates a 2D image of a Dirac funtion
@@ -369,8 +403,8 @@ def test_profile_dirac():
 
     (r, profile, geometric_area) = extract_profile_generic(im_dirac, xcen, ycen)
 
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting dirac"
         plt.figure()
         plt.ion()
@@ -406,8 +440,8 @@ def test_profile_psf():
     r_model = linspace(0.0, r.max(), 100)
     psf_model = king_profile(r_model, rcore_model, alpha_model)
 
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting psf"
         plt.figure()
         plt.ion()
@@ -449,8 +483,8 @@ def test_profile_beta():
 
     beta_profile = beta_model((1.0, rcore, beta),r_model)
 
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting beta"
         plt.figure()
         plt.ion()
@@ -520,8 +554,8 @@ def test_convolve_psf_gauss():
     (r, profile_conv, geometric_area_conv) = extract_profile_generic(im_conv_gauss, xcen, ycen)
 
     # do the plot
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting gauss"
         plt.figure()
         plt.ion()
@@ -599,8 +633,8 @@ def test_convolve_psf_beta():
     profile_psf_norm = profile_psf_norm * profile_source_norm.max() / profile_psf_norm.max()
 
     # do the plot
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting psf x beta"
         plt.figure()
         plt.ion()
@@ -676,11 +710,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
     if APPLY_PSF:
     # create psf
         im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-        if DO_ZERO_PAD:
-            im_psf[:, 0:xsize_obj] = 0.0
-            im_psf[:, xsize-xsize_obj:] = 0.0
-            im_psf[0:xsize_obj,:] = 0.0
-            im_psf[xsize-xsize_obj:,:] = 0.0
+        if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
 
     # FIXME: this needs bit reorganizing so that the proper number of
     # source cts can be assured (while a realistc s/n is kept)
@@ -689,7 +719,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
 
         # convolve
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-        im_output = trim_fftconvolve(im_conv)
+        im_output = trim_fftconvolve(im_output)
 
     return im_output
 
@@ -929,7 +959,6 @@ def fit_model_minuit_beta(r, sb_src, sb_src_err, instrument, theta, energy):
         - 'norm': normalization of the model
         - `rcore`: core radius
         - `beta`: beta exponent
-        - `r`: radius
         """
         l = 0.0
 
@@ -981,6 +1010,7 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
     ######################################################################
     # the fit likelihood
     # FIXME: get this working
+
     def minuit_sb_model_likelihood(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
         """
         Chi**2 likelihood function for the surface brightness model
@@ -993,7 +1023,6 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         implicitely (and therefore likelihood calucalation and the
         fitting have to be at the same level/namespace).
         """
-
         l = 0.0
         APPLY_PSF = False
         # build the model
@@ -1006,16 +1035,76 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
             l += (profile_norm_model - sb_src)**2 / sb_src_err**2
         return l
 
-    # fit simple beta
-    model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
-                               norm=norm0, rcore=rcore0, beta=beta0,
-                               limit_norm=limit_norm,
-                               limit_rcore=limit_rcore,
-                               limit_beta=limit_beta,
+
+    def minuit_sb_model_likelihood_debug(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+        """
+        Chi**2 likelihood function for the beta model fitting in a
+        minuit compatible way.
+        Model: beta model
+
+        Arguments:
+        - 'norm': normalization of the model
+        - `rcore`: core radius
+        - `beta`: beta exponent
+        """
+        l = 0.0
+
+        for r, sb_src, sb_src_err in data:
+            l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
+        return l
+
+    # setup sb model
+    model_fit =  minuit.Minuit(minuit_sb_model_likelihood_debug,
+                               #
+                               norm=norm0,
                                fix_norm=False,
+                               limit_norm=limit_norm,
+                               #
+                               rcore=rcore0,
                                fix_rcore=False,
-                               fix_beta=False
+                               limit_rcore=limit_rcore,
+                               #
+                               beta=beta0,
+                               fix_beta=False,
+                               limit_beta=limit_beta,
+                               #
+                               xsize=xsize,
+                               fix_xsize=True,
+                               # limit_xsize=None,
+                               #
+                               ysize=ysize,
+                               fix_ysize=True,
+                               # limit_ysize=None,
+                               #
+                               xsize_obj=xsize_obj,
+                               fix_xsize_obj=True,
+                               # limit_xsize_obj=None,
+                               #
+                               ysize_obj=ysize_obj,
+                               fix_ysize_obj=True,
+                               # limit_ysize_obj=None,
+                               #
+                               xcen=xcen,
+                               fix_xcen=True,
+                               # limit_xcen=None,
+                               #
+                               ycen=ycen,
+                               fix_ycen=True,
+                               # limit_ycen=None,
+                               #
+                               instrument=instrument_num,
+                               fix_instrument=True,
+                               # limit_instrument=None,
+                               #
+                               theta=theta,
+                               fix_theta=True,
+                               # limit_theta=None,
+                               #
+                               energy=energy,
+                               fix_energy=False,
+                               # limit_energy=None
                                )
+
 
     # fit model
     model_fit.migrad()
@@ -1100,8 +1189,8 @@ def test_fit_beta():
 
     ######################################################################
     # do the plot
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         output_figure="fit_beta.png"
         plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
         print "plotting model"
@@ -1168,15 +1257,17 @@ def test_fit_beta_psf():
 
     ######################################################################
     # do the plot
-    MAKE_PLOT=1
-    if MAKE_PLOT==1:
+    MAKE_PLOT=True
+    if MAKE_PLOT:
         print "plotting model"
         output_figure="fit_beta_psf.png"
         plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
 
+
 ######################################################################
 ######################################################################
 ######################################################################
+
 
 if __name__ == '__main__':
     print
@@ -1185,6 +1276,7 @@ if __name__ == '__main__':
     theta = 65.8443 / 60.0
     energy = 1.5
     instrument = "pn"
+    instrument_id = get_instrument_id(instrument)
 
     # setup for the gaussian test
     a_sigmax = 15.0               # [pix]
@@ -1225,7 +1317,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # fit and plot
-    test_fit_beta()
+    # test_fit_beta()
     # test_fit_beta_psf()
 
     print "...done!"
