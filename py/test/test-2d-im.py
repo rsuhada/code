@@ -961,7 +961,6 @@ def fit_model_minuit_beta(r, sb_src, sb_src_err, instrument, theta, energy):
         - `beta`: beta exponent
         """
         l = 0.0
-
         for r, sb_src, sb_src_err in data:
             l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
 
@@ -983,7 +982,7 @@ def fit_model_minuit_beta(r, sb_src, sb_src_err, instrument, theta, energy):
     return (model_fit.values, model_fit.errors)
 
 
-def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instrument, theta, energy):
+def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instid, theta, energy):
     """
     Carry out the fitting using minuit: beta model, optionally with
     psf convolution. Please note: the fits itself is done on 1D arrays
@@ -1011,7 +1010,7 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
     # the fit likelihood
     # FIXME: get this working
 
-    def minuit_sb_model_likelihood(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+    def minuit_sb_model_likelihood(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy):
         """
         Chi**2 likelihood function for the surface brightness model
         fitting in a minuit compatible way (psf x beta).
@@ -1025,8 +1024,9 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         """
         l = 0.0
         APPLY_PSF = False
+
         # build the model
-        model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy, APPLY_PSF)
+        model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy, APPLY_PSF)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
         profile_norm_model = profile_model / geometric_area_model
 
@@ -1035,8 +1035,7 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
             l += (profile_norm_model - sb_src)**2 / sb_src_err**2
         return l
 
-
-    def minuit_sb_model_likelihood_debug(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instrument, theta, energy):
+    def minuit_sb_model_likelihood_debug(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy):
         """
         Chi**2 likelihood function for the beta model fitting in a
         minuit compatible way.
@@ -1048,10 +1047,16 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         - `beta`: beta exponent
         """
         l = 0.0
-
         for r, sb_src, sb_src_err in data:
             l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
         return l
+
+# fixme
+# Thu Aug 23 17:09:06 2012
+# now replace the likelihood calculation with the PSF version
+# needs: propagate the instid parameter upstrem where the SPF is
+# calculated (make minimal change i.e. at root keep string parameter)
+# also: don'the forget that plotting has PSF turned of
 
     # setup sb model
     model_fit =  minuit.Minuit(minuit_sb_model_likelihood_debug,
@@ -1092,9 +1097,9 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
                                fix_ycen=True,
                                # limit_ycen=None,
                                #
-                               instrument=instrument_num,
-                               fix_instrument=True,
-                               # limit_instrument=None,
+                               instid=instid,
+                               fix_instid=True,
+                               # limit_instid=None,
                                #
                                theta=theta,
                                fix_theta=True,
@@ -1105,6 +1110,10 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
                                # limit_energy=None
                                )
 
+
+                               # instid=instid,
+                               # fix_instid=True,
+                               # # limit_instid=None,
 
     # fit model
     model_fit.migrad()
@@ -1222,7 +1231,7 @@ def test_fit_beta_psf():
 
     ######################################################################
     # do the fitting - fit 1d profile
-    (par_fitted, errors_fitted) = fit_model_minuit_beta_psf(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instrument, theta, energy)
+    (par_fitted, errors_fitted) = fit_model_minuit_beta_psf(r, profile_norm, profile_norm_err, xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, instid, theta, energy)
 
     ######################################################################
     # extract results
@@ -1250,6 +1259,8 @@ def test_fit_beta_psf():
 
     ######################################################################
     # build the model
+    APPLY_PSF = False            # just for debug!!
+
     model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy, APPLY_PSF)
 
     (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
@@ -1276,7 +1287,7 @@ if __name__ == '__main__':
     theta = 65.8443 / 60.0
     energy = 1.5
     instrument = "pn"
-    instrument_id = get_instrument_id(instrument)
+    instid = get_instrument_id(instrument)
 
     # setup for the gaussian test
     a_sigmax = 15.0               # [pix]
@@ -1317,7 +1328,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # fit and plot
-    # test_fit_beta()
+    test_fit_beta()
     # test_fit_beta_psf()
 
     print "...done!"
