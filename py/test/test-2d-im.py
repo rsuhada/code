@@ -165,13 +165,19 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     - 'core': beta model core radius
     - 'beta': beta model slope
     """
+    # this is pretty fast but maybe you want to do it in polar coordinates
+    print "OK", imsize[0], imsize[1], xcen, ycen, norm, rcore, beta
+    # im = zeros(imsize, dtype=double)
 
-    # this is pretty fast but maybe you want to do it in polar coords
-    im = zeros(imsize, dtype=double)
+    # Tue Sep  4 14:18:42 2012
+    # FIXME: at this point when called from minuit_sb_model_likelihood
+    # it crashes for some reason... error: TypeError: only length-1
+    # arrays can be converted to Python scalars
+    # do not know why...
 
     # the dumb method
-    for i in range(imsize[0]):
-        for j in range(imsize[1]):
+    for i in range(round(imsize[0])):
+        for j in range(round(imsize[1])):
             r2 = sqdistance(xcen, ycen, j , i) # this is already squared
             im[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
 
@@ -704,6 +710,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
 
     # create beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
+
     if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
     im_output = im_beta
 
@@ -750,6 +757,7 @@ def test_create_beta_im():
     ysize_obj = xsize_obj
 
     # create beta
+    print (xsize, ysize), xcen, ycen, normalization, rcore, beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, normalization, rcore, beta)
     im_beta = num_cts * im_beta/im_beta.sum()
 
@@ -905,7 +913,8 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
     plt.legend(loc=0, prop=prop, numpoints=1)
 
     plt.draw()
-    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    plt.get_current_fig_manager().window.wm_geometry("+640+0")
     plt.show()
     plt.savefig(output_figure)
 
@@ -989,7 +998,6 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
     - this is a limitation imposed by pymiuit (i.e. 2D model is
     constantly being refolded to a profile)
     """
-
     ######################################################################
     # minuit fit
     data = arrays2minuit(r, sb_src, sb_src_err)
@@ -1026,6 +1034,7 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
         APPLY_PSF = False
 
         # build the model
+        print xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy, APPLY_PSF
         model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy, APPLY_PSF)
         (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
         profile_norm_model = profile_model / geometric_area_model
@@ -1037,16 +1046,10 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
 
     def minuit_sb_model_likelihood_debug(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rcore, beta, instid, theta, energy):
         """
-        Chi**2 likelihood function for the beta model fitting in a
-        minuit compatible way.
-        Model: beta model
-
-        Arguments:
-        - 'norm': normalization of the model
-        - `rcore`: core radius
-        - `beta`: beta exponent
+        Simple debug: 1d beta no psf
         """
         l = 0.0
+        # print instid
         for r, sb_src, sb_src_err in data:
             l += (minuit_beta_model(r, norm, rcore, beta) - sb_src)**2 / sb_src_err**2
         return l
@@ -1059,7 +1062,8 @@ def fit_model_minuit_beta_psf(r, sb_src, sb_src_err, xsize, ysize, xsize_obj, ys
 # also: don'the forget that plotting has PSF turned of
 
     # setup sb model
-    model_fit =  minuit.Minuit(minuit_sb_model_likelihood_debug,
+    # model_fit =  minuit.Minuit(minuit_sb_model_likelihood_debug,
+    model_fit =  minuit.Minuit(minuit_sb_model_likelihood,
                                #
                                norm=norm0,
                                fix_norm=False,
@@ -1268,7 +1272,7 @@ def test_fit_beta_psf():
 
     ######################################################################
     # do the plot
-    MAKE_PLOT=True
+    MAKE_PLOT=False
     if MAKE_PLOT:
         print "plotting model"
         output_figure="fit_beta_psf.png"
@@ -1328,8 +1332,8 @@ if __name__ == '__main__':
 
     ######################################################################
     # fit and plot
-    test_fit_beta()
-    # test_fit_beta_psf()
+    # test_fit_beta()
+    test_fit_beta_psf()
 
     print "...done!"
 
