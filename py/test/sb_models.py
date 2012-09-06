@@ -54,11 +54,71 @@ def beta_2d_lmfit(pars, data=None, errors=None):
     else:
         residuals = data - model
 
-        # is this biasing? - try flat errors
+        # is this biasing?
         residuals = residuals / errors
-        residuals[where(negative(isfinite(residuals)))] = 0.0
 
-        return ravel(residuals)
+        # residuals[where(negative(isfinite(residuals)))] = 1.0e15
+        # residuals[where(negative(isfinite(residuals)))] = 0.0
+
+    SAVE_DEBUG=False
+    if SAVE_DEBUG:
+        ######################################################################
+        # get a header
+        fname='pn-test.fits'
+        hdu = pyfits.open(fname)
+        hdr = hdu[0].header
+
+        hdu = pyfits.PrimaryHDU(residuals, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('resids.fits', clobber=True)
+
+        hdu = pyfits.PrimaryHDU(model, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('model.fits', clobber=True)
+
+        hdu = pyfits.PrimaryHDU(data, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('data.fits', clobber=True)
+
+        hdu = pyfits.PrimaryHDU(errors, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('errors.fits', clobber=True)
+        ######################################################################
+
+    return ravel(residuals)
+
+
+def beta_1d_lmfit(pars, r, data=None, errors=None):
+    """
+    Creates a 1D profile of a beta model.
+    Also allows to return directly residuals
+
+    Arguments:
+    """
+
+    # unpack parameters
+    norm   = pars['norm'].value
+    rcore  = pars['rcore'].value
+    beta   = pars['beta'].value
+
+    print "hi"
+    model = norm * (1.0 + (r/rcore)**2)**(-3.0*beta+0.5)
+
+    if data == None:
+        return model
+    else:
+        # extract profile
+        (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
+        profile_norm = profile / geometric_area
+        profile_norm_err = sqrt(profile_norm)
+        profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning
+
+        residuals = profile_norm - model
+
+        # is this biasing?
+        # residuals = residuals / profile_norm_err
+
+        return residuals
 
 
 

@@ -1169,7 +1169,6 @@ def test_fit_beta():
     # remoe useless passes
     (par_fitted, errors_fitted) = fit_model_minuit_beta(r, profile_norm, profile_norm_err, instrument, theta, energy)
 
-
     ######################################################################
     # extract results
     norm_fit  = par_fitted["norm"]
