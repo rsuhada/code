@@ -741,7 +741,7 @@ def test_create_beta_im():
     ADD_BACKGROUND     = False
 
     # get a header
-    fname = 'pn-test.fits'
+    fname='pn-test.fits'
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
@@ -1330,13 +1330,13 @@ if __name__ == '__main__':
 
     ######################################################################
     # images for fitting tests
-    # test_create_beta_im()
+    test_create_beta_im()
     # test_create_cluster_im()
 
     ######################################################################
     # fit and plot
     # test_fit_beta()
-    test_fit_beta_psf()
+    # test_fit_beta_psf()
 
     print "...done!"
 

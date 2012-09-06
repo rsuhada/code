@@ -42,7 +42,6 @@ def beta_2d_lmfit(pars, data=None, errors=None):
             r2 = sqdistance(xcen, ycen, j , i) # this is already squared
             model[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
 
-
     # model = map(lambda x, y:   range(round(imsize[1])), range(round(imsize[0])))
     # L2 = map(lambda x: round(x, 1), L)
     # try this - need arg passing
@@ -50,13 +49,15 @@ def beta_2d_lmfit(pars, data=None, errors=None):
     # is equivalent to cycling through theta = math.atan2(y[i], x[i]])
     # (the y/x order here is atan2 specific, simply supply arrays as needed!)
 
-
     if data == None:
         return model
     else:
-        # residuals = (data - model) / errors
         residuals = data - model
+
+        # is this biasing? - try flat errors
+        residuals = residuals / errors
         residuals[where(negative(isfinite(residuals)))] = 0.0
+
         return ravel(residuals)
 
 

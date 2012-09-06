@@ -12,11 +12,10 @@ from test_2d_im import *
 import lmfit as lm
 from sb_models import beta_2d_lmfit
 
-def test_lmfit_beta():
+def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
     Testing simple 2D fit of beta model (no psf)
     """
-    fname = 'beta_image_cts.fits'
     input_im, hdr = load_fits_im(fname)
 
     ######################################################################
@@ -35,7 +34,10 @@ def test_lmfit_beta():
     ######################################################################
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    errors = sqrt(data)
+    # errors = sqrt(data)
+    errors = 1e-3 * ones(ysize, xsize)
+
+    print errors
 
     ######################################################################
     # init model
@@ -45,7 +47,7 @@ def test_lmfit_beta():
     pars.add('ycen'   , value=ycen_obj, vary=False)
     pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
     pars.add('rcore'  , value=10.0, vary=True, min=1.0, max=80.0)
-    pars.add('beta'   , value=0.8, vary=True, min=0.1, max=1.0)
+    pars.add('beta'   , value=0.8, vary=True, min=0.1, max=10.0)
 
     # x = beta_2d_lmfit(pars, input_im)
     # print x.shape
@@ -63,16 +65,22 @@ def test_lmfit_beta():
     ######################################################################
     # output
     print
-    print "True values:"
-    print "norm", normalization
-    print "rcore", rcore
-    print "beta", beta
-
+    print "parameter: true | fit"
+    # print "norm", normalization
+    print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
+    print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
     print
-    print 'Best-Fit Values:'
-    for name, par in pars.items():
-        print name, par.value
+    print
 
+    # print
+    # print 'Best-Fit Values:'
+    # # print "norm", pars['norm'].value
+    # print "rcore", pars['rcore'].value
+    # print "beta", pars['beta'].value
+    # print
+
+    # for name, par in pars.items():
+    #     print name, par.value
 
     ######################################################################
     # get the profiles
@@ -99,46 +107,51 @@ def test_lmfit_beta():
         plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
 
 
+def test_create_beta_im(imname='beta_image_cts.fits'):
+    """
+    Create a simple testimage - poissonized beta model no psf
+    """
+    # settings
+    POISSONIZE_IMAGE   = True            # poissonize image?
+    DO_ZERO_PAD        = True
+    APPLY_EXPOSURE_MAP = False
+    ADD_BACKGROUND     = False
 
+    # get a header
+    fname='pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
 
-    # ######################################################################
-    # # extract results
-    # norm_fit  = par_fitted["norm"]
-    # rcore_fit = par_fitted["rcore"]
-    # beta_fit  = par_fitted["beta"]
+    # image setup
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
 
-    # norm_fit_err  = errors_fitted["norm"]
-    # rcore_fit_err = errors_fitted["rcore"]
-    # beta_fit_err  = errors_fitted["beta"]
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    xsize_obj = 100
+    ysize_obj = xsize_obj
 
-    # par_fitted = [model_fit.values["norm"], model_fit.values["rcore"], model_fit.values["beta"]]
-    # errors_fitted = model_fit.errors
+    # create beta
+    print (xsize, ysize), xcen, ycen, normalization, rcore, beta
+    im_beta = make_2d_beta((xsize, ysize), xcen, ycen, normalization, rcore, beta)
+    im_beta = num_cts * im_beta/im_beta.sum()
 
-    # ######################################################################
-    # # print results
-    # print
-    # print "beta true: ", beta
-    # print "rcore true: ", rcore
-    # print
-    # print "beta: ", beta_fit, beta_fit_err
-    # print "rcore: ", rcore_fit, rcore_fit_err
-    # print "norm: ", norm_fit, norm_fit_err
-    # print
+    if POISSONIZE_IMAGE:
+        im_beta = poisson.rvs(im_beta)
+        print "poisson sum:", im_beta.sum()
 
-    # # build the model
-    # model_2d = build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm_fit, rcore_fit, beta_fit, instrument, theta, energy, APPLY_PSF)
+    if DO_ZERO_PAD:
+        im_beta[:, 0:xsize_obj] = 0.0
+        im_beta[:, xsize-xsize_obj:] = 0.0
+        im_beta[0:xsize_obj,:] = 0.0
+        im_beta[xsize-xsize_obj:,:] = 0.0
 
-    # (r_model, profile_model, geometric_area_model) = extract_profile_generic(model_2d, xcen, ycen)
-    # profile_norm_model = profile_model / geometric_area_model
-
-    # ######################################################################
-    # # do the plot
-    # MAKE_PLOT=True
-    # if MAKE_PLOT:
-    #     output_figure="fit_beta.png"
-    #     plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
-    #     print "plotting model"
-
+    # poissonized beta model image [counts] - no background/mask
+    hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
 
 if __name__ == '__main__':
@@ -168,18 +181,21 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
 
     # setup for the beta model
-    num_cts       = 2.0e3             # will be the normalization
-    rcore         = 10.0               # [pix]
+    num_cts       = 2.0e5             # will be the normalization
+    rcore         = 20.0               # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0
+    imname='t1.fits'
 
     ######################################################################
     # images for fitting tests
-    # test_create_beta_im()
+    # test_create_beta_im(imname)
     # test_create_cluster_im()
 
     ######################################################################
     # test lmfit
-    test_lmfit_beta()
+    test_lmfit_beta(imname)
 
     print "done!"
+
+
