@@ -10,7 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from test_2d_im import *
 import lmfit as lm
-from sb_models import beta_2d_lmfit
+from sb_models import beta_2d_lmfit, beta_1d_lmfit
 
 def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
@@ -184,7 +184,7 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
 
     ######################################################################
     # do the fit
-    DO_FIT = False
+    DO_FIT = True
 
     if DO_FIT:
         print "starting fit"
@@ -192,7 +192,8 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
         import time
         t1 = time.clock()
         # continue here: do the fitting and streamline extraction
-        result = lm.minimize(beta_1d_lmfit, pars, args=(data, r)) # fit in 2d
+        # result = lm.minimize(beta_1d_lmfit, pars, args=(r, data)) # fit in 1d
+        result = lm.minimize(beta_1d_lmfit, pars, args=(r, profile_norm, profile_norm_err)) # fit in 1d
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
@@ -218,8 +219,6 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
 
     output_figure = 'lmfit_beta_1d.png'
     plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
-
-
 
 
 if __name__ == '__main__':
@@ -249,7 +248,7 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
 
     # setup for the beta model
-    num_cts       = 2.0e3             # will be the normalization
+    num_cts       = 2.0e2             # will be the normalization
     rcore         = 10.0               # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0
@@ -257,7 +256,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # images for fitting tests
-    # test_create_beta_im(imname)
+    test_create_beta_im(imname)
     # test_create_cluster_im()
 
     ######################################################################
