@@ -870,9 +870,9 @@ def test_create_cluster_im():
         hdulist.writeto(imname, clobber=True)
 
 
-def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_figure):
+def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_figure, profile_data_err=None):
     """
-    Simple plot of a profile: data vs model
+    Simple plot of a profile: data vs model (optionally also error bars)
 
     Arguments:
     - `r_data`: radial grid for data
@@ -885,7 +885,18 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
     plt.ion()
     plt.clf()
 
-    plt.plot(r_data-0.5, profile_data,
+    if any(profile_data_err):
+        plt.errorbar(r_data-0.5, profile_data, profile_data_err,
+        color='black',
+        linestyle='',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=6,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+    else:
+        plt.plot(r_data-0.5, profile_data,
         color='black',
         linestyle='',              # -/--/:/-.
         linewidth=0,                # linewidth=1
@@ -913,11 +924,10 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
     plt.legend(loc=0, prop=prop, numpoints=1)
 
     plt.draw()
-    # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-    plt.get_current_fig_manager().window.wm_geometry("+640+0")
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    # plt.get_current_fig_manager().window.wm_geometry("+640+0")
     plt.show()
     plt.savefig(output_figure)
-
 
 def minuit_beta_model(r, norm, rcore, beta):
     """

@@ -10,7 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from test_2d_im import *
 import lmfit as lm
-from sb_models import beta_2d_lmfit, beta_1d_lmfit
+from sb_models import *
 
 def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
@@ -40,7 +40,7 @@ def test_lmfit_beta(fname='beta_image_cts.fits'):
     ######################################################################
     # init model
     pars = lm.Parameters()
-    pars.add('imsize' , value=(xsize_obj, ysize_obj), vary=False)
+    pars.add('imsize' , value=(xsize_obj, ysize_obj), vary=False) # FIXME: should be moved from par list to args
     pars.add('xcen'   , value=xcen_obj, vary=False)
     pars.add('ycen'   , value=ycen_obj, vary=False)
     pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
@@ -167,6 +167,7 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ######################################################################
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    imsize = data.shape         # FIXME: is this necessary? I could just use it inside the model
 
     ######################################################################
     # extract data profile
@@ -178,22 +179,33 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ######################################################################
     # init model
     pars = lm.Parameters()
+
     pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
     pars.add('rcore'  , value=10.0, vary=True, min=1.0, max=80.0)
     pars.add('beta'   , value=0.8, vary=True, min=0.1, max=10.0)
 
+    pars.add('xcen', value=xcen_obj, vary=False)
+    pars.add('ycen', value=ycen_obj, vary=False)
+
     ######################################################################
     # do the fit
     DO_FIT = True
+    FIT_1D_MODEL = False        # fit 1d model or 2d model via its profile
 
     if DO_FIT:
         print "starting fit"
 
         import time
         t1 = time.clock()
-        # continue here: do the fitting and streamline extraction
-        # result = lm.minimize(beta_1d_lmfit, pars, args=(r, data)) # fit in 1d
-        result = lm.minimize(beta_1d_lmfit, pars, args=(r, profile_norm, profile_norm_err)) # fit in 1d
+
+        if FIT_1D_MODEL:
+            result = lm.minimize(beta_1d_lmfit, pars, args=(r, profile_norm, profile_norm_err))
+            r_model = arange(0.0, r_aper, 0.1)
+            profile_norm_model = beta_1d_lmfit(pars, r_model)
+        else:
+            result = lm.minimize(beta_2d_lmfit_profile, pars, args=(imsize, profile_norm, profile_norm_err))
+            (r_model, profile_norm_model) = beta_2d_lmfit_profile(pars, imsize)
+
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
@@ -210,15 +222,12 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    r_model = arange(0.0, r_aper, 0.1)
-    profile_norm_model = beta_1d_lmfit(pars, r_model)
-
     # r_model = r
     # profile_norm_model = profile_norm
     # profile_norm_model_err = profile_norm_err
 
     output_figure = 'lmfit_beta_1d.png'
-    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure)
+    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
 if __name__ == '__main__':
@@ -248,7 +257,7 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
 
     # setup for the beta model
-    num_cts       = 2.0e2             # will be the normalization
+    num_cts       = 2.0e3             # will be the normalization
     rcore         = 10.0               # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0

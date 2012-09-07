@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_utils import sqdistance
+from test_2d_im import make_2d_beta, extract_profile_generic
 
 def beta_2d_lmfit(pars, data=None, errors=None):
     """
@@ -90,7 +91,7 @@ def beta_2d_lmfit(pars, data=None, errors=None):
 
 def beta_1d_lmfit(pars, r, data_profile=None, data_profile_err=None):
     """
-    Creates a 1D profile of a beta model.
+    Fits a 1D profile of a beta model (model created in 1D).
     Also allows to return directly residuals.
 
     Arguments:
@@ -114,4 +115,35 @@ def beta_1d_lmfit(pars, r, data_profile=None, data_profile_err=None):
         return residuals
 
 
+def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image.
+    No psf, or bg.
+    Also allows to return directly residuals.
 
+    Arguments:
+    """
+
+    # unpack parameters
+    norm   = pars['norm'].value
+    rcore  = pars['rcore'].value
+    beta   = pars['beta'].value
+    xcen   = pars['xcen'].value
+    ycen   = pars['ycen'].value
+
+    # model in 2d and extract profile
+    model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+
+    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
+    model_profile = profile / geometric_area
+
+    if data_profile == None:
+        return (r, model_profile)
+    else:
+        residuals = data_profile - model_profile
+
+        # is this biasing?
+        # residuals = residuals / data_profile_err
+
+        return residuals
