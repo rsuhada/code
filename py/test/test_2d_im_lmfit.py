@@ -226,9 +226,10 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
 def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     """
     Create a simple testimage - poissonized beta model x psf
+    Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    APPLY_PSF          = False
+    APPLY_PSF          = True
     POISSONIZE_IMAGE   = False            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
@@ -249,22 +250,18 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     # - works fine
     xsize_obj = 100
     ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
 
     imsize = (ysize, xsize)
 
     # create beta model
-    im_conv = make_2d_beta_psf(imsize, xcen, ycen, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF)
+    im_conv = make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
     im_conv = num_cts * im_conv/im_conv.sum()
 
     if POISSONIZE_IMAGE:
         im_conv = poisson.rvs(im_conv)
         print "poisson sum:", im_conv.sum()
-
-    if DO_ZERO_PAD:
-        im_conv[:, 0:xsize_obj] = 0.0
-        im_conv[:, xsize-xsize_obj:] = 0.0
-        im_conv[0:xsize_obj,:] = 0.0
-        im_conv[xsize-xsize_obj:,:] = 0.0
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header

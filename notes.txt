@@ -578,6 +578,15 @@ other references - helpful:
 
 - but still creating the beta image takes some time
 
+- 900x900 takes 3s with fftconvolve:
+  beta creation took:  0.778832  s
+  PSF creation took:  0.717411  s
+  convolve took:  1.190855  s
+
+- could me made faster - decrease to about 600x600 or less + possibly
+  a vecrorication of the image creation is possible? (currently for
+  loops)
+
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?

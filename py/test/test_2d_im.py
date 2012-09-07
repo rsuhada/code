@@ -109,6 +109,7 @@ def trim_fftconvolve(image):
     Arguments:
     - `image`: input image for trimming
     """
+
     # remove invalid edge
     image = delete(image, 0, 0)
     image = delete(image, 0, 1)
@@ -706,7 +707,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
     """
     Build a surface brighness model for fitting/plotting.
     """
-    DO_ZERO_PAD = True
+    DO_ZERO_PAD = False
 
     # create beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, norm, rcore, beta)
@@ -717,7 +718,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
     if APPLY_PSF:
     # create psf
         im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-        if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
+        # if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
 
     # FIXME: this needs bit reorganizing so that the proper number of
     # source cts can be assured (while a realistc s/n is kept)
@@ -782,11 +783,11 @@ def test_create_cluster_im():
     Creates a PSF convolved beta model image with poissonizations
     """
     # settings
-    POISSONIZE_IMAGE = True            # poissonize image?
-    DO_ZERO_PAD = True
-    APPLY_EXPOSURE_MAP = True           # add exposure map
-    ADD_BACKGROUND = True
     APPLY_PSF = True
+    POISSONIZE_IMAGE = False            # poissonize image?
+    DO_ZERO_PAD = True
+    APPLY_EXPOSURE_MAP = False           # add exposure map
+    ADD_BACKGROUND = False
 
     # FIXME: add background, realistic exposure map + decide how to
     # treat for modeling work
@@ -839,11 +840,13 @@ def test_create_cluster_im():
         if POISSONIZE_IMAGE:
             background_map_poi = poisson.rvs(background_map)
 
-        # add to the image
-        im_conv = im_conv + background_map_poi
+            # add to the image
+            im_conv = im_conv + background_map_poi
+        else:
+            im_conv = im_conv + background_map
 
-    image_mask = create_background_mask(background_map)
-    im_conv = im_conv * image_mask
+        image_mask = create_background_mask(background_map)
+        im_conv = im_conv * image_mask
 
     # poissonized model with masking and background -  beta x PSF, poissonized, has background and masked ps
     imname = 'cluster_image_cts.fits'
@@ -1339,8 +1342,8 @@ if __name__ == '__main__':
 
     ######################################################################
     # images for fitting tests
-    test_create_beta_im()
-    # test_create_cluster_im()
+    # test_create_beta_im()
+    test_create_cluster_im()
 
     ######################################################################
     # fit and plot
@@ -1352,4 +1355,6 @@ if __name__ == '__main__':
     # FIXME:
     # refactor code using load_fits_im
     # refactor code using zero_pad_image
+
+
 

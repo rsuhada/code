@@ -4,12 +4,13 @@ import os
 import math
 import pyfits
 from numpy import *
+from scipy.signal import fftconvolve
 from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_utils import sqdistance
-from test_2d_im import make_2d_beta, extract_profile_generic
+from test_2d_im import make_2d_beta, extract_profile_generic, make_2d_king, trim_fftconvolve, zero_pad_image
 
 def beta_2d_lmfit(pars, data=None, errors=None):
     """
@@ -183,28 +184,38 @@ def beta_psf_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile
 
         return residuals
 
-def make_2d_beta_psf(imsize, xcen, ycen, norm, rcore, beta, instrument, theta, energy, APPLY_PSF):
+def make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, norm, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD):
     """
     Creates a 2D image of a beta model convolved with psf
     Arguments:
     """
-
+    # Fri Sep  7 16:57:52 2012
+    # start here: add parameters format from lmfit and add fitter
     im = zeros(imsize, dtype=double)
+
+    import time
+    t1 = time.clock()
+
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
+
+    t2 = time.clock()
+    print "beta took: ", t2-t1, " s"
+
     im_output = im_beta
 
     if APPLY_PSF:
-    # create psf
-        im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
-        if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
-
-    # FIXME: this needs bit reorganizing so that the proper number of
-    # source cts can be assured (while a realistc s/n is kept)
-    # note: also needs exp map correction
-    # add background model (pre-PSF application)
+    # create PSF
+        t1 = time.clock()
+        im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
+        t2 = time.clock()
+        print "psf took: ", t2-t1, " s"
 
         # convolve
+        t1 = time.clock()
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)
+        t2 = time.clock()
+        print "convolve took: ", t2-t1, " s"
 
     return im_output
