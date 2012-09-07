@@ -103,7 +103,7 @@ def test_create_beta_im(imname='beta_image_cts.fits'):
     Create a simple testimage - poissonized beta model no psf
     """
     # settings
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -164,12 +164,10 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ycen_obj = ysize_obj / 2
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
-    ######################################################################
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     imsize = data.shape         # FIXME: is this necessary? I could just use it inside the model
 
-    ######################################################################
     # extract data profile
     (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
     profile_norm = profile / geometric_area
@@ -218,17 +216,60 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
         print
         print
 
-
     ######################################################################
     # plot profiles
-
-    # r_model = r
-    # profile_norm_model = profile_norm
-    # profile_norm_model_err = profile_norm_err
 
     output_figure = 'lmfit_beta_1d.png'
     plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
+
+def test_create_beta_psf_im(imname='beta_image_cts.fits'):
+    """
+    Create a simple testimage - poissonized beta model x psf
+    """
+    # settings
+    APPLY_PSF          = False
+    POISSONIZE_IMAGE   = False            # poissonize image?
+    DO_ZERO_PAD        = True
+    APPLY_EXPOSURE_MAP = False
+    ADD_BACKGROUND     = False
+
+    # get a header
+    fname='pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    # image setup
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+
+    imsize = (ysize, xsize)
+
+    # create beta model
+    im_conv = make_2d_beta_psf(imsize, xcen, ycen, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF)
+    im_conv = num_cts * im_conv/im_conv.sum()
+
+    if POISSONIZE_IMAGE:
+        im_conv = poisson.rvs(im_conv)
+        print "poisson sum:", im_conv.sum()
+
+    if DO_ZERO_PAD:
+        im_conv[:, 0:xsize_obj] = 0.0
+        im_conv[:, xsize-xsize_obj:] = 0.0
+        im_conv[0:xsize_obj,:] = 0.0
+        im_conv[xsize-xsize_obj:,:] = 0.0
+
+    # poissonized beta model image [counts] - no background/mask
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
 
 if __name__ == '__main__':
     print
@@ -239,7 +280,7 @@ if __name__ == '__main__':
     if DEBUG:
         reload(test_2d_im)
         reload(sb_models)
-        module_visible()
+        # module_visible()
 
     ######################################################################
     # setup basic parameters
@@ -265,13 +306,13 @@ if __name__ == '__main__':
 
     ######################################################################
     # images for fitting tests
-    test_create_beta_im(imname)
-    # test_create_cluster_im()
+    # test_create_beta_im(imname)
+    test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    test_lmfit_beta_1d(imname)
+    # test_lmfit_beta_1d(imname)
 
     print "done!"
 

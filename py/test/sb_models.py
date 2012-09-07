@@ -147,3 +147,64 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
         # residuals = residuals / data_profile_err
 
         return residuals
+
+def beta_psf_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image - beta model x psf
+    No bg.
+    Also allows to return directly residuals.
+
+    Arguments:
+    """
+
+    # unpack parameters
+    norm   = pars['norm'].value
+    rcore  = pars['rcore'].value
+    beta   = pars['beta'].value
+    xcen   = pars['xcen'].value
+    ycen   = pars['ycen'].value
+
+    # model in 2d and extract profile
+    model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+
+    model = make_2d_beta(imsize, xcen, ycen, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF)
+
+    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
+    model_profile = profile / geometric_area
+
+    if data_profile == None:
+        return (r, model_profile)
+    else:
+        residuals = data_profile - model_profile
+
+        # is this biasing?
+        # residuals = residuals / data_profile_err
+
+        return residuals
+
+def make_2d_beta_psf(imsize, xcen, ycen, norm, rcore, beta, instrument, theta, energy, APPLY_PSF):
+    """
+    Creates a 2D image of a beta model convolved with psf
+    Arguments:
+    """
+
+    im = zeros(imsize, dtype=double)
+    im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+    im_output = im_beta
+
+    if APPLY_PSF:
+    # create psf
+        im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+        if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
+
+    # FIXME: this needs bit reorganizing so that the proper number of
+    # source cts can be assured (while a realistc s/n is kept)
+    # note: also needs exp map correction
+    # add background model (pre-PSF application)
+
+        # convolve
+        im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+        im_output = trim_fftconvolve(im_output)
+
+    return im_output
