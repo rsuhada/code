@@ -256,7 +256,19 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     imsize = (ysize, xsize)
 
     # create beta model
-    im_conv = make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    # im_conv = make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
+    # init model
+    pars = lm.Parameters()
+    pars.add('xcen'   , value=xcen_obj)
+    pars.add('ycen'   , value=ycen_obj)
+    pars.add('norm'   , value=normalization)
+    pars.add('rcore'  , value=rcore)
+    pars.add('beta'   , value=beta)
+
+    # create the model
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
     im_conv = num_cts * im_conv/im_conv.sum()
 
     if POISSONIZE_IMAGE:

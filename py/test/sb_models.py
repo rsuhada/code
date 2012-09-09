@@ -184,13 +184,21 @@ def beta_psf_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile
 
         return residuals
 
-def make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, norm, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD):
+def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD):
     """
     Creates a 2D image of a beta model convolved with psf
     Arguments:
     """
     # Fri Sep  7 16:57:52 2012
-    # start here: add parameters format from lmfit and add fitter
+    # start here: check - parameters and against
+    # samefitsim  t1.fits beta-psf-pre-par.fits
+
+    xcen  = pars['xcen'].value
+    ycen  = pars['ycen'].value
+    norm  = pars['norm'].value
+    rcore = pars['rcore'].value
+    beta  = pars['beta'].value
+
     im = zeros(imsize, dtype=double)
 
     import time
