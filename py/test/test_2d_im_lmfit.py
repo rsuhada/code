@@ -260,8 +260,8 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     # init model
     pars = lm.Parameters()
-    pars.add('xcen'   , value=xcen_obj)
-    pars.add('ycen'   , value=ycen_obj)
+    pars.add('xcen'   , value=xcen)
+    pars.add('ycen'   , value=ycen)
     pars.add('norm'   , value=normalization)
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
