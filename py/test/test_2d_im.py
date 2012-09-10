@@ -736,7 +736,7 @@ def test_create_beta_im():
     Create a simple testimage - poissonized beta model no psf
     """
     # settings
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -784,7 +784,7 @@ def test_create_cluster_im():
     """
     # settings
     APPLY_PSF = True
-    POISSONIZE_IMAGE = False            # poissonize image?
+    POISSONIZE_IMAGE = True            # poissonize image?
     DO_ZERO_PAD = True
     APPLY_EXPOSURE_MAP = False           # add exposure map
     ADD_BACKGROUND = False

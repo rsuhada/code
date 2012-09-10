@@ -145,7 +145,8 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
         residuals = data_profile - model_profile
 
         # is this biasing?
-        # residuals = residuals / data_profile_err
+        residuals = residuals / data_profile_err
+        print xcen, ycen, rcore
 
         return residuals
 
@@ -170,6 +171,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     t1 = time.clock()
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+    # FIXME: CRITICAL  - verify if this is where you want to have it
     if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
 
     t2 = time.clock()
@@ -203,11 +205,11 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     """
 
     # unpack parameters
-    xcen   = pars['xcen'].value
-    ycen   = pars['ycen'].value
     norm   = pars['norm'].value
     rcore  = pars['rcore'].value
     beta   = pars['beta'].value
+    xcen   = pars['xcen'].value
+    ycen   = pars['ycen'].value
 
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
@@ -217,10 +219,11 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     model_profile = profile / geometric_area
 
     if data_profile == None:
-        return (r, model_profile, model_image)
+        return (r, model_profile)
     else:
         residuals = data_profile - model_profile
         # is this biasing?
         # residuals = residuals / data_profile_err
+        print norm, xcen, ycen, rcore
 
         return residuals

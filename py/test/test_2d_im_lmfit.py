@@ -229,7 +229,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    APPLY_PSF          = True
+    APPLY_PSF          = False
     POISSONIZE_IMAGE   = False            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
@@ -255,9 +255,6 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     imsize = (ysize, xsize)
 
-    # create beta model
-    # im_conv = make_2d_beta_psf(imsize, xcen, ycen, xsize_obj, ysize_obj, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-
     # init model
     pars = lm.Parameters()
     pars.add('xcen'   , value=xcen)
@@ -266,28 +263,42 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
 
-    # create the model
-    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    if APPLY_PSF:
+        # create the model: beta x psf
+        im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    else:
+        # simple beta
+        im_conv = make_2d_beta(imsize, xcen, ycen, normalization, rcore, beta)
 
     im_conv = num_cts * im_conv/im_conv.sum()
 
     if POISSONIZE_IMAGE:
-        im_conv = poisson.rvs(im_conv)
+        # fix current poissonize bug -poissonize only nonz-zero
+        # elements (ok - we're poissonizing the model)
+        ids = where(im_conv != 0.0)
+        im_conv[ids] = poisson.rvs(im_conv[ids])
         print "poisson sum:", im_conv.sum()
+
+    # FIXME: CRITICAL  - consolidate the zero padding
+    if not(APPLY_PSF) & DO_ZERO_PAD: im_conv = zero_pad_image(im_conv, xsize_obj)
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
+def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
-    Testing simple 1D fit of beta model (no psf)
+    Testing simple 1D fit of beta model with psf convolution
     """
+    APPLY_PSF = False
+    DO_ZERO_PAD = True
+
     input_im, hdr = load_fits_im(fname)
 
     ######################################################################
     # image setup
+
     xsize = input_im.shape[0]
     ysize = xsize
     xcen = xsize/2
@@ -323,24 +334,24 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ######################################################################
     # do the fit
     DO_FIT = True
-    FIT_1D_MODEL = False        # fit 1d model or 2d model via its profile
 
     if DO_FIT:
         print "starting fit"
 
+        # Mon Sep 10 15:15:45 2012
+        # continue here: want beta (no PSF fitting via this)
+
         import time
         t1 = time.clock()
-
-        if FIT_1D_MODEL:
-            result = lm.minimize(beta_1d_lmfit, pars, args=(r, profile_norm, profile_norm_err))
-            r_model = arange(0.0, r_aper, 0.1)
-            profile_norm_model = beta_1d_lmfit(pars, r_model)
-        else:
-            result = lm.minimize(beta_2d_lmfit_profile, pars, args=(imsize, profile_norm, profile_norm_err))
-            (r_model, profile_norm_model) = beta_2d_lmfit_profile(pars, imsize)
-
+        result = lm.minimize(beta_psf_2d_lmfit_profile, pars, args=(imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err))
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
+
+        # create the final model profile from the best-fit pars
+        (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile,(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
+        print "here:"
+        print r_model, profile_norm_model
 
         ######################################################################
         # output
@@ -354,8 +365,8 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    output_figure = 'lmfit_beta_1d.png'
-    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+    # output_figure = 'lmfit_beta_psf_1d.png'
+    # plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
 if __name__ == '__main__':
@@ -394,12 +405,14 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    test_create_beta_psf_im(imname)
+    # test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
     # test_lmfit_beta_1d(imname)
+
+    test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
