@@ -149,41 +149,6 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
 
         return residuals
 
-def beta_psf_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err=None):
-    """
-    Fits the surface brightness profile by creating a 2D model of the
-    image - beta model x psf
-    No bg.
-    Also allows to return directly residuals.
-
-    Arguments:
-    """
-
-    # unpack parameters
-    norm   = pars['norm'].value
-    rcore  = pars['rcore'].value
-    beta   = pars['beta'].value
-    xcen   = pars['xcen'].value
-    ycen   = pars['ycen'].value
-
-    # model in 2d and extract profile
-    model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
-
-    model = make_2d_beta(imsize, xcen, ycen, normalization, rcore, beta, instrument, theta, energy, APPLY_PSF)
-
-    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
-    model_profile = profile / geometric_area
-
-    if data_profile == None:
-        return (r, model_profile)
-    else:
-        residuals = data_profile - model_profile
-
-        # is this biasing?
-        # residuals = residuals / data_profile_err
-
-        return residuals
-
 def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD):
     """
     Creates a 2D image of a beta model convolved with psf
@@ -227,3 +192,35 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
         print "convolve took: ", t2-t1, " s"
 
     return im_output
+
+
+def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, data_profile=None, data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image - beta model x psf
+    No bg.
+    Also allows to return directly residuals.
+    """
+
+    # unpack parameters
+    xcen   = pars['xcen'].value
+    ycen   = pars['ycen'].value
+    norm   = pars['norm'].value
+    rcore  = pars['rcore'].value
+    beta   = pars['beta'].value
+
+    # model in 2d image beta x PSF = and extract profile
+    model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
+    # extract the profile
+    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
+    model_profile = profile / geometric_area
+
+    if data_profile == None:
+        return (r, model_profile, model_image)
+    else:
+        residuals = data_profile - model_profile
+        # is this biasing?
+        # residuals = residuals / data_profile_err
+
+        return residuals
