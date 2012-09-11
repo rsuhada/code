@@ -155,9 +155,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     Creates a 2D image of a beta model convolved with psf
     Arguments:
     """
-    # Fri Sep  7 16:57:52 2012
-    # start here: check - parameters and against
-    # samefitsim  t1.fits beta-psf-pre-par.fits
 
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
@@ -218,8 +215,10 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
     model_profile = profile / geometric_area
 
+
+    print r
     if data_profile == None:
-        return (r, model_profile)
+        return (r, model_profile, model_image)
     else:
         residuals = data_profile - model_profile
         # is this biasing?

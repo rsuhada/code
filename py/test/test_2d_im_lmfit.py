@@ -230,7 +230,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     """
     # settings
     APPLY_PSF          = False
-    POISSONIZE_IMAGE   = False            # poissonize image?
+    POISSONIZE_IMAGE   = True            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -262,6 +262,11 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     pars.add('norm'   , value=normalization)
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
+
+    print 40*"#"
+    print "working:"
+    print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
+    print 40*"#"
 
     if APPLY_PSF:
         # create the model: beta x psf
@@ -333,13 +338,10 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     ######################################################################
     # do the fit
-    DO_FIT = True
+    DO_FIT = False
 
     if DO_FIT:
         print "starting fit"
-
-        # Mon Sep 10 15:15:45 2012
-        # continue here: want beta (no PSF fitting via this)
 
         import time
         t1 = time.clock()
@@ -347,20 +349,36 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-        # create the final model profile from the best-fit pars
-        (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile,(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
 
-        print "here:"
-        print r_model, profile_norm_model
+    print 40*"#"
+    print "NOT working:"
+    print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
+    print 40*"#"
 
-        ######################################################################
-        # output
-        print
-        print "parameter: true | fit"
-        print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
-        print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
-        print
-        print
+    # Tue Sep 11 07:48:18 2012
+    # START: the parameter list - coordinates and sizes are wrong
+    # create the final model profile from the best-fit pars
+    (r_model, profile_norm_model, tmp_im) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
+
+    model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+
+    hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('tmp.fits', clobber=True)
+
+
+    # print "here:", profile_norm_model
+    # print profile_norm_model
+
+    ######################################################################
+    # output
+    print
+    print "parameter: true | fit"
+    print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
+    print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
+    print
+    print
 
     ######################################################################
     # plot profiles
@@ -405,7 +423,7 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    # test_create_beta_psf_im(imname)
+    test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
@@ -417,3 +435,17 @@ if __name__ == '__main__':
     print "done!"
 
 
+
+
+# ########################################
+# working:
+# Parameters([('xcen', <Parameter 'xcen', 450, bounds=[None:None]>), ('ycen', <Parameter 'ycen', 450, bounds=[None:None]>), ('norm', <Parameter 'norm', 1.0, bounds=[None:None]>), ('rcore', <Parameter 'rcore', 10.0, bounds=[None:None]>), ('beta', <Parameter 'beta', 0.66666666666666663, bounds=[None:None]>)]) (900, 900) 100 100 pn 1.097405 1.5 False True
+# ########################################
+
+
+
+
+# ########################################
+# NOT working:
+# Parameters([('norm', <Parameter 'norm', 2.0, bounds=[0.0:2030.0]>), ('rcore', <Parameter 'rcore', 10.0, bounds=[1.0:80.0]>), ('beta', <Parameter 'beta', 0.80000000000000004, bounds=[0.10000000000000001:10.0]>), ('xcen', <Parameter 'xcen', value=50 (fixed), bounds=[None:None]>), ('ycen', <Parameter 'ycen', value=50 (fixed), bounds=[None:None]>)]) (100, 100) 100 100 pn 1.097405 1.5 False True
+# ########################################
