@@ -167,8 +167,11 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     import time
     t1 = time.clock()
 
+    print "psf", imsize, xcen, ycen, norm, rcore, beta
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     # FIXME: CRITICAL  - verify if this is where you want to have it
+    # in case of convolution you'd like to have a 0 border to avoid edge effects
+
     if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
 
     t2 = time.clock()
@@ -216,7 +219,15 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     model_profile = profile / geometric_area
 
 
-    print r
+    # this is the new version
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    # we want just the relevant part of the image
+    data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
+    model_profile = profile / geometric_area
+
+
     if data_profile == None:
         return (r, model_profile, model_image)
     else:

@@ -169,7 +169,7 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     # this is pretty fast but maybe you want to do it in polar coordinates
     # print "OK", imsize[0], imsize[1], xcen, ycen, norm, rcore, beta
     im = zeros(imsize, dtype=double)
-
+    print "no psf", imsize, xcen, ycen, norm, rcore, beta
     # Tue Sep  4 14:18:42 2012
     # FIXME: at this point when called from minuit_sb_model_likelihood
     # it crashes for some reason... error: TypeError: only length-1

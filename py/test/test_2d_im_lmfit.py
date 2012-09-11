@@ -230,7 +230,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     """
     # settings
     APPLY_PSF          = False
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -263,18 +263,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
 
-    print 40*"#"
-    print "working:"
-    print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
-    print 40*"#"
-
-    if APPLY_PSF:
-        # create the model: beta x psf
-        im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-    else:
-        # simple beta
-        im_conv = make_2d_beta(imsize, xcen, ycen, normalization, rcore, beta)
-
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
     im_conv = num_cts * im_conv/im_conv.sum()
 
     if POISSONIZE_IMAGE:
@@ -283,9 +272,6 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
         print "poisson sum:", im_conv.sum()
-
-    # FIXME: CRITICAL  - consolidate the zero padding
-    if not(APPLY_PSF) & DO_ZERO_PAD: im_conv = zero_pad_image(im_conv, xsize_obj)
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -308,6 +294,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
+    imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
     xsize_obj = 100
     ysize_obj = xsize_obj
@@ -317,7 +304,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    imsize = data.shape         # FIXME: is this necessary? I could just use it inside the model
+    # imsize = data.shape
 
     # extract data profile
     (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
@@ -329,16 +316,16 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # init model
     pars = lm.Parameters()
 
-    pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
-    pars.add('rcore'  , value=10.0, vary=True, min=1.0, max=80.0)
-    pars.add('beta'   , value=0.8, vary=True, min=0.1, max=10.0)
+    pars.add('norm'   , value=1.0, vary=True, min=0.0, max=sum(input_im))
+    pars.add('rcore'  , value=15.0, vary=True, min=1.0, max=80.0)
+    pars.add('beta'   , value=0.7, vary=True, min=0.1, max=10.0)
 
-    pars.add('xcen', value=xcen_obj, vary=False)
-    pars.add('ycen', value=ycen_obj, vary=False)
+    pars.add('xcen', value=xcen, vary=False)
+    pars.add('ycen', value=ycen, vary=False)
 
     ######################################################################
     # do the fit
-    DO_FIT = False
+    DO_FIT = True
 
     if DO_FIT:
         print "starting fit"
@@ -350,23 +337,12 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         print "fitting took: ", t2-t1, " s"
 
 
-    print 40*"#"
-    print "NOT working:"
-    print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
-    print 40*"#"
+    # print 40*"#"
+    # print "NOT working:"
+    # print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
+    # print 40*"#"
 
-    # Tue Sep 11 07:48:18 2012
-    # START: the parameter list - coordinates and sizes are wrong
-    # create the final model profile from the best-fit pars
     (r_model, profile_norm_model, tmp_im) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-
-
-    model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-
-    hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('tmp.fits', clobber=True)
-
 
     # print "here:", profile_norm_model
     # print profile_norm_model
@@ -383,8 +359,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    # output_figure = 'lmfit_beta_psf_1d.png'
-    # plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+    output_figure = 'lmfit_beta_psf_1d.png'
+    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
 if __name__ == '__main__':
@@ -430,22 +406,10 @@ if __name__ == '__main__':
     # test_lmfit_beta(imname)
     # test_lmfit_beta_1d(imname)
 
-    test_lmfit_beta_psf_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
 
 
 
-# ########################################
-# working:
-# Parameters([('xcen', <Parameter 'xcen', 450, bounds=[None:None]>), ('ycen', <Parameter 'ycen', 450, bounds=[None:None]>), ('norm', <Parameter 'norm', 1.0, bounds=[None:None]>), ('rcore', <Parameter 'rcore', 10.0, bounds=[None:None]>), ('beta', <Parameter 'beta', 0.66666666666666663, bounds=[None:None]>)]) (900, 900) 100 100 pn 1.097405 1.5 False True
-# ########################################
-
-
-
-
-# ########################################
-# NOT working:
-# Parameters([('norm', <Parameter 'norm', 2.0, bounds=[0.0:2030.0]>), ('rcore', <Parameter 'rcore', 10.0, bounds=[1.0:80.0]>), ('beta', <Parameter 'beta', 0.80000000000000004, bounds=[0.10000000000000001:10.0]>), ('xcen', <Parameter 'xcen', value=50 (fixed), bounds=[None:None]>), ('ycen', <Parameter 'ycen', value=50 (fixed), bounds=[None:None]>)]) (100, 100) 100 100 pn 1.097405 1.5 False True
-# ########################################
