@@ -134,7 +134,12 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
     ycen   = pars['ycen'].value
 
     # model in 2d and extract profile
+    import time
+    t1 = time.clock()
     model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
+    t2 = time.clock()
+    print "task took: ", t2-t1, " s"
+
 
     (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
     model_profile = profile / geometric_area
@@ -146,7 +151,7 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
 
         # is this biasing?
         residuals = residuals / data_profile_err
-        print xcen, ycen, rcore
+        # print xcen, ycen, rcore
 
         return residuals
 
@@ -167,14 +172,16 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     import time
     t1 = time.clock()
 
+    print "1. pars ", imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, xcen, ycen, norm, rcore, beta
+
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     # FIXME: CRITICAL  - verify if this is where you want to have it
     # in case of convolution you'd like to have a 0 border to avoid edge effects
 
-    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
-
     t2 = time.clock()
-    print "beta took: ", t2-t1, " s"
+    print "1. beta took: ", t2-t1, " s"
+
+    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
 
     im_output = im_beta
 
@@ -210,13 +217,19 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     xcen   = pars['xcen'].value
     ycen   = pars['ycen'].value
 
+    import time
+    t1 = time.clock()
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    t2 = time.clock()
+    print "beta inside minimize took: ", t2-t1, " s"
+
+
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
 
-    # extract the profile
-    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
-    model_profile = profile / geometric_area
-
+    # # extract the profile
+    # (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
+    # model_profile = profile / geometric_area
 
     # this is the new version
     xcen_obj = xsize_obj / 2
@@ -228,11 +241,11 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
 
 
     if data_profile == None:
-        return (r, model_profile, model_image)
+        return (r, model_profile)
     else:
         residuals = data_profile - model_profile
         # is this biasing?
         # residuals = residuals / data_profile_err
-        print norm, xcen, ycen, rcore
+        # print norm, xcen, ycen, rcore
 
         return residuals

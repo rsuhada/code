@@ -302,6 +302,9 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ycen_obj = ysize_obj / 2
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
+    ######################################################################
+    # getting the "data"
+
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     # imsize = data.shape
@@ -325,8 +328,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
 
-
-    leastsq_pars={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 2}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 2}
 
     ######################################################################
     # do the fit
@@ -335,27 +337,42 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     if DO_FIT:
         print "starting fit"
 
-        # Tue Sep 11 15:43:25 2012
-        # continue here: try no PSF beta fit: speed and functionality
-
         import time
         t1 = time.clock()
+
+        # Wed Sep 12 12:08:32 2012
+        # CONTINUE: need to write a new make_2d_beta_PSF that doesn't
+        # call outside - still need to run fftw...
+
+        # import time
+        # t1 = time.clock()
+        # im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+        # t2 = time.clock()
+        # print "beta outside minimize took: ", t2-t1, " s"
+
         result = lm.minimize(beta_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
-                             engine='leastsq',
-                             leastsq_pars
+                             **leastsq_kws
                              )
+
+        # result = lm.Minimizer(beta_psf_2d_lmfit_profile,
+        #                      pars,
+        #                      fcn_args=nonfit_args
+        #                      )
+        # result.leastsq(**leastsq_kws)
+
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-    (r_model, profile_norm_model, tmp_im) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
 
     # print "here:", profile_norm_model
     # print profile_norm_model
 
     ######################################################################
     # output
+
     print
     print "parameter: true | fit"
     print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
@@ -366,8 +383,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    # output_figure = 'lmfit_beta_psf_1d.png'
-    # plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+    output_figure = 'lmfit_beta_psf_1d.png'
+    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
 if __name__ == '__main__':
@@ -406,16 +423,19 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    test_create_beta_psf_im(imname)
+    # test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    # test_lmfit_beta_1d(imname)
+    test_lmfit_beta_1d(imname)
 
-    test_lmfit_beta_psf_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
+
+
+
 
 
 
