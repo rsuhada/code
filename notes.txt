@@ -587,11 +587,36 @@ other references - helpful:
   a vecrorication of the image creation is possible? (currently for
   loops)
 
+Other speedup possibilities:
+can remove optional keyword and test like DO_ZERO_PAD and APPLY_PSF
+(can be always true)
+
+What works (validated)
+Mon Sep 10 14:50:08 2012
+
+1. beta model 1d fitter (2d image via its profile)
+   test_lmfit_beta_1d
+
+2. 2d beta x PSF image creator in lmfit format
+   test_create_beta_psf_image
+   make_2d_beta_PSF
+   - validate in both modes  - with and without psf
+
+Not working
+Mon Sep 10 14:52:22 2012
+    test_lmfit_beta_psf_1d
+
+- not fitting
+- need to think about the image size
+
+
+
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
 - also the chipgaps are too larger - check snowden parameters on it - they are the same
 - other methods: arnaud, xmm-LSS, yu-ying, snowden, karl
+
 
 ######################################################################
 # moving to desproc:

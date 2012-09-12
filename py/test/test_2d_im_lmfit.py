@@ -350,7 +350,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         # t2 = time.clock()
         # print "beta outside minimize took: ", t2-t1, " s"
 
-        result = lm.minimize(beta_psf_2d_lmfit_profile,
+        result = lm.minimize(beta_psf_2d_lmfit_profile_refactror,
                              pars,
                              args=nonfit_args,
                              **leastsq_kws
@@ -385,6 +385,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     output_figure = 'lmfit_beta_psf_1d.png'
     plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+
+
 
 
 if __name__ == '__main__':
@@ -428,9 +430,9 @@ if __name__ == '__main__':
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    test_lmfit_beta_1d(imname)
+    # test_lmfit_beta_1d(imname)
 
-    # test_lmfit_beta_psf_1d(imname)
+    test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
