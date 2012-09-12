@@ -230,7 +230,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     """
     # settings
     APPLY_PSF          = False
-    POISSONIZE_IMAGE   = False            # poissonize image?
+    POISSONIZE_IMAGE   = True            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -323,6 +323,11 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     pars.add('xcen', value=xcen, vary=False)
     pars.add('ycen', value=ycen, vary=False)
 
+    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
+
+
+    leastsq_pars={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 2}
+
     ######################################################################
     # do the fit
     DO_FIT = True
@@ -330,17 +335,19 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     if DO_FIT:
         print "starting fit"
 
+        # Tue Sep 11 15:43:25 2012
+        # continue here: try no PSF beta fit: speed and functionality
+
         import time
         t1 = time.clock()
-        result = lm.minimize(beta_psf_2d_lmfit_profile, pars, args=(imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err))
+        result = lm.minimize(beta_psf_2d_lmfit_profile,
+                             pars,
+                             args=nonfit_args,
+                             engine='leastsq',
+                             leastsq_pars
+                             )
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
-
-
-    # print 40*"#"
-    # print "NOT working:"
-    # print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
-    # print 40*"#"
 
     (r_model, profile_norm_model, tmp_im) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
 
@@ -359,8 +366,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    output_figure = 'lmfit_beta_psf_1d.png'
-    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+    # output_figure = 'lmfit_beta_psf_1d.png'
+    # plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
 if __name__ == '__main__':
@@ -390,7 +397,7 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
 
     # setup for the beta model
-    num_cts       = 2.0e3             # will be the normalization
+    num_cts       = 2.0e5             # will be the normalization
     rcore         = 10.0               # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0
@@ -406,7 +413,7 @@ if __name__ == '__main__':
     # test_lmfit_beta(imname)
     # test_lmfit_beta_1d(imname)
 
-    # test_lmfit_beta_psf_1d(imname)
+    test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 

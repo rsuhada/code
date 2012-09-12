@@ -167,7 +167,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     import time
     t1 = time.clock()
 
-    print "psf", imsize, xcen, ycen, norm, rcore, beta
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     # FIXME: CRITICAL  - verify if this is where you want to have it
     # in case of convolution you'd like to have a 0 border to avoid edge effects
