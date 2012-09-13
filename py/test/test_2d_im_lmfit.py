@@ -168,6 +168,10 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     imsize = data.shape         # FIXME: is this necessary? I could just use it inside the model
 
+    # work on full image
+    data = input_im
+    imsize = data.shape
+
     # extract data profile
     (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
     profile_norm = profile / geometric_area
@@ -189,6 +193,14 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     # do the fit
     DO_FIT = True
     FIT_1D_MODEL = False        # fit 1d model or 2d model via its profile
+
+    # model in 2d and extract profile
+    import time
+    t1 = time.clock()
+    # model_image = make_2d_beta(imsize, xcen, ycen, 2.0, 10.0, 0.8)
+    (r_model, profile_norm_model) = beta_2d_lmfit_profile(pars, imsize)
+    t2 = time.clock()
+    print "objective outside minimize took: ", t2-t1, " s"
 
     if DO_FIT:
         print "starting fit"
@@ -328,7 +340,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 2}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 50}
 
     ######################################################################
     # do the fit
@@ -350,7 +362,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         # t2 = time.clock()
         # print "beta outside minimize took: ", t2-t1, " s"
 
-        result = lm.minimize(beta_psf_2d_lmfit_profile_refactror,
+        result = lm.minimize(beta_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
                              **leastsq_kws
@@ -430,15 +442,28 @@ if __name__ == '__main__':
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    # test_lmfit_beta_1d(imname)
+    test_lmfit_beta_1d(imname)
 
-    test_lmfit_beta_psf_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
 
+# Thu Sep 13 07:38:21 2012
+# START here:
 
+# the problem is not beta but the extraction very likely:
+# this is in test_lmfit_beta_1d ::
 
-
+# beta inside minimize took:  0.777033  s
+# extract inside minimize took:  5.003653  s
+# objective outside minimize took:  5.78158  s
+# starting fit
+# beta inside minimize took:  4.817892  s
+# extract inside minimize took:  5.015683  s
+# beta inside minimize took:  4.812917  s
+# extract inside minimize took:  5.266668  s
+# ie minimize only messes up the timing but there seems no slow-down
+# TODO: test by adding extraction to test_create_beta_psf_im
 
 

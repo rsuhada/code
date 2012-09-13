@@ -138,11 +138,14 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
     t1 = time.clock()
     model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     t2 = time.clock()
-    print "task took: ", t2-t1, " s"
+    print "beta inside minimize took: ", t2-t1, " s"
 
-
+    t1 = time.clock()
     (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
     model_profile = profile / geometric_area
+    t2 = time.clock()
+    print "extract inside minimize took: ", t2-t1, " s"
+
 
     if data_profile == None:
         return (r, model_profile)
