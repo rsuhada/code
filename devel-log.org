@@ -1,0 +1,22 @@
+#+TITLE: Esaspi Devel Log
+#+AUTHOR: Robert Suhada
+#+STARTUP: hidestars
+#+STARTUP: showall
+#+OPTIONS: \n:t
+#+OPTIONS: ^:nil
+#+OPTIONS: *:nil
+
+
+* Mon Sep 17 18:29:03 2012
+
+Confirmed that the bottleneck is at the moment the moment the
+extract_generic routine (about 5s for 900x900)
+
+* TODO actually run fitter on 2e5 beta to confirm that it works
+* TODO actually run fitter on 2e3 beta to confirm that it works
+* TODO actually run fitter on 2e3 beta x psf to confirm that it works
+* TODO need to look at speedup possibility via matrix ops
+* TODO need to thik about image size handling (can lead to speed up,
+  including if I can assume exact center of cluster)
+
+

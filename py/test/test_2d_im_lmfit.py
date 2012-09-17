@@ -437,33 +437,16 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    # test_create_beta_psf_im(imname)
+    test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    test_lmfit_beta_1d(imname)
+    # test_lmfit_beta_1d(imname)
 
     # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
-
-# Thu Sep 13 07:38:21 2012
-# START here:
-
-# the problem is not beta but the extraction very likely:
-# this is in test_lmfit_beta_1d ::
-
-# beta inside minimize took:  0.777033  s
-# extract inside minimize took:  5.003653  s
-# objective outside minimize took:  5.78158  s
-# starting fit
-# beta inside minimize took:  4.817892  s
-# extract inside minimize took:  5.015683  s
-# beta inside minimize took:  4.812917  s
-# extract inside minimize took:  5.266668  s
-# ie minimize only messes up the timing but there seems no slow-down
-# TODO: test by adding extraction to test_create_beta_psf_im
 
 
