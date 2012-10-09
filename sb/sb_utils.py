@@ -61,6 +61,16 @@ def sqdist_matrix(im, xcen, ycen):
 
     return outmatrix
 
+def distance_matrix(im, xcen, ycen):
+    """
+    Return distance matrix. This can be used in bincount (after
+    recasting to int). Solution from stackoverflow, should be really
+    fast.
+    """
+    outmatrix = sqrt(arange(-xcen, im.shape[0]-xcen, dtype=float)[:,None]**2
+          + arange(-ycen, im.shape[1]-ycen, dtype=float)[None,:]**2)
+    return outmatrix
+
 def get_cts_stat(im, distmatrix, xim, yim, r_aper):
     """
     Provide basic statistics (total/mean cts etc.) for an input image

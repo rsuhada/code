@@ -176,8 +176,8 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     # do not know why...
 
     # the dumb method
-    for i in range(round(imsize[0])):
-        for j in range(round(imsize[1])):
+    for i in range(imsize[0]):
+        for j in range(imsize[1]):
             r2 = sqdistance(xcen, ycen, j , i) # this is already squared
             im[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
 
@@ -232,7 +232,7 @@ def extract_profile_generic(im, xcen, ycen):
 
     return (rgrid, x, geometric_area)
 
-def extract_profile_faster(im, xcen, ycen):
+def extract_profile_faster(im, distmatrix, xcen, ycen):
     """
     Improved function to extract a 1D profile of a 2D image
     profile[i] plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.
@@ -243,51 +243,16 @@ def extract_profile_faster(im, xcen, ycen):
     - `ycen`: center y coordinate
     """
 
-    # FIXME: 1. rmax as argument, 2. look at speed improvement in
-    # sqdist
-
     import time
     t1 = time.clock()
 
-    distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
-
-    t2 = time.clock()
-    print "dist matrix took: ", t2-t1, " s"
-
-    # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
-    rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
-    n = len(rgrid)
-
-    x = zeros(n, dtype=float)   # profile
-    geometric_area = zeros(n, dtype=float)  # area normalised profile
-
-    import time
-    t1 = time.clock()
-
-    # starting bin
-    i=0
-    ids = where((distmatrix <= rgrid[i]) & (distmatrix >= 0))
-    geometric_area[i] = len(ids[0])      # [pix]
-    x[i] = sum(im[ids])
-
-    # # iterate through the rest
-    # for i in range(1, n):
-    #     ids = where((distmatrix <= rgrid[i]) & (distmatrix >= (rgrid[i-1])))
-    #     geometric_area[i] = len(ids[0])      # [pix]
-    #     x[i] = sum(im[ids])
-
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            index = floor(distmatrix[i, j])
-            if index< len(x) - 1:
-                x[index] += im[i, j]
-                geometric_area[index] += 1
-
+    geometric_area = bincount(distmatrix.flat)
+    profile = bincount(distmatrix.flat, weights=im.flat)
 
     t2 = time.clock()
     print "extraction took: ", t2-t1, " s"
 
-    return (rgrid, x, geometric_area)
+    return (profile, geometric_area)
 
 
 def test_psf_parameter():

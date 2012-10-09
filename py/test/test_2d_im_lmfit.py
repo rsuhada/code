@@ -11,6 +11,7 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from test_2d_im import *
 import lmfit as lm
 from sb_models import *
+from sb_utils import sqdist_matrix, distance_matrix
 
 def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
@@ -275,7 +276,10 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
 
-    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
+                               instrument, theta, energy,
+                               APPLY_PSF, DO_ZERO_PAD)
+
     im_conv = num_cts * im_conv/im_conv.sum()
 
     print
@@ -283,26 +287,45 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     import time
     t1 = time.clock()
-    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen_obj, ycen_obj)
+    (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
     t2 = time.clock()
-    print "full extraction took: ", t2-t1, " s"
+    print "standard extraction took: ", t2-t1, " s"
+
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('test.fits', clobber=True)
 
     print
     print
+
+    # setup data for the profile extraction - for speedup
+    distmatrix = distance_matrix(im_conv, xcen, ycen).astype(int) # need int for bincount
+    rgrid_length = im_conv.shape[0]/2
+    rgrid = arange(1, rgrid_length+1,1.0)
 
     import time
     t1 = time.clock()
-    (r, profile, geometric_area) = extract_profile_faster(im_conv, xcen_obj, ycen_obj)
+    (profile, geometric_area) = extract_profile_faster(im_conv, distmatrix, xcen_obj, ycen_obj)
     t2 = time.clock()
     print "faster extraction took: ", t2-t1, " s"
 
+    ######################################################################
+    output_figure = "profiles.png"
+    profile_norm_err = sqrt(profile)
+
+    profile_norm_ref = profile_ref / geometric_area_ref
+    profile_norm = profile / geometric_area
+
+    plot_data_model_simple(r, profile_ref, rgrid, profile[0:len(rgrid)],
+                           output_figure)
+    ######################################################################
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug -poissonize only nonz-zero
         # elements (ok - we're poissonizing the model)
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
-        print "poisson sum:", im_conv.sum()
+        # print "poisson sum:", im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -413,6 +436,7 @@ if __name__ == '__main__':
     if DEBUG:
         reload(test_2d_im)
         reload(sb_models)
+        reload(sb_utils)
         # module_visible()
 
     ######################################################################

@@ -71,3 +71,9 @@ Current solution:
 ln -s 0674491401 SPT-CL-J2018-6259a
 ln -s 0674491501 SPT-CL-J2018-6259a
 
+* Tue Oct  9 14:22:50 2012
+
+** speeding up
+
+- refactored to pass distmatrix to the extractor
+- moving code to use bincount for extraction
