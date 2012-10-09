@@ -7,16 +7,67 @@
 #+OPTIONS: *:nil
 
 
+* agenda
+
+
+** DONE [#A] actually run fitter on 2e5 beta to confirm that it works
+  CLOSED: [2012-09-17 Mon 19:30]
+
+Sucessful: [[result_lmfitter_beta.png]]
+
+parameter: true | fit
+rcore 10.0 10.6277787014 +/- 0.115453837186
+beta 0.666666666667 0.692480574855 +/- 0.00708285330472
+
+fitting took roughly:  740.88284  s on (900, 900) image
+
+
+** DONE [#A] actually run fitter on 2e3 beta x psf to confirm that it works
+   CLOSED: [2012-09-18 Tue 08:25]
+
+   Sucessful: [[result_lmfitter_beta_psf.png]]
+
+   fitting took:  979.982657  s
+
+   parameter: true | fit
+   rcore 10.0 10.4510325964 +/- 0.422839552458
+   beta 0.666666666667 0.676426452245 +/- 0.0183221247242
+
+
+** TODO [#C] actually run fitter on 2e3 beta to confirm that it works
+
+** TODO [#C] need to look at speedup possibility via matrix ops
+
+** TODO [#B] need to thik about image size handling (can lead to speed up,
+   including if I can assume exact center of cluster)
+
+
+** TODO [#B] check extractor speedup possibilities - the obvoius one with passing
+
+** TODO [#A] add vikhlini model
+
+** TODO [#A] add vikhlini model fitter
+
+** TODO [#A] start real data integration
+
 * Mon Sep 17 18:29:03 2012
 
 Confirmed that the bottleneck is at the moment the moment the
 extract_generic routine (about 5s for 900x900)
 
-* TODO actually run fitter on 2e5 beta to confirm that it works
-* TODO actually run fitter on 2e3 beta to confirm that it works
-* TODO actually run fitter on 2e3 beta x psf to confirm that it works
-* TODO need to look at speedup possibility via matrix ops
-* TODO need to thik about image size handling (can lead to speed up,
-  including if I can assume exact center of cluster)
 
+* Tue Sep 18 08:25:09 2012
+run some further test, fitter seems to work but rather slowly
+
+* Mon Sep 24 09:58:36 2012
+
+* Tue Sep 25 12:32:56 2012
+
+Problem occurred: what to do if observation is split into 2 obsids
+(i.e. not one obsid into more eventlists)
+
+Current solution:
+
+ln -s 0674491401 SPT-CL-J2018-6259a
+ln -s 0674491501 SPT-CL-J2018-6259a
 

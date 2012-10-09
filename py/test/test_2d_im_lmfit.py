@@ -241,7 +241,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    APPLY_PSF          = False
+    APPLY_PSF          = True
     POISSONIZE_IMAGE   = True            # poissonize image?
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
@@ -278,6 +278,25 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
     im_conv = num_cts * im_conv/im_conv.sum()
 
+    print
+    print
+
+    import time
+    t1 = time.clock()
+    (r, profile, geometric_area) = extract_profile_generic(im_conv, xcen_obj, ycen_obj)
+    t2 = time.clock()
+    print "full extraction took: ", t2-t1, " s"
+
+    print
+    print
+
+    import time
+    t1 = time.clock()
+    (r, profile, geometric_area) = extract_profile_faster(im_conv, xcen_obj, ycen_obj)
+    t2 = time.clock()
+    print "faster extraction took: ", t2-t1, " s"
+
+
     if POISSONIZE_IMAGE:
         # fix current poissonize bug -poissonize only nonz-zero
         # elements (ok - we're poissonizing the model)
@@ -294,7 +313,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
     Testing simple 1D fit of beta model with psf convolution
     """
-    APPLY_PSF = False
+    APPLY_PSF = True
     DO_ZERO_PAD = True
 
     input_im, hdr = load_fits_im(fname)
@@ -340,7 +359,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 50}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1000}
 
     ######################################################################
     # do the fit
@@ -352,35 +371,16 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         import time
         t1 = time.clock()
 
-        # Wed Sep 12 12:08:32 2012
-        # CONTINUE: need to write a new make_2d_beta_PSF that doesn't
-        # call outside - still need to run fftw...
-
-        # import time
-        # t1 = time.clock()
-        # im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-        # t2 = time.clock()
-        # print "beta outside minimize took: ", t2-t1, " s"
-
         result = lm.minimize(beta_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
                              **leastsq_kws
                              )
 
-        # result = lm.Minimizer(beta_psf_2d_lmfit_profile,
-        #                      pars,
-        #                      fcn_args=nonfit_args
-        #                      )
-        # result.leastsq(**leastsq_kws)
-
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
     (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-
-    # print "here:", profile_norm_model
-    # print profile_norm_model
 
     ######################################################################
     # output
@@ -399,6 +399,9 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
 
 
+######################################################################
+######################################################################
+######################################################################
 
 
 if __name__ == '__main__':
@@ -447,6 +450,7 @@ if __name__ == '__main__':
     # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
+
 
 
 

@@ -13,7 +13,7 @@ then
     ######################################################################
     # try auto-greping a raw data file
 
-    name=`grep ${obsid} ~/w/xspt/data/raw/data.txt | awk '{print $1}'`
+    name=`grep ${obsid} ~/w/xspt/data/raw/data.txt | awk '{print $1}' | tail -1`
 
 fi
 

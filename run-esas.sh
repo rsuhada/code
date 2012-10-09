@@ -10,14 +10,14 @@
 
 if [[ $# -lt 2 ]]
 then
-	echo "Runs a esas analysis"
-	echo
+  echo "Runs a esas analysis"
+  echo
     echo "Parameters:"
     echo "1. config file"
     echo "2. module list file"
     echo ""
     echo "Syntax:"
-	echo "run-esas.sh 0097820101.conf 0097820101.modules"
+  echo "run-esas.sh 0097820101.conf 0097820101.modules"
     echo
     exit 1
 fi

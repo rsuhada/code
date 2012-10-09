@@ -175,8 +175,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     import time
     t1 = time.clock()
 
-    print "1. pars ", imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, xcen, ycen, norm, rcore, beta
-
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     # FIXME: CRITICAL  - verify if this is where you want to have it
     # in case of convolution you'd like to have a 0 border to avoid edge effects
@@ -226,84 +224,12 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     t2 = time.clock()
     print "beta inside minimize took: ", t2-t1, " s"
 
-
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
 
     # # extract the profile
     # (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
     # model_profile = profile / geometric_area
-
-    # this is the new version
-    xcen_obj = xsize_obj / 2
-    ycen_obj = ysize_obj / 2
-    # we want just the relevant part of the image
-    data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
-    model_profile = profile / geometric_area
-
-
-    if data_profile == None:
-        return (r, model_profile)
-    else:
-        residuals = data_profile - model_profile
-        # is this biasing?
-        # residuals = residuals / data_profile_err
-        # print norm, xcen, ycen, rcore
-
-        return residuals
-
-
-def beta_psf_2d_lmfit_profile_refactror(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, data_profile=None, data_profile_err=None):
-    """
-    Fits the surface brightness profile by creating a 2D model of the
-    image - beta model x psf
-    No bg.
-    Also allows to return directly residuals.
-    """
-
-    # unpack parameters
-    norm   = pars['norm'].value
-    rcore  = pars['rcore'].value
-    beta   = pars['beta'].value
-    xcen   = pars['xcen'].value
-    ycen   = pars['ycen'].value
-
-    # import time
-    # t1 = time.clock()
-    # im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-    # t2 = time.clock()
-    # print "beta inside minimize took: ", t2-t1, " s"
-
-    #make_2d_beta_psf#################################################
-    im = zeros(imsize, dtype=double)
-
-    import time
-    t1 = time.clock()
-    im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
-    t2 = time.clock()
-    print "1. beta took: ", t2-t1, " s"
-
-    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
-
-    model_image = im_beta
-
-    if APPLY_PSF:
-    # create PSF
-        t1 = time.clock()
-        im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
-        t2 = time.clock()
-        print "psf took: ", t2-t1, " s"
-
-        # convolve
-        t1 = time.clock()
-        model_image = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-        model_image = trim_fftconvolve(model_image)
-        t2 = time.clock()
-        print "convolve took: ", t2-t1, " s"
-
-    #make_2d_beta_psf#################################################
-
 
     # this is the new version
     xcen_obj = xsize_obj / 2

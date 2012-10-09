@@ -110,24 +110,27 @@ iter-spec:
 - requires vikhlinins calculator # FIXME: refactor to remove this dependency
 
 sb fitter:
-- requires minuit as the fitting package (?)
+- requires lmfit
+
+- requires minuit as the fitting package (deprecated - not needed
+  anymore)
 
 ######################################################################
-# running on a dir
+# running on a dir - how to setup an analysis directory
 
 1. download tar from XSA
-2. untar 1 time: should be OBSID/odf/xxxxxx.tar.gz
-3. have a .conf and .modules file in configs/ (e.g. copy templates):
+2. untar 1 time: should have OBSID/odf/xxxxxx.tar.gz, copy to your
+   work dir
+3. get-templates.sh 060401099
+   - standalone script to do the prep work
+
+old/manual way:
+have a .conf and .modules file in configs/ (e.g. copy templates):
 
 cp ~/data1/sw/esaspi/templates/template.conf configs/SPT-XXXXX.conf
 cp ~/data1/sw/esaspi/templates/template.modules configs/SPT-XXXXX.modules
 
 - edit them by setting the config options and pick the first module
-
-update:
-get-templates.sh 060401099
-
-- standalone script to do the prep work
 
 4. there should be a notes/ dir for analysis notes
 5. there has to be a soft link OBSID -> your analysis dir : you can

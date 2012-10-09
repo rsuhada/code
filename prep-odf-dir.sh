@@ -42,6 +42,9 @@ if [[ ! -e $NOTESFILE ]]
 then
     echo "adding analysis notes file: $NOTESFILE"
     cp ${codedir}/templates/analysis-template.txt $NOTESFILE
+    sed -i.bk "s/CLNAME/CLNAME ${CLNAME}/g" $NOTESFILE ; rm ${NOTESFILE}.bk
+    sed -i.bk "s/OBSID/OBSID ${obsid}/g" $NOTESFILE ; rm ${NOTESFILE}.bk
+    sed -i.bk "s/PROPOSAL_ID/PROPOSAL_ID ${obsid:1:5}/g" $NOTESFILE ; rm ${NOTESFILE}.bk
 fi
 
 ######################################################################

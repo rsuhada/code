@@ -197,13 +197,23 @@ def extract_profile_generic(im, xcen, ycen):
     # FIXME: 1. rmax as argument, 2. look at speed improvement in
     # sqdist
 
+    import time
+    t1 = time.clock()
+
     distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
+
+    t2 = time.clock()
+    print "dist matrix took: ", t2-t1, " s"
+
     # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
     rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
     n = len(rgrid)
 
     x = zeros(n, dtype=float)   # profile
     geometric_area = zeros(n, dtype=float)  # area normalised profile
+
+    import time
+    t1 = time.clock()
 
     # starting bin
     i=0
@@ -217,7 +227,68 @@ def extract_profile_generic(im, xcen, ycen):
         geometric_area[i] = len(ids[0])      # [pix]
         x[i] = sum(im[ids])
 
+    t2 = time.clock()
+    print "extraction took: ", t2-t1, " s"
+
     return (rgrid, x, geometric_area)
+
+def extract_profile_faster(im, xcen, ycen):
+    """
+    Improved function to extract a 1D profile of a 2D image
+    profile[i] plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.
+    For plotting and comparison you might want to do r-0.5
+    Arguments:
+    - `im`: 2D array
+    - `xcen`: center x coordinate
+    - `ycen`: center y coordinate
+    """
+
+    # FIXME: 1. rmax as argument, 2. look at speed improvement in
+    # sqdist
+
+    import time
+    t1 = time.clock()
+
+    distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
+
+    t2 = time.clock()
+    print "dist matrix took: ", t2-t1, " s"
+
+    # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
+    rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
+    n = len(rgrid)
+
+    x = zeros(n, dtype=float)   # profile
+    geometric_area = zeros(n, dtype=float)  # area normalised profile
+
+    import time
+    t1 = time.clock()
+
+    # starting bin
+    i=0
+    ids = where((distmatrix <= rgrid[i]) & (distmatrix >= 0))
+    geometric_area[i] = len(ids[0])      # [pix]
+    x[i] = sum(im[ids])
+
+    # # iterate through the rest
+    # for i in range(1, n):
+    #     ids = where((distmatrix <= rgrid[i]) & (distmatrix >= (rgrid[i-1])))
+    #     geometric_area[i] = len(ids[0])      # [pix]
+    #     x[i] = sum(im[ids])
+
+    for i in range(im.shape[0]):
+        for j in range(im.shape[1]):
+            index = floor(distmatrix[i, j])
+            if index< len(x) - 1:
+                x[index] += im[i, j]
+                geometric_area[index] += 1
+
+
+    t2 = time.clock()
+    print "extraction took: ", t2-t1, " s"
+
+    return (rgrid, x, geometric_area)
+
 
 def test_psf_parameter():
     """
