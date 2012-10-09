@@ -232,13 +232,17 @@ def extract_profile_generic(im, xcen, ycen):
 
     return (rgrid, x, geometric_area)
 
-def extract_profile_faster(im, distmatrix, xcen, ycen):
+def extract_profile_fast(im, distmatrix, xcen, ycen):
     """
-    Improved function to extract a 1D profile of a 2D image
-    profile[i] plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.
-    For plotting and comparison you might want to do r-0.5
+    Improved function to extract a 1D profile of a 2D image profile[i]
+    plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.  For
+    plotting and comparison you might want to do r-1 (central pixel is
+    r=0). Note that this is slightly different from the
+    extract_profile_generic, where there is only a 0.5 pix shift.
+
     Arguments:
     - `im`: 2D array
+    - `distmatrix`: 2D array distmatrix - has to be int type
     - `xcen`: center x coordinate
     - `ycen`: center y coordinate
     """
@@ -944,13 +948,23 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
         label=r"source"               # '__nolegend__'
         )
 
-    plt.plot(r_model-0.5, profile_model,
+    # plt.plot(r_model-0.5, profile_model,
+    #     color='red',
+    #     linestyle='-',              # -/--/:/-.
+    #     linewidth=1,                # linewidth=1
+    #     marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+    #     markerfacecolor='black',
+    #     markersize=0,               # markersize=6
+    #     label=r"model fit"          # '__nolegend__'
+    #     )
+
+    plt.plot(r_model-1, profile_model,
         color='red',
         linestyle='-',              # -/--/:/-.
-        linewidth=1,                # linewidth=1
-        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='black',
-        markersize=0,               # markersize=6
+        linewidth=0,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='red',
+        markersize=4,               # markersize=6
         label=r"model fit"          # '__nolegend__'
         )
 

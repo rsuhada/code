@@ -291,34 +291,19 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     t2 = time.clock()
     print "standard extraction took: ", t2-t1, " s"
 
-    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('test.fits', clobber=True)
-
     print
     print
 
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(im_conv, xcen, ycen).astype(int) # need int for bincount
     rgrid_length = im_conv.shape[0]/2
-    rgrid = arange(1, rgrid_length+1,1.0)
+    rgrid = arange(0, rgrid_length, 1.0)
 
     import time
     t1 = time.clock()
-    (profile, geometric_area) = extract_profile_faster(im_conv, distmatrix, xcen_obj, ycen_obj)
+    (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
     t2 = time.clock()
     print "faster extraction took: ", t2-t1, " s"
-
-    ######################################################################
-    output_figure = "profiles.png"
-    profile_norm_err = sqrt(profile)
-
-    profile_norm_ref = profile_ref / geometric_area_ref
-    profile_norm = profile / geometric_area
-
-    plot_data_model_simple(r, profile_ref, rgrid, profile[0:len(rgrid)],
-                           output_figure)
-    ######################################################################
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug -poissonize only nonz-zero
@@ -361,11 +346,29 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     # we want just the relevant part of the image
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    # imsize = data.shape
+    imsize = data.shape
 
     # extract data profile
-    (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
-    profile_norm = profile / geometric_area
+    # (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
+    # profile_norm = profile / geometric_area
+
+    import time
+    t1 = time.clock()
+
+    #ADDED SPEED#####################################################################
+    # setup data for the profile extraction - for speedup
+    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
+    r_length = data.shape[0]/2
+    r = arange(0, r_length, 1.0)
+    (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+    profile_norm = profile[0:r_length] / geometric_area[0:r_length] # trim the corners
+    #ADDED SPEED#####################################################################
+
+    t2 = time.clock()
+    print "extract task took: ", t2-t1, " s"
+
+
+    # normalize and get errors
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning
 
@@ -399,7 +402,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                              args=nonfit_args,
                              **leastsq_kws
                              )
-
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
@@ -464,14 +466,14 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    test_create_beta_psf_im(imname)
+    # test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
     # test_lmfit_beta_1d(imname)
 
-    # test_lmfit_beta_psf_1d(imname)
+    test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 

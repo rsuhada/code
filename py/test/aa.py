@@ -9,8 +9,8 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-from sb_utils import sqdistance, distance_matrix
-from test_2d_im import make_2d_beta, extract_profile_generic, extract_profile_fast, make_2d_king, trim_fftconvolve, zero_pad_image
+from sb_utils import sqdistance
+from test_2d_im import make_2d_beta, extract_profile_generic, make_2d_king, trim_fftconvolve, zero_pad_image
 
 def beta_2d_lmfit(pars, data=None, errors=None):
     """
@@ -220,12 +220,12 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
 
     import time
     t1 = time.clock()
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    t2 = time.clock()
+    print "beta inside minimize took: ", t2-t1, " s"
 
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
-
-    t2 = time.clock()
-    print "beta inside minimize took: ", t2-t1, " s"
 
     # # extract the profile
     # (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
@@ -236,29 +236,9 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     ycen_obj = ysize_obj / 2
     # we want just the relevant part of the image
     data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-
-    print data
-    from time import sleep
-    sleep(100)
-
     (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
     model_profile = profile / geometric_area
 
-    #ADDED SPEED#####################################################################
-    # setup data for the profile extraction - for speedup
-    # distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
-    # r_length = data.shape[0]/2
-    # r = arange(0, r_length, 1.0)
-
-    # from time import sleep
-    # sleep(100)
-
-    # (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
-    # model_profile = profile[0:r_length] / geometric_area[0:r_length] # trim the corners
-
-    # print len(r)
-    # print len(model_profile)
-    #ADDED SPEED#####################################################################
 
     if data_profile == None:
         return (r, model_profile)
