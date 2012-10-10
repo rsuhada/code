@@ -34,9 +34,8 @@ fitting took roughly:  740.88284  s on (900, 900) image
    beta 0.666666666667 0.676426452245 +/- 0.0183221247242
 
 
-** TODO [#C] actually run fitter on 2e3 beta to confirm that it works
-
-** TODO [#C] need to look at speedup possibility via matrix ops
+** DONE need to look at speedup possibility via matrix ops
+   CLOSED: [2012-10-10 Wed 11:33]
 
 ** TODO [#B] need to thik about image size handling (can lead to speed up,
    including if I can assume exact center of cluster)
@@ -77,3 +76,22 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 
 - refactored to pass distmatrix to the extractor
 - moving code to use bincount for extraction
+
+
+* Wed Oct 10 13:39:32 2012
+
+** speed-up
+- even though running it outside minimize shows factor 3 speedup ~2.3s
+  per iteration, limited by fftconvolve, i.e. the ultimate bottle neck
+  (I could speed up the beta and king calculation too)
+
+- running it inside minime gives ~6.4s per iteration i.e. barely any
+  speedup! claim is it happens during beta model calculation (not
+  certain due to the naive timing but the extraction time *is* sped up
+  with the bincount solution as expected)
+
+- in addition the testrun took very long and didn't converge
+  properly - possibly problem with the array formating etc.
+
+- recommendation - revert to the original working version...
+

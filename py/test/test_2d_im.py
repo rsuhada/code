@@ -15,6 +15,7 @@ from scipy import delete
 from scipy import integrate
 from scipy.stats import poisson
 import minuit
+import time
 
 def get_instrument_id(instrument):
     """
@@ -197,7 +198,6 @@ def extract_profile_generic(im, xcen, ycen):
     # FIXME: 1. rmax as argument, 2. look at speed improvement in
     # sqdist
 
-    import time
     t1 = time.clock()
 
     distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
@@ -212,7 +212,6 @@ def extract_profile_generic(im, xcen, ycen):
     x = zeros(n, dtype=float)   # profile
     geometric_area = zeros(n, dtype=float)  # area normalised profile
 
-    import time
     t1 = time.clock()
 
     # starting bin
@@ -247,7 +246,6 @@ def extract_profile_fast(im, distmatrix, xcen, ycen):
     - `ycen`: center y coordinate
     """
 
-    import time
     t1 = time.clock()
 
     geometric_area = bincount(distmatrix.flat)

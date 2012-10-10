@@ -3,6 +3,7 @@ import sys
 import os
 import math
 import pyfits
+import time
 from numpy import *
 from scipy.signal import fftconvolve
 from pylab import rc
@@ -134,18 +135,32 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
     ycen   = pars['ycen'].value
 
     # model in 2d and extract profile
-    import time
     t1 = time.clock()
     model_image = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     t2 = time.clock()
     print "beta inside minimize took: ", t2-t1, " s"
 
+    ######################################################################
+    # original extraction
+    # t1 = time.clock()
+    # (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
+    # model_profile = profile / geometric_area
+    # t2 = time.clock()
+    # print "extract inside minimize took: ", t2-t1, " s"
+    ######################################################################
+
+
+    #ADDED SPEED#####################################################################
+    # setup data for the profile extraction - for speedup
     t1 = time.clock()
-    (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
-    model_profile = profile / geometric_area
+    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
+    r_length = data.shape[0]/2 + 1
+    r = arange(0, r_length, 1.0)
+    (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+    model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
     t2 = time.clock()
     print "extract inside minimize took: ", t2-t1, " s"
-
+    #ADDED SPEED#####################################################################
 
     if data_profile == None:
         return (r, model_profile)
@@ -164,11 +179,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     Arguments:
     """
 
-    print 30*"#"
-    print "pars:"
-    print pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD
-    print 30*"#"
-
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
     norm  = pars['norm'].value
@@ -177,7 +187,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     im = zeros(imsize, dtype=double)
 
-    import time
     t1 = time.clock()
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
@@ -185,7 +194,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     # in case of convolution you'd like to have a 0 border to avoid edge effects
 
     t2 = time.clock()
-    print "1. beta took: ", t2-t1, " s"
+    print "beta took: ", t2-t1, " s"
 
     if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
 
@@ -223,25 +232,14 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     rcore  = pars['rcore'].value
     beta   = pars['beta'].value
 
-    import time
     t1 = time.clock()
 
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                    instrument, theta, energy,
                                    APPLY_PSF, DO_ZERO_PAD)
-
-    input_im, hdr = load_fits_im("t1.fits")
-    hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('test.fits', clobber=True)
-
     t2 = time.clock()
     print "beta inside minimize took: ", t2-t1, " s"
-
-    # # extract the profile
-    # (r, profile, geometric_area) = extract_profile_generic(model_image, xcen, ycen)
-    # model_profile = profile / geometric_area
 
     # this is the new version
     xcen_obj = xsize_obj / 2
@@ -249,9 +247,6 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     # we want just the relevant part of the image
     # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     data = model_image
-
-    # (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
-    # model_profile = profile / geometric_area
 
     #ADDED SPEED#####################################################################
     # setup data for the profile extraction - for speedup
@@ -261,6 +256,7 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
     #ADDED SPEED#####################################################################
+
 
     if data_profile == None:
         return (r, model_profile)

@@ -605,14 +605,6 @@ Mon Sep 10 14:50:08 2012
    make_2d_beta_PSF
    - validate in both modes  - with and without psf
 
-Not working
-Mon Sep 10 14:52:22 2012
-    test_lmfit_beta_psf_1d
-
-- not fitting
-- need to think about the image size
-
-
 
 2. background
 

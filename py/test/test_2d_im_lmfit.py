@@ -12,6 +12,7 @@ from test_2d_im import *
 import lmfit as lm
 from sb_models import *
 from sb_utils import sqdist_matrix, distance_matrix
+import time
 
 def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
@@ -55,7 +56,6 @@ def test_lmfit_beta(fname='beta_image_cts.fits'):
     if DO_FIT:
         print "starting fit"
 
-        import time
         t1 = time.clock()
         result = lm.minimize(beta_2d_lmfit, pars, args=(data, errors)) # fit in 2d
         t2 = time.clock()
@@ -196,7 +196,6 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     FIT_1D_MODEL = False        # fit 1d model or 2d model via its profile
 
     # model in 2d and extract profile
-    import time
     t1 = time.clock()
     # model_image = make_2d_beta(imsize, xcen, ycen, 2.0, 10.0, 0.8)
     (r_model, profile_norm_model) = beta_2d_lmfit_profile(pars, imsize)
@@ -206,7 +205,6 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     if DO_FIT:
         print "starting fit"
 
-        import time
         t1 = time.clock()
 
         if FIT_1D_MODEL:
@@ -285,7 +283,6 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     print
     print
 
-    import time
     t1 = time.clock()
     (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
     t2 = time.clock()
@@ -299,7 +296,6 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     rgrid_length = im_conv.shape[0]/2
     rgrid = arange(0, rgrid_length, 1.0)
 
-    import time
     t1 = time.clock()
     (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
     t2 = time.clock()
@@ -385,10 +381,16 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # do the fit
     DO_FIT = True
 
+    # timing outside the function
+    # for i in range(10):
+    #     t1 = time.clock()
+    #     results = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
+    #     t2 = time.clock()
+    #     print "function call outside fit took: ", t2-t1, " s"
+
     if DO_FIT:
         print "starting fit"
 
-        import time
         t1 = time.clock()
 
         result = lm.minimize(beta_psf_2d_lmfit_profile,
@@ -425,7 +427,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
 if __name__ == '__main__':
     print
-    DEBUG = True
+    DEBUG = False
 
     ######################################################################
     # devel/debug
@@ -465,9 +467,10 @@ if __name__ == '__main__':
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-    # test_lmfit_beta_1d(imname)
 
-    test_lmfit_beta_psf_1d(imname)
+
+    test_lmfit_beta_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
 
