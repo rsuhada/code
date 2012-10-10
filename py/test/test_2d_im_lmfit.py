@@ -345,15 +345,13 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # getting the "data"
 
     # we want just the relevant part of the image
-    data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    # data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    data = input_im
     imsize = data.shape
 
     # extract data profile
     # (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
     # profile_norm = profile / geometric_area
-
-    import time
-    t1 = time.clock()
 
     #ADDED SPEED#####################################################################
     # setup data for the profile extraction - for speedup
@@ -361,12 +359,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     r_length = data.shape[0]/2
     r = arange(0, r_length, 1.0)
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
-    profile_norm = profile[0:r_length] / geometric_area[0:r_length] # trim the corners
+    profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
     #ADDED SPEED#####################################################################
-
-    t2 = time.clock()
-    print "extract task took: ", t2-t1, " s"
-
 
     # normalize and get errors
     profile_norm_err = sqrt(profile_norm)
