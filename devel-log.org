@@ -108,4 +108,6 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 
 - checked a comprehension solution but didn't finish
 
+- testing code is in the untracked scratch subdir
+
 

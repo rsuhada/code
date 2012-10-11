@@ -14,6 +14,39 @@ from sb_models import *
 from sb_utils import sqdist_matrix, distance_matrix
 import time
 
+def iplot(x, y):
+    """
+    A simple interctive plot for debugging
+
+    Arguments:
+    - `x`:
+    - `y`:
+    """
+
+    # interactive quick plot
+    plt.figure()
+    plt.ion()
+    plt.clf()
+
+    plt.plot(x, y,
+        color='black',
+        linestyle='-',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
+        label=r"data"               # '__nolegend__'
+        )
+
+    plt.xscale("linear")
+    plt.yscale("linear")
+
+    plt.show()
+    plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+    plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
+
+
 def test_lmfit_beta(fname='beta_image_cts.fits'):
     """
     Testing simple 2D fit of beta model (no psf)
@@ -341,8 +374,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # getting the "data"
 
     # we want just the relevant part of the image
-    # data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    data = input_im
+    data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     imsize = data.shape
 
     # extract data profile
@@ -356,11 +388,15 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     r = arange(0, r_length, 1.0)
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('tmpdst.fits', clobber=True)
     #ADDED SPEED#####################################################################
 
     # normalize and get errors
     profile_norm_err = sqrt(profile_norm)
-    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning
+    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning?
 
     ######################################################################
     # init model
@@ -375,18 +411,11 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1000}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1}
 
     ######################################################################
     # do the fit
     DO_FIT = True
-
-    # timing outside the function
-    # for i in range(10):
-    #     t1 = time.clock()
-    #     results = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
-    #     t2 = time.clock()
-    #     print "function call outside fit took: ", t2-t1, " s"
 
     if DO_FIT:
         print "starting fit"
@@ -467,7 +496,7 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    test_create_beta_psf_im(imname)
+    # test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
@@ -475,6 +504,8 @@ if __name__ == '__main__':
 
 
     # test_lmfit_beta_1d(imname)
-    # test_lmfit_beta_psf_1d(imname)
+    test_lmfit_beta_psf_1d(imname)
 
     print "done!"
+
+

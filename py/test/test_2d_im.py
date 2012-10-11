@@ -941,23 +941,13 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
         label=r"source"               # '__nolegend__'
         )
 
-    # plt.plot(r_model-0.5, profile_model,
-    #     color='red',
-    #     linestyle='-',              # -/--/:/-.
-    #     linewidth=1,                # linewidth=1
-    #     marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-    #     markerfacecolor='black',
-    #     markersize=0,               # markersize=6
-    #     label=r"model fit"          # '__nolegend__'
-    #     )
-
-    plt.plot(r_model-1, profile_model,
+    plt.plot(r_model-0.5, profile_model,
         color='red',
         linestyle='-',              # -/--/:/-.
-        linewidth=0,                # linewidth=1
-        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='red',
-        markersize=4,               # markersize=6
+        linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
         label=r"model fit"          # '__nolegend__'
         )
 
