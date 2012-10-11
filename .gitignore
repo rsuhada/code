@@ -13,3 +13,5 @@
 # Ignore objects and archives.
 # *.[oa]
 TAGS
+# direcotries end with /
+scratch/

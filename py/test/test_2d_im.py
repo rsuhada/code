@@ -88,7 +88,7 @@ def make_2d_uncorr_gauss(imsize, xcen, ycen, sigmax, sigmay):
 def king_2d_model(x, y, xcen, ycen, rcore, alpha):
     """
     Returns the value of a King profile at given position (relative to
-    the center). Function is useful e.g. for  integration.
+    the center). Function is useful e.g. for integration.
 
     Arguments:
     - `x`: x coordinate
@@ -131,15 +131,16 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     - 'theta': offaxis angle [arcmin]
     """
 
-    # this is pretty fast but maybe you want to do it in polar coords
-    im = zeros(imsize, dtype=double)
+    # see notes at make_2d_beta
+    r2 = zeros(imsize, dtype=double)
     (rcore, alpha) = get_psf_king_pars(instrument, energy, theta)
 
     # the dumb method
     for i in range(imsize[0]):
         for j in range(imsize[1]):
-            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
-            im[i, j] = 1.0 / ( 1.0 + r2/rcore**2 )**alpha
+            r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
+
+    im = 1.0 / ( 1.0 + r2/rcore**2 )**alpha
 
     # normalization calculation
     # from model: to inf converges slowly
@@ -167,20 +168,14 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     - 'core': beta model core radius
     - 'beta': beta model slope
     """
-    # this is pretty fast but maybe you want to do it in polar coordinates
-    # print "OK", imsize[0], imsize[1], xcen, ycen, norm, rcore, beta
-    im = zeros(imsize, dtype=double)
-    # Tue Sep  4 14:18:42 2012
-    # FIXME: at this point when called from minuit_sb_model_likelihood
-    # it crashes for some reason... error: TypeError: only length-1
-    # arrays can be converted to Python scalars
-    # do not know why...
+    r2 = zeros(imsize, dtype=double)
+    # FIXME: refactor to pass distmatrix
 
-    # the dumb method
     for i in range(imsize[0]):
         for j in range(imsize[1]):
-            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
-            im[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+            r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
+
+    im = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
 
     return im
 

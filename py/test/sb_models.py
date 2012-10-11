@@ -36,21 +36,17 @@ def beta_2d_lmfit(pars, data=None, errors=None):
     rcore  = pars['rcore'].value
     beta   = pars['beta'].value
 
-    model = zeros(imsize, dtype=double)
+    r2 = zeros(imsize, dtype=double)
 
-    # this is pretty fast but maybe you want to do it in polar coordinates
-    # the dumb method
+    # I've tested a version with list comprehension and was a tiny bit
+    # *slower*
+
     for i in range(round(imsize[0])):
         for j in range(round(imsize[1])):
-            r2 = sqdistance(xcen, ycen, j , i) # this is already squared
-            model[i, j] = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+            r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
 
-    # model = map(lambda x, y:   range(round(imsize[1])), range(round(imsize[0])))
-    # L2 = map(lambda x: round(x, 1), L)
-    # try this - need arg passing
-    # theta = map(math.atan2, y, x)
-    # is equivalent to cycling through theta = math.atan2(y[i], x[i]])
-    # (the y/x order here is atan2 specific, simply supply arrays as needed!)
+    model = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+
 
     if data == None:
         return model
@@ -186,7 +182,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     beta  = pars['beta'].value
 
     im = zeros(imsize, dtype=double)
-
     t1 = time.clock()
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)

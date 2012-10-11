@@ -1,7 +1,7 @@
 #+TITLE: Esaspi Devel Log
 #+AUTHOR: Robert Suhada
-#+STARTUP: hidestars
-#+STARTUP: showall
+#+STARTUP: showstars
+#+STARTUP: contetnt
 #+OPTIONS: \n:t
 #+OPTIONS: ^:nil
 #+OPTIONS: *:nil
@@ -9,6 +9,7 @@
 
 * agenda
 
+** TODO [#A] refactor make_2d_beta and make_2d_king to be without loop by passing distmatrix
 
 ** DONE [#A] actually run fitter on 2e5 beta to confirm that it works
   CLOSED: [2012-09-17 Mon 19:30]
@@ -54,7 +55,6 @@ fitting took roughly:  740.88284  s on (900, 900) image
 Confirmed that the bottleneck is at the moment the moment the
 extract_generic routine (about 5s for 900x900)
 
-
 * Tue Sep 18 08:25:09 2012
 run some further test, fitter seems to work but rather slowly
 
@@ -77,10 +77,15 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 - refactored to pass distmatrix to the extractor
 - moving code to use bincount for extraction
 
-
 * Wed Oct 10 13:39:32 2012
-
 ** speed-up
+- bincount extraction implemented in extract_profile_fast
+
+- profile extracted classically in good agreement though since
+  bincount requires int in distance (i.e. pixels) there are
+  differences in which pixels are atributed to which bin. This is
+  still OK
+
 - even though running it outside minimize shows factor 3 speedup ~2.3s
   per iteration, limited by fftconvolve, i.e. the ultimate bottle neck
   (I could speed up the beta and king calculation too)
@@ -94,4 +99,13 @@ ln -s 0674491501 SPT-CL-J2018-6259a
   properly - possibly problem with the array formating etc.
 
 - recommendation - revert to the original working version...
+
+
+* Thu Oct 11 12:24:00 2012
+** speed-up
+- improved make_2d_beta and make_2d_king by removing one operation
+  from the loop
+
+- checked a comprehension solution but didn't finish
+
 

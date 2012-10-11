@@ -427,11 +427,16 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
 if __name__ == '__main__':
     print
-    DEBUG = False
+    DEBUG = True
 
     ######################################################################
     # devel/debug
     if DEBUG:
+
+        import test_2d_im
+        import sb_models
+        import sb_utils
+
         reload(test_2d_im)
         reload(sb_models)
         reload(sb_utils)
@@ -462,18 +467,14 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    # test_create_beta_psf_im(imname)
+    test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
 
 
-    test_lmfit_beta_1d(imname)
+    # test_lmfit_beta_1d(imname)
     # test_lmfit_beta_psf_1d(imname)
 
     print "done!"
-
-
-
-
