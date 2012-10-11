@@ -14,6 +14,18 @@ from sb_models import *
 from sb_utils import sqdist_matrix, distance_matrix
 import time
 
+
+def print_result_tab(pars_true, pars_fit):
+    """
+    Print a nice result table
+    """
+    for key in pars_true:
+        # print key, "  |   ", pars_true[key].value, "  |   ", pars_fit[key].value, "+/-", pars_fit[key].stderr
+        print "%10s | %10.8f | %10.8f | %10.8f" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
+
+
+
+
 def iplot(x, y):
     """
     A simple interctive plot for debugging
@@ -44,7 +56,6 @@ def iplot(x, y):
     plt.show()
     plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
     plt.get_current_fig_manager().window.wm_geometry(plotPosition)
-
 
 
 def test_lmfit_beta(fname='beta_image_cts.fits'):
@@ -388,10 +399,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     r = arange(0, r_length, 1.0)
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
-
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('tmpdst.fits', clobber=True)
     #ADDED SPEED#####################################################################
 
     # normalize and get errors
@@ -402,16 +409,16 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # init model
     pars = lm.Parameters()
 
-    pars.add('norm'   , value=1.0, vary=True, min=0.0, max=sum(input_im))
-    pars.add('rcore'  , value=15.0, vary=True, min=1.0, max=80.0)
-    pars.add('beta'   , value=0.7, vary=True, min=0.1, max=10.0)
+    pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(input_im))
+    pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
+    pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
 
-    pars.add('xcen', value=xcen, vary=False)
-    pars.add('ycen', value=ycen, vary=False)
+    pars.add('xcen', value=xcen_obj, vary=False)
+    pars.add('ycen', value=ycen_obj, vary=False)
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1000}
 
     ######################################################################
     # do the fit
@@ -430,10 +437,29 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-    (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD)
+    (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile(pars,
+                                                              imsize,
+                                                              xsize_obj,
+                                                              ysize_obj,
+                                                              instrument,
+                                                              theta,
+                                                              energy,
+                                                              APPLY_PSF,
+                                                              DO_ZERO_PAD)
+
+    ######################################################################
+    # iplot(r, profile_norm)
+    print r[0:2]
+    print "**", profile_norm[0:2]
+
+    # iplot(r, profile_norm_model)
+    print r_model[0:2]
+    print profile_norm_model[0:2]
+    ######################################################################
 
     ######################################################################
     # output
+    print_result_tab(pars_true, pars)
 
     print
     print "parameter: true | fit"
@@ -441,6 +467,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
     print
     print
+
 
     ######################################################################
     # plot profiles
@@ -492,6 +519,16 @@ if __name__ == '__main__':
     beta          = 2.0 / 3.0
     normalization = 1.0
     imname='t1.fits'
+
+    ######################################################################
+    # pars
+    pars_true = lm.Parameters()
+
+    pars_true.add('norm', value=normalization, vary=False)
+    pars_true.add('rcore', value=rcore, vary=False)
+    pars_true.add('beta', value=beta, vary=False)
+    pars_true.add('xcen', value=450, vary=False)
+    pars_true.add('ycen', value=450, vary=False)
 
     ######################################################################
     # images for fitting tests

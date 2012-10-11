@@ -175,13 +175,14 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     Arguments:
     """
 
+    hdr = pyfits.getheader('pn-test.fits')
+
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
     norm  = pars['norm'].value
     rcore = pars['rcore'].value
     beta  = pars['beta'].value
 
-    im = zeros(imsize, dtype=double)
     t1 = time.clock()
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
@@ -191,7 +192,15 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     t2 = time.clock()
     print "beta took: ", t2-t1, " s"
 
-    if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
+    # hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
+    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    # hdulist.writeto('tmpa.fits', clobber=True)
+
+    # if DO_ZERO_PAD: im_beta = zero_pad_image(im_beta, xsize_obj)
+
+    # hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
+    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    # hdulist.writeto('tmp0.fits', clobber=True)
 
     im_output = im_beta
 
@@ -206,8 +215,10 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
         t1 = time.clock()
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)
+
         t2 = time.clock()
         print "convolve took: ", t2-t1, " s"
+
 
     return im_output
 
@@ -228,13 +239,14 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     beta   = pars['beta'].value
 
     t1 = time.clock()
-
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                    instrument, theta, energy,
                                    APPLY_PSF, DO_ZERO_PAD)
     t2 = time.clock()
     print "beta inside minimize took: ", t2-t1, " s"
+
+    print "@@", sum(model_image)
 
     # this is the new version
     xcen_obj = xsize_obj / 2
