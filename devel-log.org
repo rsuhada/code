@@ -71,7 +71,6 @@ ln -s 0674491401 SPT-CL-J2018-6259a
 ln -s 0674491501 SPT-CL-J2018-6259a
 
 * Tue Oct  9 14:22:50 2012
-
 ** speeding up
 
 - refactored to pass distmatrix to the extractor
@@ -100,7 +99,6 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 
 - recommendation - revert to the original working version...
 
-
 * Thu Oct 11 12:24:00 2012
 ** speed-up
 - improved make_2d_beta and make_2d_king by removing one operation
@@ -114,6 +112,11 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 ** speedup - test result
 
 *** fit for 2e5 cts
+
+- running:
+
+test_create_beta_psf_im(imname)
+test_lmfit_beta_psf_1d(imname)
 
 fitting took:  3.282843  s
 
@@ -135,5 +138,48 @@ fitting took:  3.282843  s
 - this is only partly because of the model improvements - the main
   part being the propor implementation of the cut-out procedure
 
+** commit
 
+- important commit: fitting *works*
+
+- errors are provisional, I'm going to improve them now
+
+- running this for 2e5 and any parameter input shows that the
+  fitter/extractor is *correct* and *fast*
+
+- create and fit functions:
+
+test_create_beta_psf_im(imname)
+test_lmfit_beta_psf_1d(imname)
+
+
+- commit ID:
+   commit 5ec79ee8c4ee277f4eac29a56fbe084c68d7c5cc
+   1 parent e8fd34b25a
+
+
+** test files
+expmap   = "pn-test-exp.fits"
+bgmap    = "pn-test-bg-2cp.fits"
+maskmap  = "pn-test-mask.fits"
+outfile  = "cluster-im.fits"
+
+files are from:
+/Users/rs/w/xspt/data/SPT-CL-J0205-5829/analysis
+
+pnS003-500-2000-oot.im
+pnS003-500-2000-oot.im.orig
+pnS003-500-2000-woot.im
+pnS003-500-2000.bg
+pnS003-500-2000.cheese
+pnS003-500-2000.exp
+pnS003-500-2000.im
+pnS003-500-2000.im-det-m1.reg
+pnS003-500-2000.im-det-m2.reg
+pnS003-500-2000.im-det-pn.reg
+pnS003-500-2000.mask
+pnS003-500-2000.mask.wps
+pnS003-500-2000.spl.bg
+pnS003-500-2000.spl.cheese
+pnS003-500-2000.uv.exp
 

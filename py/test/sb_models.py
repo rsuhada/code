@@ -12,6 +12,9 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_utils import sqdistance, distance_matrix, load_fits_im
 from test_2d_im import make_2d_beta, extract_profile_generic, extract_profile_fast, make_2d_king, trim_fftconvolve, zero_pad_image
+from scipy import integrate
+from scipy.stats import poisson
+
 
 def beta_2d_lmfit(pars, data=None, errors=None):
     """
@@ -255,3 +258,46 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
 
 
         return residuals
+
+def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile):
+    """
+    Take a synthetic sb model and turn it into a "observation" by
+    applying an exposure map, bg image and mask.
+
+    'srcmodel' - model of the source poissonized in units [cts],
+                 normed to required total cts
+    'expmap' - exposure map
+    'bgmap' - background map (smooth, units cts)
+    'maskmap' - mask
+    """
+
+    # load images
+    srcmodel, hdr = load_fits_im(srcmodel_file)
+    expmap, hdr = load_fits_im(expmap_file)
+    bgmap, hdr = load_fits_im(bgmap_file)
+    maskmap, hdr = load_fits_im(maskmap_file)
+
+    # do the rescaling to the fft image
+    # FIXME: some problem
+    expmap = trim_fftconvolve(expmap)
+    bgmap = trim_fftconvolve(bgmap)
+    maskmap = trim_fftconvolve(maskmap)
+
+    # do the transforms
+    bgmap_poi = poisson.rvs(bgmap)
+    output_im = srcmodel + bgmap
+
+    ids = where(maskmap != 0.0)
+    output_im[ids] = output_im[ids] / expmap[ids]
+    output_im = output_im * maskmap
+
+    # save output
+    hdu = pyfits.PrimaryHDU(output_im, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto(outfile, clobber=True)
+
+
+
+
+
+

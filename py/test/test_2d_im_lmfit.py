@@ -28,8 +28,6 @@ def print_result_tab(pars_true, pars_fit):
     print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
     print
 
-
-
 def iplot(x, y):
     """
     A simple interctive plot for debugging
@@ -38,7 +36,6 @@ def iplot(x, y):
     - `x`:
     - `y`:
     """
-
     # interactive quick plot
     plt.figure()
     plt.ion()
@@ -198,6 +195,11 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     """
     Testing simple 1D fit of beta model (no psf)
     """
+
+    # FIXME: Fri Oct 12 15:03:37 2012 code currently outdated: look at
+    # test_lmfit_beta_psf_1d(imname) function which is up to date
+    # (change in extracxtion, model)
+
     input_im, hdr = load_fits_im(fname)
 
     ######################################################################
@@ -541,14 +543,26 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    test_create_beta_psf_im(imname)
+    # test_create_beta_psf_im(imname)
+
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
 
     # test_lmfit_beta_1d(imname)
-    test_lmfit_beta_psf_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
+
+    ######################################################################
+    # make a synthetic image from precreated image
+
+    srcmodel = "t1.fits"
+    expmap   = "pn-test-exp.fits"
+    bgmap    = "pn-test-bg-2cp.fits"
+    maskmap  = "pn-test-mask.fits"
+    outfile  = "cluster-im.fits"
+
+    make_synthetic_observation(srcmodel, expmap, bgmap, maskmap, outfile)
 
     print "done!"
 
