@@ -20,12 +20,12 @@ def print_result_tab(pars_true, pars_fit):
     Print a nice result table
     """
     print
-    print 53*"-"
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
     print "| %10s | %10s | %10s | %10s |" % ("name", "true", "fit", "error")
-    print 53*"-"
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
     for key in pars_true:
         print "| %10s | %10.5f | %10.5f | %10.5f |" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
-    print 53*"-"
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
     print
 
 
@@ -328,26 +328,15 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     im_conv = num_cts * im_conv/im_conv.sum()
 
-    print
-    print
-
-    t1 = time.clock()
+    # slow extractor
     (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
-    t2 = time.clock()
-    print "standard extraction took: ", t2-t1, " s"
-
-    print
-    print
 
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(im_conv, xcen, ycen).astype(int) # need int for bincount
     rgrid_length = im_conv.shape[0]/2
     rgrid = arange(0, rgrid_length, 1.0)
 
-    t1 = time.clock()
     (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
-    t2 = time.clock()
-    print "faster extraction took: ", t2-t1, " s"
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug -poissonize only nonz-zero
@@ -420,9 +409,11 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
-    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, profile_norm, profile_norm_err)
+    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
+                   energy, APPLY_PSF, DO_ZERO_PAD, profile_norm,
+                   profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1000}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1e4}
 
     ######################################################################
     # do the fit
@@ -430,7 +421,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     if DO_FIT:
         print "starting fit"
-
         t1 = time.clock()
 
         result = lm.minimize(beta_psf_2d_lmfit_profile,
@@ -441,6 +431,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
+    # get the output model
     (r_model, profile_norm_model) = beta_psf_2d_lmfit_profile(pars,
                                                               imsize,
                                                               xsize_obj,
@@ -450,16 +441,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                                                               energy,
                                                               APPLY_PSF,
                                                               DO_ZERO_PAD)
-
-    ######################################################################
-    # iplot(r, profile_norm)
-    print r[0:2]
-    print "**", profile_norm[0:2]
-
-    # iplot(r, profile_norm_model)
-    print r_model[0:2]
-    print profile_norm_model[0:2]
-    ######################################################################
 
     ######################################################################
     # output
@@ -476,9 +457,32 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ######################################################################
     # plot profiles
 
-    output_figure = 'lmfit_beta_psf_1d.png'
-    plot_data_model_simple(r, profile_norm, r_model, profile_norm_model, output_figure, profile_norm_err)
+    pars_true.add('xcen', value=50.0, vary=False)
+    pars_true.add('ycen', value=50.0, vary=False)
 
+    result = lm.minimize(beta_psf_2d_lmfit_profile,
+                         pars_true,
+                         args=nonfit_args,
+                         **leastsq_kws
+                         )
+
+
+    (r_true, profile_norm_true) = beta_psf_2d_lmfit_profile(pars_true,
+                                                            imsize,
+                                                            xsize_obj,
+                                                            ysize_obj,
+                                                            instrument,
+                                                            theta,
+                                                            energy,
+                                                            APPLY_PSF,
+                                                            DO_ZERO_PAD)
+
+    output_figure = 'lmfit_beta_psf_1d.png'
+
+    plot_data_model_simple(r, profile_norm,
+                           r_model, profile_norm_model,
+                           output_figure, profile_norm_err,
+                           r_true, profile_norm_true)
 
 ######################################################################
 ######################################################################
@@ -518,8 +522,8 @@ if __name__ == '__main__':
     c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
 
     # setup for the beta model
-    num_cts       = 2.0e5             # will be the normalization
-    rcore         = 10.0               # [pix]
+    num_cts       = 2.0e5             # Will be the normalization
+    rcore         = 10.0              # [pix]
     beta          = 2.0 / 3.0
     normalization = 1.0
     imname='t1.fits'
@@ -528,7 +532,7 @@ if __name__ == '__main__':
     # pars
     pars_true = lm.Parameters()
 
-    pars_true.add('norm', value=normalization, vary=False)
+    pars_true.add('norm', value=normalization, vary=True)
     pars_true.add('rcore', value=rcore, vary=False)
     pars_true.add('beta', value=beta, vary=False)
     pars_true.add('xcen', value=450, vary=False)
@@ -537,12 +541,11 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
-    # test_create_beta_psf_im(imname)
+    test_create_beta_psf_im(imname)
 
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-
 
     # test_lmfit_beta_1d(imname)
     test_lmfit_beta_psf_1d(imname)

@@ -241,13 +241,8 @@ def extract_profile_fast(im, distmatrix, xcen, ycen):
     - `ycen`: center y coordinate
     """
 
-    t1 = time.clock()
-
     geometric_area = bincount(distmatrix.flat)
     profile = bincount(distmatrix.flat, weights=im.flat)
-
-    t2 = time.clock()
-    print "extraction took: ", t2-t1, " s"
 
     return (profile, geometric_area)
 
@@ -905,7 +900,10 @@ def test_create_cluster_im():
         hdulist.writeto(imname, clobber=True)
 
 
-def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_figure, profile_data_err=None):
+def plot_data_model_simple(r_data, profile_data,
+                           r_model, profile_model,
+                           output_figure, profile_data_err=None,
+                           r_true=None, profile_true=None):
     """
     Simple plot of a profile: data vs model (optionally also error bars)
 
@@ -951,8 +949,18 @@ def plot_data_model_simple(r_data, profile_data, r_model, profile_model, output_
         label=r"model fit"          # '__nolegend__'
         )
 
-    plt.xscale("log")
-    plt.yscale("log")
+    plt.plot(r_true-0.5, profile_true,
+        color='green',
+        linestyle='-',              # -/--/:/-.
+        linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
+        label=r"true model"          # '__nolegend__'
+        )
+
+    plt.xscale("linear")
+    plt.yscale("linear")
     # plt.ylim(ymin=1e-3,ymax=5e0)
 
     prop = matplotlib.font_manager.FontProperties(size=16)  # size=16

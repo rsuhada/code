@@ -110,4 +110,30 @@ ln -s 0674491501 SPT-CL-J2018-6259a
 
 - testing code is in the untracked scratch subdir
 
+* Fri Oct 12 11:58:54 2012
+** speedup - test result
+
+*** fit for 2e5 cts
+
+fitting took:  3.282843  s
+
+|-------+-----------+-----------+---------|
+| name  |      true |       fit |   error |
+|-------+-----------+-----------+---------|
+| norm  |   1.00000 | 288.98153 | 4.39254 |
+| rcore |  10.00000 |   9.76340 | 0.26461 |
+| beta  |   0.66667 |   0.64858 | 0.00918 |
+| xcen  | 450.00000 |  50.00000 | 0.00000 |
+| ycen  | 450.00000 |  50.00000 | 0.00000 |
+|-------+-----------+-----------+---------|
+
+
+[[/Users/rs/data1/sw/esaspi/py/test/test_results/betaxpst_fit_2e5.png][plot]]
+
+- looks excellent and speedup is immense (from 700-900s to 3s)
+
+- this is only partly because of the model improvements - the main
+  part being the propor implementation of the cut-out procedure
+
+
 

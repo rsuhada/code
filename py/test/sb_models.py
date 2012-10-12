@@ -187,10 +187,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
     # FIXME: CRITICAL  - verify if this is where you want to have it
-    # in case of convolution you'd like to have a 0 border to avoid edge effects
-
-    t2 = time.clock()
-    print "beta took: ", t2-t1, " s"
 
     # hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
@@ -206,19 +202,11 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     if APPLY_PSF:
     # create PSF
-        t1 = time.clock()
         im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
-        t2 = time.clock()
-        print "psf took: ", t2-t1, " s"
 
         # convolve
-        t1 = time.clock()
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)
-
-        t2 = time.clock()
-        print "convolve took: ", t2-t1, " s"
-
 
     return im_output
 
@@ -230,6 +218,7 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     No bg.
     Also allows to return directly residuals.
     """
+    USE_ERROR=True             # debug option
 
     # unpack parameters
     xcen   = pars['xcen'].value
@@ -238,15 +227,10 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     rcore  = pars['rcore'].value
     beta   = pars['beta'].value
 
-    t1 = time.clock()
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                    instrument, theta, energy,
                                    APPLY_PSF, DO_ZERO_PAD)
-    t2 = time.clock()
-    print "beta inside minimize took: ", t2-t1, " s"
-
-    print "@@", sum(model_image)
 
     # this is the new version
     xcen_obj = xsize_obj / 2
@@ -255,22 +239,19 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, th
     # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     data = model_image
 
-    #ADDED SPEED#####################################################################
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2 + 1
     r = arange(0, r_length, 1.0)
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
-    #ADDED SPEED#####################################################################
-
 
     if data_profile == None:
         return (r, model_profile)
     else:
         residuals = data_profile - model_profile
         # is this biasing?
-        # residuals = residuals / data_profile_err
-        # print norm, xcen, ycen, rcore
+        if USE_ERROR: residuals = residuals / data_profile_err
+
 
         return residuals
