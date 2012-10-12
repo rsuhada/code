@@ -19,10 +19,14 @@ def print_result_tab(pars_true, pars_fit):
     """
     Print a nice result table
     """
+    print
+    print 53*"-"
+    print "| %10s | %10s | %10s | %10s |" % ("name", "true", "fit", "error")
+    print 53*"-"
     for key in pars_true:
-        # print key, "  |   ", pars_true[key].value, "  |   ", pars_fit[key].value, "+/-", pars_fit[key].stderr
-        print "%10s | %10.8f | %10.8f | %10.8f" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
-
+        print "| %10s | %10.5f | %10.5f | %10.5f |" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
+    print 53*"-"
+    print
 
 
 
@@ -461,12 +465,12 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # output
     print_result_tab(pars_true, pars)
 
-    print
-    print "parameter: true | fit"
-    print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
-    print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
-    print
-    print
+    # print
+    # print "parameter: true | fit"
+    # print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
+    # print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
+    # print
+    # print
 
 
     ######################################################################
