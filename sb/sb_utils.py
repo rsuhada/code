@@ -25,7 +25,7 @@ def zero_pad_image(image, keep_radius):
     return image
 
 
-def load_fits_im(file_name='', extension=0):
+def load_fits_im(file_name='', extension=None):
     """
     Load an image from fits file extension, return also header.
     Only really useful if you want an image from single extension.
@@ -34,14 +34,32 @@ def load_fits_im(file_name='', extension=0):
     - 'file_name': fits file name
     - 'extension': number of extension to get image from
     """
-    # FIXME: add file existence check
-
-    # hdu   = fopen(file_name)
+    if not extension: extension = 0 # tmp fix until see below
     hdu   = pyfits.open(file_name)
     image = hdu[extension].data
     hdr   = hdu[extension].header
-
     return image, hdr
+
+
+    # # FIXME: add file existence check and no image extension handling
+    # # if no extension specified find the first image
+    # if not extension:   # switch to extension = None in function def not "0" (which is a valid extension)
+    #     for table in hdu:
+    #         hdr = table.header
+    #         print "header", hdu
+    #         # this is not correct - there can be IMAGE in a non-IMAGE
+    #         # extension, try nacis
+    #         if 'IMAGE' in hdr.values():
+    #             image = table.data
+    #             return image, hdr
+    # else:
+    #     image = hdu[extension].data
+    #     hdr   = hdu[extension].header
+    #     return image, hdr
+
+    # # error
+    # return 1, 1
+
 
 def sqdistance(xcen, ycen, x, y):
     """

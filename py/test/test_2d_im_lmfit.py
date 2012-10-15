@@ -10,6 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from test_2d_im import *
 import lmfit as lm
+from esaspi_utils import show_in_ds9
 from sb_models import *
 from sb_utils import sqdist_matrix, distance_matrix
 import time
@@ -502,10 +503,12 @@ if __name__ == '__main__':
         import test_2d_im
         import sb_models
         import sb_utils
+        import esaspi_utils
 
         reload(test_2d_im)
         reload(sb_models)
         reload(sb_utils)
+        reload(esaspi_utils)
         # module_visible()
 
     ######################################################################
@@ -545,7 +548,6 @@ if __name__ == '__main__':
     # test_create_beta_im(imname)
     # test_create_beta_psf_im(imname)
 
-
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
@@ -563,6 +565,7 @@ if __name__ == '__main__':
     outfile  = "cluster-im.fits"
 
     make_synthetic_observation(srcmodel, expmap, bgmap, maskmap, outfile)
+    show_in_ds9(outfile)
 
     print "done!"
 

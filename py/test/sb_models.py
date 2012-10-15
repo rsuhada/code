@@ -275,7 +275,7 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     srcmodel, hdr = load_fits_im(srcmodel_file)
     expmap, hdr = load_fits_im(expmap_file)
     bgmap, hdr = load_fits_im(bgmap_file)
-    maskmap, hdr = load_fits_im(maskmap_file)
+    maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
 
     # do the rescaling to the fft image
     # FIXME: some problem
@@ -284,10 +284,14 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     maskmap = trim_fftconvolve(maskmap)
 
     # do the transforms
-    bgmap_poi = poisson.rvs(bgmap)
-    output_im = srcmodel + bgmap
+    bgmap_poi = bgmap * maskmap     # get rid of artifacts
 
-    ids = where(maskmap != 0.0)
+    ids = where(bgmap_poi != 0.0)
+    bgmap_poi[ids] = poisson.rvs(bgmap[ids])
+
+    output_im = srcmodel + bgmap_poi
+
+    # ids = where(maskmap != 0.0)
     output_im[ids] = output_im[ids] / expmap[ids]
     output_im = output_im * maskmap
 
@@ -295,9 +299,4 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     hdu = pyfits.PrimaryHDU(output_im, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(outfile, clobber=True)
-
-
-
-
-
 
