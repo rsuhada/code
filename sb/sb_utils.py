@@ -304,3 +304,14 @@ def king_profile(r, rcore, alpha):
 
     return y
 
+# def lmfit_get_ci(fit, sigmas=(0.67400000000000004, 0.94999999999999996, 0.997)):
+#     """
+#     Calculate the 2D confidence intervals for a lmfit results
+
+#     Arguments:
+#     - `fit`: lmfit minimizer (containg results)
+#     """
+
+#     ci, trace = lm.conf_interval(result,sigmas=sigmas, trace=True, verbose=0, maxiter=1)
+#     lmfit.printfuncs.report_ci(ci)
+

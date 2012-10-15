@@ -431,6 +431,9 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                              args=nonfit_args,
                              **leastsq_kws
                              )
+
+        result.leastsq()
+
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
@@ -447,7 +450,9 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     ######################################################################
     # output
+
     print_result_tab(pars_true, pars)
+    lm.printfuncs.report_errors(result.params)
 
     # print
     # print "parameter: true | fit"
@@ -455,6 +460,28 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
     # print
     # print
+
+    ######################################################################
+    # confidence intervals
+
+    CALC_1D_CI = True
+    CALC_2D_CI = True
+
+    if CALC_1D_CI:
+        print "Calculating 1D confidence intervals"
+        sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        ci_pars = ['rcore', 'beta']
+
+        ci = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                              trace=False, verbose=True, maxiter=1)
+
+        lm.printfuncs.report_ci(ci)
+
+        if CALC_2D_CI:
+            print "Calculating 2D confidence intervals"
+            x, y, grid = lm.conf_interval2d(result,'rcore','beta',30,30)
+            # plt.contourf(x,y,grid,np.linspace(0,1,11))
+            plt.contourf(x,y,grid)
 
 
     ######################################################################
@@ -466,9 +493,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     result = lm.minimize(beta_psf_2d_lmfit_profile,
                          pars_true,
                          args=nonfit_args,
-                         **leastsq_kws
-                         )
-
+                         **leastsq_kws)
 
     (r_true, profile_norm_true) = beta_psf_2d_lmfit_profile(pars_true,
                                                             imsize,
@@ -553,19 +578,19 @@ if __name__ == '__main__':
     # test_lmfit_beta(imname)
 
     # test_lmfit_beta_1d(imname)
-    # test_lmfit_beta_psf_1d(imname)
+    test_lmfit_beta_psf_1d(imname)
 
     ######################################################################
     # make a synthetic image from precreated image
 
-    srcmodel = "t1.fits"
-    expmap   = "pn-test-exp.fits"
-    bgmap    = "pn-test-bg-2cp.fits"
-    maskmap  = "pn-test-mask.fits"
-    outfile  = "cluster-im.fits"
+    # srcmodel = "t1.fits"
+    # expmap   = "pn-test-exp.fits"
+    # bgmap    = "pn-test-bg-2cp.fits"
+    # maskmap  = "pn-test-mask.fits"
+    # outfile  = "cluster-im.fits"
 
-    make_synthetic_observation(srcmodel, expmap, bgmap, maskmap, outfile)
-    show_in_ds9(outfile)
+    # make_synthetic_observation(srcmodel, expmap, bgmap, maskmap, outfile)
+    # show_in_ds9(outfile)
 
     print "done!"
 
