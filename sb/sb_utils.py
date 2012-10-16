@@ -315,3 +315,31 @@ def king_profile(r, rcore, alpha):
 #     ci, trace = lm.conf_interval(result,sigmas=sigmas, trace=True, verbose=0, maxiter=1)
 #     lmfit.printfuncs.report_ci(ci)
 
+
+
+def optibingrid(binnum=20, rmax=100, c=1.2):
+    """
+    Calculate the profile grid using the "optimal" binning (see
+    Andersson et al. 2011)
+
+    Arguments:
+    - 'binnum': total number of bins [20]
+    - 'rmax': maximal radius [100 pix, recommended 1.5r500]
+    """
+    r = array([(i * rmax**(1.0/c)/binnum)**c for i in range(binnum)])
+
+    return r
+
+def optibin(im, xcen, ycen, rgrid):
+    """
+    Extract from the image a profile using the optimal binning (see
+    Andersson et al. 2011)
+
+    Arguments:
+    - 'im': 2d array
+    - 'xcen': x coordinate of the center [pix]
+    - 'ycen': x coordinate of the center [pix]
+    - 'rgrid': radii grid (recommendation: 1.5r500) [pix]
+    """
+
+    return 0

@@ -12,7 +12,7 @@ from test_2d_im import *
 import lmfit as lm
 from esaspi_utils import show_in_ds9
 from sb_models import *
-from sb_utils import sqdist_matrix, distance_matrix
+from sb_utils import sqdist_matrix, distance_matrix, optibin, optibingrid
 import time
 
 
@@ -416,7 +416,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                    energy, APPLY_PSF, DO_ZERO_PAD, profile_norm,
                    profile_norm_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1e4}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
     # do the fit
@@ -464,25 +464,30 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     ######################################################################
     # confidence intervals
 
-    CALC_1D_CI = True
-    CALC_2D_CI = True
+    CALC_1D_CI = False
+    CALC_2D_CI = False
 
     if CALC_1D_CI:
         print "Calculating 1D confidence intervals"
-        sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        sigmas = [0.682689492137, 0.954499736104]
         ci_pars = ['rcore', 'beta']
 
-        ci = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=False, verbose=True, maxiter=1)
+        ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                              trace=True, verbose=True, maxiter=1)
 
         lm.printfuncs.report_ci(ci)
 
-        if CALC_2D_CI:
-            print "Calculating 2D confidence intervals"
-            x, y, grid = lm.conf_interval2d(result,'rcore','beta',30,30)
-            # plt.contourf(x,y,grid,np.linspace(0,1,11))
-            plt.contourf(x,y,grid)
+    from timer import Timer
 
+    for i in range(1):
+        with Timer() as t:
+            if CALC_2D_CI:
+                print "Calculating 2D confidence intervals"
+                x, y, prob = lm.conf_interval2d(result,'rcore','beta',20,20)
+                # plt.contourf(x,y,grid,np.linspace(0,1,11))
+                plt.contourf(x,y,grid)
+        print "elasped time:", t.secs, " s"
 
     ######################################################################
     # plot profiles
@@ -511,6 +516,27 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                            r_model, profile_norm_model,
                            output_figure, profile_norm_err,
                            r_true, profile_norm_true)
+
+
+
+def test_full_model():
+    """
+    Run lmfitting on a full image incl. exposure map, masking and
+    background
+    """
+
+    # load images
+    im, hdr = load_fits_im(im_file)
+    expmap, hdr = load_fits_im(expmap_file)
+    bgmap, hdr = load_fits_im(bgmap_file)
+    maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
+
+    # profile_data_cts = optibin(srcmodel, xcen, ycen)
+    print optibingrid(rmax=150)
+
+
+
+
 
 ######################################################################
 ######################################################################
@@ -578,19 +604,27 @@ if __name__ == '__main__':
     # test_lmfit_beta(imname)
 
     # test_lmfit_beta_1d(imname)
-    test_lmfit_beta_psf_1d(imname)
+    # test_lmfit_beta_psf_1d(imname)
 
     ######################################################################
     # make a synthetic image from precreated image
 
-    # srcmodel = "t1.fits"
-    # expmap   = "pn-test-exp.fits"
-    # bgmap    = "pn-test-bg-2cp.fits"
-    # maskmap  = "pn-test-mask.fits"
-    # outfile  = "cluster-im.fits"
+    im_file = "t1.fits"
+    expmap_file = "pn-test-exp.fits"
+    bgmap_file  = "pn-test-bg-2cp.fits"
+    maskmap_file= "pn-test-mask.fits"
+    outfile_file= "cluster-im.fits"
 
-    # make_synthetic_observation(srcmodel, expmap, bgmap, maskmap, outfile)
+    # make_synthetic_observation(im_file, expmap_file,
+    #                            bgmap_file, maskmap_file, outfile_file)
     # show_in_ds9(outfile)
+
+    ######################################################################
+    # composite test - fitting an image including all instrumental
+    # effects
+
+    test_full_model()
+
 
     print "done!"
 
