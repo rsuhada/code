@@ -12,7 +12,7 @@ from test_2d_im import *
 import lmfit as lm
 from esaspi_utils import show_in_ds9
 from sb_models import *
-from sb_utils import sqdist_matrix, distance_matrix, optibin, optibingrid
+from sb_utils import *
 import time
 
 
@@ -517,31 +517,60 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                            output_figure, profile_norm_err,
                            r_true, profile_norm_true)
 
-
-
 def test_full_model():
     """
     Run lmfitting on a full image incl. exposure map, masking and
     background
     """
-
     # load images
     im, hdr = load_fits_im(im_file)
     expmap, hdr = load_fits_im(expmap_file)
     bgmap, hdr = load_fits_im(bgmap_file)
     maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
 
-    # profile_data_cts = optibin(srcmodel, xcen, ycen)
-    print optibingrid(rmax=150)
+    ######################################################################
+    # setup image coordinates
 
+    xsize = im.shape[0]
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+    imsize = im.shape         # FIXME: is this necessary? I could just
+                              # use it inside the model
 
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
 
+    rgrid = optibingrid(rmax=150)
+    distmatrix = distance_matrix(im, xcen, ycen)
+
+    rgrid[1] = 1.0
+    rgrid[2] = 2.0
+
+    # use the histogram trick
+    hist = histogram(distmatrix, bins=rgrid, weights=im)
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)
+    hdulist = pyfits.HDUList([hdu])
+    hdulist.writeto('tmp.fits', clobber=True)
+
+    print im[xcen +1, ycen +0]
+    print im[xcen -1, ycen +0]
+    print im[xcen -0, ycen -1]
+    print im[xcen -0, ycen +1]
+
+    print
+    print hist[0]
+
+    print sum(im[where(distmatrix==0)])
+    print sum(im[where(logical_and(distmatrix>=1, distmatrix<2))])
 
 
 ######################################################################
 ######################################################################
 ######################################################################
-
 
 if __name__ == '__main__':
     print
@@ -602,18 +631,18 @@ if __name__ == '__main__':
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
-
     # test_lmfit_beta_1d(imname)
+
     # test_lmfit_beta_psf_1d(imname)
 
     ######################################################################
     # make a synthetic image from precreated image
 
-    im_file = "t1.fits"
-    expmap_file = "pn-test-exp.fits"
-    bgmap_file  = "pn-test-bg-2cp.fits"
-    maskmap_file= "pn-test-mask.fits"
-    outfile_file= "cluster-im.fits"
+    # im_file = "t1.fits"
+    # expmap_file = "pn-test-exp.fits"
+    # bgmap_file  = "pn-test-bg-2cp.fits"
+    # maskmap_file= "pn-test-mask.fits"
+    # outfile_file= "cluster-im.fits"
 
     # make_synthetic_observation(im_file, expmap_file,
     #                            bgmap_file, maskmap_file, outfile_file)
@@ -623,8 +652,15 @@ if __name__ == '__main__':
     # composite test - fitting an image including all instrumental
     # effects
 
-    test_full_model()
+    ######################################################################
+    # image setup
 
+    im_file = "cluster-im.fits"
+    expmap_file = "pn-test-exp.fits"
+    bgmap_file  = "pn-test-bg-2cp.fits"
+    maskmap_file= "pn-test-mask.fits"
+
+    test_full_model()
 
     print "done!"
 

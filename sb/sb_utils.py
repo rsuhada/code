@@ -89,6 +89,20 @@ def distance_matrix(im, xcen, ycen):
           + arange(-ycen, im.shape[1]-ycen, dtype=float)[None,:]**2)
     return outmatrix
 
+def distance_matrix_bin(im, xcen, ycen, rgrid):
+    """
+    Return binned distance matrix using the input radii,
+
+    Arguments:
+    - `im`: 2D array - image
+    - `xcen`: x coordinate [pix]
+    - `ycen`: y coordinate [pix]
+    - `rgrid`: radius grid array [pix]
+    """
+    outmatrix = sqrt(arange(-xcen, im.shape[0]-xcen, dtype=float)[:,None]**2
+          + arange(-ycen, im.shape[1]-ycen, dtype=float)[None,:]**2)
+    return outmatrix
+
 def get_cts_stat(im, distmatrix, xim, yim, r_aper):
     """
     Provide basic statistics (total/mean cts etc.) for an input image
@@ -343,3 +357,70 @@ def optibin(im, xcen, ycen, rgrid):
     """
 
     return 0
+
+def extract_profile_generic(im, xcen, ycen):
+    """
+    Generic function to extract a 1D profile of a 2D image
+    profile[i] plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.
+    For plotting and comparison you might want to do r-0.5
+    Arguments:
+    - `im`: 2D array
+    - `xcen`: center x coordinate
+    - `ycen`: center y coordinate
+    """
+
+    # FIXME: 1. rmax as argument, 2. look at speed improvement in
+    # sqdist
+
+    t1 = time.clock()
+
+    distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
+
+    t2 = time.clock()
+    print "dist matrix took: ", t2-t1, " s"
+
+    # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
+    rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
+    n = len(rgrid)
+
+    x = zeros(n, dtype=float)   # profile
+    geometric_area = zeros(n, dtype=float)  # area normalised profile
+
+    t1 = time.clock()
+
+    # starting bin
+    i=0
+    ids = where((distmatrix <= rgrid[i]) & (distmatrix >= 0))
+    geometric_area[i] = len(ids[0])      # [pix]
+    x[i] = sum(im[ids])
+
+    # iterate through the rest
+    for i in range(1, n):
+        ids = where((distmatrix <= rgrid[i]) & (distmatrix >= (rgrid[i-1])))
+        geometric_area[i] = len(ids[0])      # [pix]
+        x[i] = sum(im[ids])
+
+    t2 = time.clock()
+    print "extraction took: ", t2-t1, " s"
+
+    return (rgrid, x, geometric_area)
+
+def extract_profile_fast(im, distmatrix, xcen, ycen):
+    """
+    Improved function to extract a 1D profile of a 2D image profile[i]
+    plotted at r[i] gives the sum for r[i-1] < r < r[i] ring.  For
+    plotting and comparison you might want to do r-1 (central pixel is
+    r=0). Note that this is slightly different from the
+    extract_profile_generic, where there is only a 0.5 pix shift.
+
+    Arguments:
+    - `im`: 2D array
+    - `distmatrix`: 2D array distmatrix - has to be int type
+    - `xcen`: center x coordinate
+    - `ycen`: center y coordinate
+    """
+    geometric_area = bincount(distmatrix.flat)
+    profile = bincount(distmatrix.flat, weights=im.flat)
+
+    return (profile, geometric_area)
+
