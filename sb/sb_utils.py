@@ -424,3 +424,4 @@ def extract_profile_fast(im, distmatrix, xcen, ycen):
 
     return (profile, geometric_area)
 
+

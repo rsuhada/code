@@ -833,8 +833,8 @@ def test_create_cluster_im():
 
 
 def plot_data_model_simple(r_data, profile_data,
-                           r_model, profile_model,
-                           output_figure, profile_data_err=None,
+                           r_model=None, profile_model=None,
+                           output_figure=None, profile_data_err=None,
                            r_true=None, profile_true=None):
     """
     Simple plot of a profile: data vs model (optionally also error bars)
@@ -846,7 +846,7 @@ def plot_data_model_simple(r_data, profile_data,
     - `profile_norm_model`: profile model
     - `ouputname`:
     """
-    plt.figure()
+    ax1 = plt.figure()
     plt.ion()
     plt.clf()
 
@@ -871,25 +871,31 @@ def plot_data_model_simple(r_data, profile_data,
         label=r"source"               # '__nolegend__'
         )
 
-    plt.plot(r_model-0.5, profile_model,
-        color='red',
-        linestyle='-',              # -/--/:/-.
-        linewidth=1,                # linewidth=1
-        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='black',
-        markersize=0,               # markersize=6
-        label=r"model fit"          # '__nolegend__'
-        )
+    if any(profile_model):
+        plt.plot(r_model-0.5, profile_model,
+            color='red',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"model fit"          # '__nolegend__'
+            )
 
-    plt.plot(r_true-0.5, profile_true,
-        color='green',
-        linestyle='-',              # -/--/:/-.
-        linewidth=1,                # linewidth=1
-        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='black',
-        markersize=0,               # markersize=6
-        label=r"true model"          # '__nolegend__'
-        )
+    if any(profile_true):
+        plt.plot(r_true-0.5, profile_true,
+            color='green',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"true model"          # '__nolegend__'
+            )
+
+    from pylab import xlabel, ylabel
+    xlabel('radius', fontsize=14, fontweight="normal")          # fontsize=12
+    ylabel('profile', fontsize=14, fontweight="normal")          # fontsize=12
 
     plt.xscale("linear")
     plt.yscale("linear")
@@ -902,7 +908,9 @@ def plot_data_model_simple(r_data, profile_data,
     plt.get_current_fig_manager().window.wm_geometry("+1100+0")
     # plt.get_current_fig_manager().window.wm_geometry("+640+0")
     plt.show()
-    plt.savefig(output_figure)
+
+    if output_figure:
+        plt.savefig(output_figure)
 
 def minuit_beta_model(r, norm, rcore, beta):
     """

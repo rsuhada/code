@@ -388,14 +388,12 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
     # profile_norm = profile / geometric_area
 
-    #ADDED SPEED#####################################################################
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2
     r = arange(0, r_length, 1.0)
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
-    #ADDED SPEED#####################################################################
 
     # normalize and get errors
     profile_norm_err = sqrt(profile_norm)
@@ -523,7 +521,7 @@ def test_full_model():
     background
     """
     # load images
-    im, hdr = load_fits_im(im_file)
+    im_full, hdr = load_fits_im(im_file)
     expmap, hdr = load_fits_im(expmap_file)
     bgmap, hdr = load_fits_im(bgmap_file)
     maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
@@ -531,42 +529,47 @@ def test_full_model():
     ######################################################################
     # setup image coordinates
 
-    xsize = im.shape[0]
-    ysize = xsize
-    xcen = xsize/2
-    ycen = ysize/2
-    imsize = im.shape         # FIXME: is this necessary? I could just
-                              # use it inside the model
-
-    xsize_obj = 100
+    rmax = 50.0                # [pix], should be 1.5 r500, also note that the xsize_obj should encompass this
+    xsize_obj = 2*rmax
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
 
-    rgrid = optibingrid(rmax=150)
-    distmatrix = distance_matrix(im, xcen, ycen)
+    # get the bined radial boundaries
+    rgrid = optibingrid(rmax=rmax)
 
-    rgrid[1] = 1.0
-    rgrid[2] = 2.0
+    # we want just the relevant part of the image
+    subidx1 = xcen-xsize_obj/2
+    subidx2 = xcen+xsize_obj/2
+    subidy1 = ycen-ysize_obj/2
+    subidy2 = ycen+ysize_obj/2
+
+    im = im_full[subidx1:subidx2, subidy1:subidy2]
+    imsize = im.shape
+    distmatrix = distance_matrix(im, xcen_obj, ycen_obj)
+
+    # extract all the subimages
+    expmap  = expmap[subidx1:subidx2, subidy1:subidy2]
+    bgmap   = bgmap[subidx1:subidx2, subidy1:subidy2]
+    maskmap = maskmap[subidx1:subidx2, subidy1:subidy2]
 
     # use the histogram trick
-    hist = histogram(distmatrix, bins=rgrid, weights=im)
+    tot_prof = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
+    bg_prof = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
+    exp_prof = array(histogram(distmatrix, bins=rgrid, weights=expmap)[0])
+    garea = array(histogram(distmatrix, bins=rgrid, weights=maskmap)[0]) # geometric area
+    garea2 = array(histogram(distmatrix, bins=rgrid)[0]) # geometric area
 
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)
-    hdulist = pyfits.HDUList([hdu])
-    hdulist.writeto('tmp.fits', clobber=True)
+    rgrid = delete(rgrid, 0)    # remove the not left-boundary of the first bin
+    tot_prof_norm = tot_prof / garea
+    bg_prof_norm = bg_prof / garea
 
-    print im[xcen +1, ycen +0]
-    print im[xcen -1, ycen +0]
-    print im[xcen -0, ycen -1]
-    print im[xcen -0, ycen +1]
+    print rgrid
+    print tot_prof_norm
+    print bg_prof_norm
+    print garea
 
-    print
-    print hist[0]
-
-    print sum(im[where(distmatrix==0)])
-    print sum(im[where(logical_and(distmatrix>=1, distmatrix<2))])
-
+    plot_data_model_simple(rgrid, tot_prof_norm, rgrid, bg_prof_norm)
 
 ######################################################################
 ######################################################################
@@ -655,7 +658,17 @@ if __name__ == '__main__':
     ######################################################################
     # image setup
 
-    im_file = "cluster-im.fits"
+    # image: synthetic test
+    # im_file = "cluster-im.fits"
+    # xcen = xsize/2
+    # ycen = ysize/2
+
+    # image: 0205
+    im_file = "pn-test.fits"
+    xcen = 439.05376            # test the coords wrt ds9!
+    ycen = 408.61525
+
+    # rest of the input images
     expmap_file = "pn-test-exp.fits"
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"
