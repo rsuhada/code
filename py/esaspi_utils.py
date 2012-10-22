@@ -23,3 +23,22 @@ def show_in_ds9(fits_image):
     print "Opening a ds9 display!"
     os.system(ds9path+" "+fits_image+" &")
     print "Done: Opening a ds9 display!"
+
+def ds9imcoord2py(coord):
+    """
+    Convert a ds9 image coordinate to a python index
+
+    Arguments:
+    - `coord`: ds9 image coordinate
+    """
+    return round(coord - 1)
+
+def py2ds9imcoord(pyindex):
+    """
+    Convert a python index to a ds9 image coordinate
+
+    Arguments:
+    - `coord`: ds9 image coordinate
+    """
+    return pyindex + 1
+

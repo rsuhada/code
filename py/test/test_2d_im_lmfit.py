@@ -10,7 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from test_2d_im import *
 import lmfit as lm
-from esaspi_utils import show_in_ds9
+from esaspi_utils import *
 from sb_models import *
 from sb_utils import *
 import time
@@ -558,7 +558,6 @@ def test_full_model():
     bg_prof = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
     exp_prof = array(histogram(distmatrix, bins=rgrid, weights=expmap)[0])
     garea = array(histogram(distmatrix, bins=rgrid, weights=maskmap)[0]) # geometric area
-    garea2 = array(histogram(distmatrix, bins=rgrid)[0]) # geometric area
 
     rgrid = delete(rgrid, 0)    # remove the not left-boundary of the first bin
     tot_prof_norm = tot_prof / garea
@@ -569,7 +568,11 @@ def test_full_model():
     print bg_prof_norm
     print garea
 
-    plot_data_model_simple(rgrid, tot_prof_norm, rgrid, bg_prof_norm)
+    print im_full[xcen, ycen]
+    print im[xcen_obj, ycen_obj]
+
+
+    # plot_data_model_simple(rgrid, tot_prof_norm, rgrid, bg_prof_norm)
 
 ######################################################################
 ######################################################################
@@ -658,15 +661,26 @@ if __name__ == '__main__':
     ######################################################################
     # image setup
 
+    ######################################################################
     # image: synthetic test
     # im_file = "cluster-im.fits"
-    # xcen = xsize/2
-    # ycen = ysize/2
+    # xcen = 450
+    # ycen = 450
+    ######################################################################
 
+    ######################################################################
     # image: 0205
     im_file = "pn-test.fits"
-    xcen = 439.05376            # test the coords wrt ds9!
-    ycen = 408.61525
+
+    # ds9 center in ds9 im coords
+    xcen_ds9 = 408.61525
+    ycen_ds9 = 439.05376
+
+    # the ds9 coordinates have to be transformed (including order
+    # switch)
+    xcen = ds9imcoord2py(ycen_ds9)
+    ycen = ds9imcoord2py(xcen_ds9)
+    ######################################################################
 
     # rest of the input images
     expmap_file = "pn-test-exp.fits"
