@@ -529,7 +529,7 @@ def test_full_model():
     ######################################################################
     # setup image coordinates
 
-    rmax = 50.0                # [pix], should be 1.5 r500, also note that the xsize_obj should encompass this
+    rmax = 50.0                 # [pix], should be 1.5 r500
     xsize_obj = 2*rmax
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
@@ -553,26 +553,30 @@ def test_full_model():
     bgmap   = bgmap[subidx1:subidx2, subidy1:subidy2]
     maskmap = maskmap[subidx1:subidx2, subidy1:subidy2]
 
-    # use the histogram trick
-    tot_prof = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
-    bg_prof = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
+    # apply mask
+    expmap = expmap * maskmap
+    bgmap = bgmap * maskmap
+
+    # use the histogram trick to extract profiles
+    tot_cts_prof = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
+    bg_cts_prof = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
     exp_prof = array(histogram(distmatrix, bins=rgrid, weights=expmap)[0])
     garea = array(histogram(distmatrix, bins=rgrid, weights=maskmap)[0]) # geometric area
 
-    rgrid = delete(rgrid, 0)    # remove the not left-boundary of the first bin
-    tot_prof_norm = tot_prof / garea
-    bg_prof_norm = bg_prof / garea
+    rgrid = delete(rgrid, 0)    # remove the left-boundary of the first bin
+    tot_cts_prof_norm = tot_cts_prof / garea
+    bg_cts_prof_norm = bg_cts_prof / garea
 
     print rgrid
-    print tot_prof_norm
-    print bg_prof_norm
+    print tot_cts_prof_norm
+    print bg_cts_prof_norm
     print garea
 
     print im_full[xcen, ycen]
     print im[xcen_obj, ycen_obj]
 
-
-    # plot_data_model_simple(rgrid, tot_prof_norm, rgrid, bg_prof_norm)
+    plot_data_model_simple(rgrid, tot_cts_prof_norm,
+                           rgrid, bg_cts_prof_norm)
 
 ######################################################################
 ######################################################################
