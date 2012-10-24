@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
         ######################################################################
         # start output file for profiles
-        # FIXME: convert it to fits file output
+        # FIXME: convert it to fits file output?
 
         f = open(outfile, 'w')
 
@@ -43,7 +43,6 @@ if __name__ == '__main__':
         f.write('#\n')
 
         f.write('# r sb_src sb_bg sb_tot sb_src_err sb_bg_err sb_tot_err ctr_src ctr_bg ctr_tot ctr_src_err ctr_bg_err ctr_tot_err cts_src cts_bg cts_tot cts_src_err cts_bg_err cts_tot_err exp_time area_correction mask_area geometric_area sb_src_wps sb_bg_wps sb_tot_wps sb_src_wps_err sb_bg_wps_err sb_tot_wps_err ctr_src_wps ctr_bg_wps ctr_tot_wps ctr_src_wps_err ctr_bg_wps_err ctr_tot_wps_err cts_src_wps cts_bg_wps cts_tot_wps cts_src_wps_err cts_bg_wps_err cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
-
 
         ######################################################################
         # start output file for cumulative profiles
@@ -63,7 +62,6 @@ if __name__ == '__main__':
         g.write('#\n')
 
         g.write('# r cumul_sb_src cumul_sb_bg cumul_sb_tot cumul_sb_src_err cumul_sb_bg_err cumul_sb_tot_err cumul_ctr_src cumul_ctr_bg cumul_ctr_tot cumul_ctr_src_err cumul_ctr_bg_err cumul_ctr_tot_err cumul_cts_src cumul_cts_bg cumul_cts_tot cumul_cts_src_err cumul_cts_bg_err cumul_cts_tot_err exp_time area_correction mask_area geometric_area cumul_sb_src_wps cumul_sb_bg_wps cumul_sb_tot_wps cumul_sb_src_wps_err cumul_sb_bg_wps_err cumul_sb_tot_wps_err cumul_ctr_src_wps cumul_ctr_bg_wps cumul_ctr_tot_wps cumul_ctr_src_wps_err cumul_ctr_bg_wps_err cumul_ctr_tot_wps_err cumul_cts_src_wps cumul_cts_bg_wps cumul_cts_tot_wps cumul_cts_src_wps_err cumul_cts_bg_wps_err cumul_cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
-
 
         ######################################################################
         # load in the fits file

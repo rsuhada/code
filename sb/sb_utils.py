@@ -424,4 +424,61 @@ def extract_profile_fast(im, distmatrix, xcen, ycen):
 
     return (profile, geometric_area)
 
+def extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap):
+    """
+    Extract cts, ctr and surface brightness radial profiles.
+    - `distmatrix`: distance matrix wrt the desired center
+    - `rgrid`: grid with aperture boundaries [pix]
+    - `im`: cluster image [cts]
+    - `expmap`: exposure map [s]
+    - `bgmap`: background map [cts]
+    - `maskmap`: detector mask map
+    """
+    # use the histogram trick to extract profiles
+    cts_tot = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
+    cts_bg = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
+    expt = array(histogram(distmatrix, bins=rgrid, weights=expmap)[0])
+    mask_area = array(histogram(distmatrix, bins=rgrid, weights=maskmap)[0]) # mask area
+    geo_area = array(histogram(distmatrix, bins=rgrid)[0]) # geometric area
 
+    # area correction due to point sources
+    geo_area = geo_area.astype('float')
+    mask_area = mask_area.astype('float')
+    ps_area_corr = 1.0 + (1.0 - mask_area/geo_area)
+
+    # correct for are missing in removed ps
+    cts_tot = cts_tot * ps_area_corr
+    cts_bg = cts_bg * ps_area_corr
+
+    ctr_tot = 0.0 * cts_tot
+    ctr_bg  = 0.0 * cts_bg
+
+    # calculate the count rates
+    idx = where(expt>0.0)
+    ctr_tot[idx] = cts_tot[idx]/expt[idx]
+    ctr_bg[idx]  = cts_bg[idx]/expt[idx]
+
+    # calculate the surface brightness (already corrected for missing
+    # ps - use geo_area not mask_area)
+    sb_tot          = ctr_tot/geo_area
+    sb_bg           = ctr_bg/geo_area
+
+    # poisson errors
+    cts_tot_err = sqrt(cts_tot)
+    cts_bg_err  = sqrt(cts_bg)
+    # cts_src_err = sqrt(cts_tot_err**2.0 + cts_bg_err**2.0)
+
+    ctr_tot_err = cts_tot_err/expt
+    ctr_bg_err  = cts_bg_err/expt
+    # ctr_src_err = sqrt(ctr_tot_err**2.0 + ctr_bg_err**2.0)
+
+    sb_tot_err  = ctr_tot_err/geo_area
+    sb_bg_err   = ctr_bg_err/geo_area
+    # sb_src_err  = ctr_src_err/mask_area
+
+    # return just the surface brightnesses for speed/handling ease
+    # return sb_tot, sb_tot_err, sb_bg, sb_bg_err
+
+    # extended return
+    return cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, \
+           cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err

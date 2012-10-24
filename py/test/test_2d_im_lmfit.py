@@ -553,30 +553,32 @@ def test_full_model():
     bgmap   = bgmap[subidx1:subidx2, subidy1:subidy2]
     maskmap = maskmap[subidx1:subidx2, subidy1:subidy2]
 
-    # apply mask
-    expmap = expmap * maskmap
-    bgmap = bgmap * maskmap
+    # apply mask - since we are doing the correction, mask shouldn't
+    # be applied here
+    # expmap = expmap * maskmap   # since we are
+    # bgmap = bgmap * maskmap
 
-    # use the histogram trick to extract profiles
-    tot_cts_prof = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
-    bg_cts_prof = array(histogram(distmatrix, bins=rgrid, weights=bgmap)[0])
-    exp_prof = array(histogram(distmatrix, bins=rgrid, weights=expmap)[0])
-    garea = array(histogram(distmatrix, bins=rgrid, weights=maskmap)[0]) # geometric area
+    cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap)
 
+     # sb_tot, sb_tot_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmapk)
     rgrid = delete(rgrid, 0)    # remove the left-boundary of the first bin
-    tot_cts_prof_norm = tot_cts_prof / garea
-    bg_cts_prof_norm = bg_cts_prof / garea
 
     print rgrid
-    print tot_cts_prof_norm
-    print bg_cts_prof_norm
-    print garea
+    print cts_tot
+    print cts_bg
+    # print geo_area
+    # print mask_area
+    # print ps_area_corr
 
     print im_full[xcen, ycen]
     print im[xcen_obj, ycen_obj]
 
-    plot_data_model_simple(rgrid, tot_cts_prof_norm,
-                           rgrid, bg_cts_prof_norm)
+    plot_data_model_simple(rgrid, ctr_tot,
+                           rgrid, ctr_bg)
+
+    plot_data_model_simple(rgrid, sb_tot,
+                           rgrid, sb_bg)
+
 
 ######################################################################
 ######################################################################

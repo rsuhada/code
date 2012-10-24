@@ -899,6 +899,10 @@ def plot_data_model_simple(r_data, profile_data,
 
     plt.xscale("linear")
     plt.yscale("linear")
+
+    plt.xscale("log")
+    plt.yscale("log")
+
     # plt.ylim(ymin=1e-3,ymax=5e0)
 
     prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
