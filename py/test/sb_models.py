@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    rc, rs, n0, alpha, beta, gamma, epsilon    rc, rs, n0, alpha, beta, gamma, epsilon    rc, rs, n0, alpha, beta, gamma, epsilon#!/usr/bin/env python
 import sys
 import os
 import math
@@ -209,6 +209,55 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
         # convolve
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+        im_output = trim_fftconvolve(im_output)
+
+    return im_output
+
+def v06_funct(r, rc, rs, n0, alpha, beta, gamma, epsilon):
+    """
+    The integration kernel of the vikhlinin06 model (i.e. the n_p *
+    n_e)
+    """
+    rn = r / rc                 # normed radius
+
+    denominator = (1.0 + rn**2)**(3*beta - alpha/2.0) * (1.0 + (r/rs)**gamma)**(epsilon/gamma)
+    f = n0**2 * rn**(-1*alpha) / denominator
+
+    return f
+
+def make_2d_v06(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon):
+    """
+    Creates a 2D image of a projected v06 model (cylindrical
+    projection)
+
+    Arguments:
+    """
+    im = v06_funct(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
+
+    return im
+
+def make_2d_v06_psf(pars, distmatrix):
+    """
+    Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
+    """
+    APPLY_PSF = False
+
+    rc = pars['rc'].value
+    rs = pars['rs'].value
+    n0 = pars['n0'].value
+    alpha = pars['alpha'].value
+    beta = pars['beta'].value
+    gamma = pars['gamma'].value
+    epsilon = pars['epsilon'].value
+
+    im_output = make_2d_v06(imsize, xcen, ycen, norm, rcore, beta)
+
+    if APPLY_PSF:
+    # create PSF
+        im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
+
+        # convolve
+        im_output = fftconvolve(im_output.astype(float), im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)
 
     return im_output

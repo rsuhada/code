@@ -354,6 +354,72 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
+def test_create_v06_psf_im(imname='v06_image_cts.fits'):
+    """
+    Create a simple testimage - poissonized beta model x psf
+    Validated wrt test_2d_im routines (minuit)
+    """
+    # settings
+    APPLY_PSF          = True
+    POISSONIZE_IMAGE   = True            # poissonize image?
+    DO_ZERO_PAD        = True
+
+    # get a header
+    fname='pn-test.fits'
+    hdu = pyfits.open(fname)
+    hdr = hdu[0].header
+
+    # image setup
+    xsize = 900
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+
+    # if zero padded image for testing - this to check normalizations
+    # - works fine
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+
+    imsize = (ysize, xsize)
+
+    # init model
+    pars = lm.Parameters()
+    pars.add('xcen'   , value=xcen)
+    pars.add('ycen'   , value=ycen)
+    pars.add('norm'   , value=normalization)
+    pars.add('rcore'  , value=rcore)
+    pars.add('beta'   , value=beta)
+
+    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
+                               instrument, theta, energy,
+                               APPLY_PSF, DO_ZERO_PAD)
+
+    im_conv = num_cts * im_conv/im_conv.sum()
+
+    # slow extractor
+    (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
+
+    # setup data for the profile extraction - for speedup
+    distmatrix = distance_matrix(im_conv, xcen, ycen).astype(int) # need int for bincount
+    rgrid_length = im_conv.shape[0]/2
+    rgrid = arange(0, rgrid_length, 1.0)
+
+    (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
+
+    if POISSONIZE_IMAGE:
+        # fix current poissonize bug -poissonize only nonz-zero
+        # elements (ok - we're poissonizing the model)
+        ids = where(im_conv != 0.0)
+        im_conv[ids] = poisson.rvs(im_conv[ids])
+        # print "poisson sum:", im_conv.sum()
+
+    # poissonized beta model image [counts] - no background/mask
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto(imname, clobber=True)
+
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
     Testing simple 1D fit of beta model with psf convolution
@@ -530,7 +596,7 @@ def test_full_model():
     ######################################################################
     # setup image coordinates
 
-    rmax = 100.0                 # [pix], should be 1.5 r500
+    rmax = 75.0                 # [pix], should be 1.5 r500
     xsize_obj = 2*rmax
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
@@ -560,26 +626,20 @@ def test_full_model():
     # expmap = expmap * maskmap   # since we are
     # bgmap = bgmap * maskmap
 
-    cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap)
+    # cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap)
 
-     # sb_tot, sb_tot_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmapk)
+    sb_tot, sb_tot_err, sb_bg, sb_bg_err = extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap)
     rgrid = delete(rgrid, 0)    # remove the left-boundary of the first bin
 
     print rgrid
-    print cts_tot
-    print cts_bg
+    # print cts_tot
+    # print cts_bg
     # print geo_area
     # print mask_area
     # print ps_area_corr
 
     print im_full[xcen, ycen]
     print im[xcen_obj, ycen_obj]
-
-    # plot_data_model_simple(rgrid, ctr_tot,
-    #                        rgrid, ctr_bg)
-
-    # plot_data_model_simple(rgrid, sb_tot,
-    #                        rgrid, sb_bg)
 
     print sb_bg
     print sb_bg_err
@@ -650,6 +710,8 @@ if __name__ == '__main__':
     # test_create_beta_im(imname)
     # test_create_beta_psf_im(imname)
 
+    test_create_v06_psf_im(imname)
+
     ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
@@ -703,7 +765,7 @@ if __name__ == '__main__':
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"
 
-    test_full_model()
+    # test_full_model()
 
     print "done!"
 

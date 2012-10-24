@@ -157,6 +157,23 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     im = im / norm
     return im
 
+def make_2d_king2(r, instrument, theta, energy):
+    """
+    Creates a 2D image of the PSF
+
+    Arguments:
+    - 'r': distance from the center (2D nupy array)
+    - 'energy': energy [keV]
+    - 'theta': offaxis angle [arcmin]
+    - 'instrument': pn/m1/m2
+    """
+    (rcore, alpha) = get_psf_king_pars(instrument, energy, theta)
+    im = 1.0 / ( 1.0 + (r/rcore)**2 )**alpha
+    norm = im.sum()
+    im = im / norm
+    return im
+
+
 def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     """
     Creates a 2D image of a beta model
@@ -297,7 +314,7 @@ def test_create_psf():
     hdu = pyfits.open(fname)
     hdr = hdu[0].header
 
-    imname = 'psf-100-pad.fits'
+    imname = 'psf_100_pad.fits'
     xsize = 900
     ysize = xsize
     xcen = xsize/2
@@ -309,6 +326,12 @@ def test_create_psf():
     ysize_obj = xsize_obj
 
     im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+
+    # faster version
+    # im = zeros((xsize, ysize))
+    # distmatrix = distance_matrix(im, xcen, ycen)
+    # im_psf = make_2d_king2(distmatrix, instrument, theta, energy)
+
     if DO_ZERO_PAD:
         im_psf[:, 0:xsize_obj] = 0.0
         im_psf[:, xsize-xsize_obj:] = 0.0
@@ -1312,7 +1335,7 @@ if __name__ == '__main__':
     # fits image creation tests
     # test_create_dirac()
     # test_create_gauss()
-    # test_create_psf()
+    test_create_psf()
     # test_create_beta()
 
     # profile extration tests
@@ -1327,7 +1350,7 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im()
-    test_create_cluster_im()
+    # test_create_cluster_im()
 
     ######################################################################
     # fit and plot

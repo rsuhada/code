@@ -477,8 +477,8 @@ def extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap):
     # sb_src_err  = ctr_src_err/mask_area
 
     # return just the surface brightnesses for speed/handling ease
-    # return sb_tot, sb_tot_err, sb_bg, sb_bg_err
+    return sb_tot, sb_tot_err, sb_bg, sb_bg_err
 
     # extended return
-    return cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, \
-           cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err
+    # return cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, \
+           # cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err
