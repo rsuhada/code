@@ -129,7 +129,8 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
     ######################################################################
     # plot data sets
 
-    plt.errorbar(r, c1, [(c1-c1_err<=0.0).choose(c1_err, c1-ymin), c1_err],
+    # plt.errorbar(r, c1, [(c1-c1_err<=0.0).choose(c1_err, c1-ymin), c1_err],
+    plt.errorbar(r, c1, c1_err,
         color='black',
         linestyle='',              # -/--/-./:
         linewidth=1,                # linewidth=1
@@ -139,7 +140,8 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
         label=r"source"               # '__nolegend__'
         )
 
-    plt.errorbar(r, c2, [(c2-c2_err<=0.0).choose(c2_err, c2-ymin), c2_err],
+    # plt.errorbar(r, c2, [(c2-c2_err<=0.0).choose(c2_err, c2-ymin), c2_err],
+    plt.errorbar(r, c2, c2_err,
         color='blue',
         linestyle='',              # -/--/-./:
         linewidth=1,                # linewidth=1
@@ -158,8 +160,8 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
 
     # subplot text sets
     # ax1.set_title('plot title', fontsize=16, fontweight="bold")  # fontsize=16
-    ax1.set_xlabel('r [arcsec]', fontsize=14, fontweight="bold")          # fontsize=12
-    ax1.set_ylabel('surface brightness [cts/s/pix]', fontsize=14, fontweight="heavy")          # fontsize=12
+    ax1.set_xlabel('r [arcsec]', fontsize=14, fontweight="normal")          # fontsize=12
+    ax1.set_ylabel('surface brightness [cts/s/pix]', fontsize=14, fontweight="normal")          # fontsize=12
 
     # legend
     prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
@@ -179,6 +181,7 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
         label.set_fontsize(14)                  # default = 12
         label.set_fontweight("normal")          # [ 'normal' | 'normal' | 'heavy' | 'light' | 'ultranormal' | 'ultralight']
 
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
     # save figure
     plt.savefig(fig_name)
 

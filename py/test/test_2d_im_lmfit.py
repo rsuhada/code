@@ -13,6 +13,7 @@ import lmfit as lm
 from esaspi_utils import *
 from sb_models import *
 from sb_utils import *
+from sb_plotting_utils import *
 import time
 
 
@@ -529,7 +530,7 @@ def test_full_model():
     ######################################################################
     # setup image coordinates
 
-    rmax = 50.0                 # [pix], should be 1.5 r500
+    rmax = 100.0                 # [pix], should be 1.5 r500
     xsize_obj = 2*rmax
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
@@ -537,6 +538,7 @@ def test_full_model():
 
     # get the bined radial boundaries
     rgrid = optibingrid(rmax=rmax)
+    # rgrid = arange(1, 51, 1)
 
     # we want just the relevant part of the image
     subidx1 = xcen-xsize_obj/2
@@ -573,12 +575,20 @@ def test_full_model():
     print im_full[xcen, ycen]
     print im[xcen_obj, ycen_obj]
 
-    plot_data_model_simple(rgrid, ctr_tot,
-                           rgrid, ctr_bg)
+    # plot_data_model_simple(rgrid, ctr_tot,
+    #                        rgrid, ctr_bg)
 
-    plot_data_model_simple(rgrid, sb_tot,
-                           rgrid, sb_bg)
+    # plot_data_model_simple(rgrid, sb_tot,
+    #                        rgrid, sb_bg)
 
+    print sb_bg
+    print sb_bg_err
+
+    fname='test.png'
+    plot_sb_profile(rgrid, sb_tot, sb_tot_err, sb_bg, sb_bg_err, fname)
+
+    # for i in range(len(rgrid)):
+    #     print rgrid[i], sb_tot[i], sb_tot_err[i]
 
 ######################################################################
 ######################################################################
