@@ -119,9 +119,11 @@ def trim_fftconvolve(image):
 
     return image
 
-def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
+def make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy):
     """
-    Creates a 2D image of the PSF
+    DEPRECATED: use make_2d_king.
+
+    Creates a 2D image of the PSF.
 
     Arguments:
     - `imsize`: input 2D array size
@@ -157,7 +159,7 @@ def make_2d_king(imsize, xcen, ycen, instrument, theta, energy):
     im = im / norm
     return im
 
-def make_2d_king2(r, instrument, theta, energy):
+def make_2d_king(r, instrument, theta, energy):
     """
     Creates a 2D image of the PSF
 
@@ -325,12 +327,12 @@ def test_create_psf():
     xsize_obj = 100
     ysize_obj = xsize_obj
 
-    im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+    # im_psf = make_2d_king_old((xsize, ysize), xcen, ycen, instrument, theta, energy)
 
     # faster version
-    # im = zeros((xsize, ysize))
-    # distmatrix = distance_matrix(im, xcen, ycen)
-    # im_psf = make_2d_king2(distmatrix, instrument, theta, energy)
+    im = zeros((xsize, ysize))
+    distmatrix = distance_matrix(im, xcen, ycen)
+    im_psf = make_2d_king(distmatrix, instrument, theta, energy)
 
     if DO_ZERO_PAD:
         im_psf[:, 0:xsize_obj] = 0.0
@@ -699,7 +701,7 @@ def build_sb_model_beta(xsize, ysize, xsize_obj, ysize_obj, xcen, ycen, norm, rc
 
     if APPLY_PSF:
     # create psf
-        im_psf = make_2d_king((xsize, ysize), xcen, ycen, instrument, theta, energy)
+        im_psf = make_2d_king_old((xsize, ysize), xcen, ycen, instrument, theta, energy)
         # if DO_ZERO_PAD: im_psf = zero_pad_image(im_psf, xsize_obj)
 
     # FIXME: this needs bit reorganizing so that the proper number of
@@ -1335,7 +1337,7 @@ if __name__ == '__main__':
     # fits image creation tests
     # test_create_dirac()
     # test_create_gauss()
-    test_create_psf()
+    # test_create_psf()
     # test_create_beta()
 
     # profile extration tests
@@ -1362,6 +1364,3 @@ if __name__ == '__main__':
     # FIXME:
     # refactor code using load_fits_im
     # refactor code using zero_pad_image
-
-
-

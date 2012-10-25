@@ -1,4 +1,4 @@
-    rc, rs, n0, alpha, beta, gamma, epsilon    rc, rs, n0, alpha, beta, gamma, epsilon    rc, rs, n0, alpha, beta, gamma, epsilon#!/usr/bin/env python
+#!/usr/bin/env python
 import sys
 import os
 import math
@@ -205,7 +205,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     if APPLY_PSF:
     # create PSF
-        im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
+        im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
 
         # convolve
         im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
@@ -250,12 +250,11 @@ def make_2d_v06_psf(pars, distmatrix):
     gamma = pars['gamma'].value
     epsilon = pars['epsilon'].value
 
-    im_output = make_2d_v06(imsize, xcen, ycen, norm, rcore, beta)
+    im_output = make_2d_v06(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
 
     if APPLY_PSF:
     # create PSF
-        im_psf = make_2d_king(imsize, xcen, ycen, instrument, theta, energy)
-
+        im_psf = make_2d_king(distmatrix, instrument, theta, energy)
         # convolve
         im_output = fftconvolve(im_output.astype(float), im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)

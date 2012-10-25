@@ -360,9 +360,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    APPLY_PSF          = True
     POISSONIZE_IMAGE   = True            # poissonize image?
-    DO_ZERO_PAD        = True
 
     # get a header
     fname='pn-test.fits'
@@ -386,23 +384,23 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     # init model
     pars = lm.Parameters()
-    pars.add('xcen'   , value=xcen)
-    pars.add('ycen'   , value=ycen)
-    pars.add('norm'   , value=normalization)
-    pars.add('rcore'  , value=rcore)
-    pars.add('beta'   , value=beta)
+    pars.add('rc', value=rc)
+    pars.add('rs', value=rs)
+    pars.add('n0', value=n0)
+    pars.add('alpha', value=alpha)
+    pars.add('beta', value=beta)
+    pars.add('gamma', value=gamma, vary=False)
+    pars.add('epsilon', value=epsilon)
 
-    im_conv = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
-                               instrument, theta, energy,
-                               APPLY_PSF, DO_ZERO_PAD)
-
+    # CONTINUE HERE
+    distmatrix = distance_matrix(zeros(imsize), xcen, ycen)
+    im_conv = make_2d_v06_psf(pars, distmatrix)
     im_conv = num_cts * im_conv/im_conv.sum()
 
     # slow extractor
     (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
 
-    # setup data for the profile extraction - for speedup
-    distmatrix = distance_matrix(im_conv, xcen, ycen).astype(int) # need int for bincount
+    # setup data for the profile extraction - for speed-up
     rgrid_length = im_conv.shape[0]/2
     rgrid = arange(0, rgrid_length, 1.0)
 
@@ -710,7 +708,29 @@ if __name__ == '__main__':
     # test_create_beta_im(imname)
     # test_create_beta_psf_im(imname)
 
+    ######################################################################
+    # creating a v06 model
+
+    n0 = 1.0e-3
+    rc = 10.0                   # ballpark 0.1 r500
+    beta = 2.0/3.0
+    rs = 90.0                   # ballpark 0.5-1 r500
+    alpha = 1.0                 # <3
+    gamma = 3.0                 # fix = 3
+    epsilon = 2.5               # <5
+
+    pars_true = lm.Parameters()
+    pars_true.add('n0', value=n0, vary=False)
+    pars_true.add('rc', value=rc, vary=False)
+    pars_true.add('beta', value=beta, vary=False)
+    pars_true.add('rs', value=rs, vary=False)
+    pars_true.add('alpha', value=alpha, vary=False)
+    pars_true.add('gamma', value=gamma, vary=False)
+    pars_true.add('epsilon', value=epsilon, vary=False)
+
     test_create_v06_psf_im(imname)
+
+
 
     ######################################################################
     # test lmfit
