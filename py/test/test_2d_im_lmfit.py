@@ -360,7 +360,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -375,12 +375,13 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     # if zero padded image for testing - this to check normalizations
     # - works fine
+    rmax = 75.0                 # [pix], should be 1.5 r500
     xsize_obj = 100
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
 
-    imsize = (ysize, xsize)
+    imsize = (xsize_obj, xsize_obj)
 
     # init model
     pars = lm.Parameters()
@@ -392,22 +393,19 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     pars.add('gamma', value=gamma, vary=False)
     pars.add('epsilon', value=epsilon)
 
-    # CONTINUE HERE
-    distmatrix = distance_matrix(zeros(imsize), xcen, ycen)
-    im_conv = make_2d_v06_psf(pars, distmatrix)
-    im_conv = num_cts * im_conv/im_conv.sum()
+    im_conv = zeros(imsize)
+    distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
 
-    # slow extractor
-    (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
+    im_conv = make_2d_v06_psf(pars, distmatrix)
+    # im_conv = num_cts * im_conv/im_conv.sum()
 
     # setup data for the profile extraction - for speed-up
-    rgrid_length = im_conv.shape[0]/2
-    rgrid = arange(0, rgrid_length, 1.0)
-
-    (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
+    # rgrid_length = im_conv.shape[0]/2
+    # rgrid = arange(0, rgrid_length, 1.0)
+    # (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
 
     if POISSONIZE_IMAGE:
-        # fix current poissonize bug -poissonize only nonz-zero
+        # fix current poissonize bug - poissonize only non-zero
         # elements (ok - we're poissonizing the model)
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
@@ -417,6 +415,8 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
+
+    show_in_ds9(imname)
 
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
@@ -728,9 +728,7 @@ if __name__ == '__main__':
     pars_true.add('gamma', value=gamma, vary=False)
     pars_true.add('epsilon', value=epsilon, vary=False)
 
-    test_create_v06_psf_im(imname)
-
-
+    test_create_v06_psf_im()
 
     ######################################################################
     # test lmfit
