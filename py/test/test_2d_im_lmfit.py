@@ -15,7 +15,7 @@ from sb_models import *
 from sb_utils import *
 from sb_plotting_utils import *
 import time
-
+from scipy import integrate
 
 def print_result_tab(pars_true, pars_fit):
     """
@@ -791,11 +791,12 @@ if __name__ == '__main__':
     lmin = 0
     lmax = r500
 
-    from scipy import integrate
-
     int_sb = [integrate.quad(v06_funct_los, lmin, lmax,
                              args=(b, rc, rs, n0, alpha, beta, gamma, epsilon))[0]
               for b in bgrid]
+
+    # integrate in rings
+    # print integrate.dblquad(func, -pi/2, pi/2, lambda x:-pi/2, lambda x:pi/2)[0]
 
     QUICK_PLOT = True
     if QUICK_PLOT:
