@@ -216,12 +216,65 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 def v06_funct(r, rc, rs, n0, alpha, beta, gamma, epsilon):
     """
     The integration kernel of the vikhlinin06 model (i.e. the n_p *
-    n_e)
+    n_e) as a function of 3D radius. Following andersson11 does not
+    include the central beta model.
     """
     rn = r / rc                 # normed radius
 
     denominator = (1.0 + rn**2)**(3*beta - alpha/2.0) * (1.0 + (r/rs)**gamma)**(epsilon/gamma)
     f = n0**2 * rn**(-1*alpha) / denominator
+
+    return f
+
+def v06_funct_los(l, b, rc, rs, n0, alpha, beta, gamma, epsilon):
+    """
+    The integration kernel of the vikhlinin06 model (i.e. the n_p *
+    n_e) as a function of LOS depth at fixed projected
+    distance. Following andersson11 does not include the central beta
+    model.
+
+    Arguments:
+    - 'l': LOS depth
+    - 'b': projected distance ("impact" parameter)
+    """
+
+    r = sqrt(l**2 + b**2)       # convert (l, b) -> r (3D radius)
+    rn = r / rc                 # normed radius
+
+    denominator = (1.0 + rn**2)**(3*beta - alpha/2.0) * (1.0 + (r/rs)**gamma)**(epsilon/gamma)
+    f = n0**2 * rn**(-1*alpha) / denominator
+
+    return f
+
+def v06_full_funct(r, rc, rs, n0, alpha, beta, gamma, epsilon, n02, rc2, beta2):
+    """
+    The integration kernel of the vikhlinin06 model (i.e. the n_p *
+    n_e) as a function of 3D distance. Includes the central beta
+    model.
+    """
+    rn = r / rc                 # normed radius
+
+    denominator = (1.0 + rn**2)**(3*beta - alpha/2.0) * (1.0 + (r/rs)**gamma)**(epsilon/gamma)
+    f = n0**2 * rn**(-1*alpha) / denominator + n02**2 / (1.0 + (r/rc2)**2)**(3.0*beta2)
+
+    return f
+
+def v06_full_funct_los(l, b, rc, rs, n0, alpha, beta, gamma, epsilon, n02, rc2, beta2):
+    """
+    The integration kernel of the vikhlinin06 model (i.e. the n_p *
+    n_e) as a function of LOS depth at fixed projected
+    distance. Includes the central beta model.
+
+    Arguments:
+    - 'l': LOS depth
+    - 'b': projected distance ("impact" parameter)
+    """
+
+    r = sqrt(l**2 + b**2)       # convert (l, b) -> r (3D radius)
+    rn = r / rc                 # normed radius
+
+    denominator = (1.0 + rn**2)**(3*beta - alpha/2.0) * (1.0 + (r/rs)**gamma)**(epsilon/gamma)
+    f = n0**2 * rn**(-1*alpha) / denominator + n02**2 / (1.0 + (r/rc2)**2)**(3.0*beta2)
 
     return f
 
@@ -347,4 +400,3 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     hdu = pyfits.PrimaryHDU(output_im, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto(outfile, clobber=True)
-

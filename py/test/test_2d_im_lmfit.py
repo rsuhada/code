@@ -709,28 +709,6 @@ if __name__ == '__main__':
     # test_create_beta_psf_im(imname)
 
     ######################################################################
-    # creating a v06 model
-
-    n0 = 1.0e-3
-    rc = 10.0                   # ballpark 0.1 r500
-    beta = 2.0/3.0
-    rs = 90.0                   # ballpark 0.5-1 r500
-    alpha = 1.0                 # <3
-    gamma = 3.0                 # fix = 3
-    epsilon = 2.5               # <5
-
-    pars_true = lm.Parameters()
-    pars_true.add('n0', value=n0, vary=False)
-    pars_true.add('rc', value=rc, vary=False)
-    pars_true.add('beta', value=beta, vary=False)
-    pars_true.add('rs', value=rs, vary=False)
-    pars_true.add('alpha', value=alpha, vary=False)
-    pars_true.add('gamma', value=gamma, vary=False)
-    pars_true.add('epsilon', value=epsilon, vary=False)
-
-    test_create_v06_psf_im()
-
-    ######################################################################
     # test lmfit
     # test_lmfit_beta(imname)
     # test_lmfit_beta_1d(imname)
@@ -777,13 +755,69 @@ if __name__ == '__main__':
     xcen = ds9imcoord2py(ycen_ds9)
     ycen = ds9imcoord2py(xcen_ds9)
     ######################################################################
-
     # rest of the input images
     expmap_file = "pn-test-exp.fits"
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"
 
     # test_full_model()
+
+    ######################################################################
+    # creating a v06 model
+
+    r500 = 1.0e3                # r500 [kpc]
+    r500_pix = 100              # r500 in im pixels
+    n0 = 1.0e-3
+    rc = 10.0                   # ballpark 0.1 r500
+    beta = 2.0/3.0
+    rs = 90.0                   # ballpark 0.5-1 r500
+    alpha = 1.0                 # <3
+    gamma = 3.0                 # fix = 3
+    epsilon = 2.5               # <5
+
+    pars_true = lm.Parameters()
+    pars_true.add('n0', value=n0, vary=False)
+    pars_true.add('rc', value=rc, vary=False)
+    pars_true.add('beta', value=beta, vary=False)
+    pars_true.add('rs', value=rs, vary=False)
+    pars_true.add('alpha', value=alpha, vary=False)
+    pars_true.add('gamma', value=gamma, vary=False)
+    pars_true.add('epsilon', value=epsilon, vary=False)
+
+    # test_create_v06_psf_im()
+
+    bgrid = arange(0, r500_pix + 1, 1, dtype='float') # projected radius
+
+    lmin = 0
+    lmax = r500
+
+    from scipy import integrate
+
+    int_sb = [integrate.quad(v06_funct_los, lmin, lmax,
+                             args=(b, rc, rs, n0, alpha, beta, gamma, epsilon))[0]
+              for b in bgrid]
+
+    QUICK_PLOT = True
+    if QUICK_PLOT:
+        # interactive quick plot
+        plt.figure()
+        plt.ion()
+        plt.clf()
+        plt.plot(bgrid, int_sb,
+            color='black',
+            linestyle='-',              # -/--/-./:
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"data"               # '__nolegend__'
+            )
+        plt.xscale("log")
+        plt.yscale("log")
+        plt.show()
+        plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+        plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
 
     print "done!"
 
