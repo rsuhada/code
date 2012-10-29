@@ -278,18 +278,55 @@ def v06_full_funct_los(l, b, rc, rs, n0, alpha, beta, gamma, epsilon, n02, rc2, 
 
     return f
 
-def make_2d_v06(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon):
+def make_2d_v06(distmatrix, r500, rc, rs, n0, alpha, beta, gamma, epsilon):
     """
     Creates a 2D image of a projected v06 model (cylindrical
     projection)
 
     Arguments:
     """
-    im = v06_funct(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
 
+    rmin = 1                                      # minimal radius seems to be 10kpc
+    bgrid = arange(rmin, r500 + 1, 1, dtype='float') # projected radius -
+                                                  # need only for
+                                                  # plotting
+
+    lmin = 0
+    lmax = 3.0 * r500
+
+    int_sb = [integrate.quad(v06_funct_los, lmin, lmax,
+                             args=(b, rc, rs, n0, alpha, beta, gamma, epsilon))[0]
+              for b in bgrid]
+
+    print bgrid[0:4]
+    print int_sb[0:4]
+    print distmatrix.min()
+
+    QUICK_PLOT = True
+    if QUICK_PLOT:
+        # interactive quick plot
+        plt.figure()
+        plt.ion()
+        plt.clf()
+        plt.plot(bgrid, int_sb,
+            color='black',
+            linestyle='-',              # -/--/-./:
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"data"               # '__nolegend__'
+            )
+        plt.xscale("log")
+        plt.yscale("log")
+        plt.show()
+        plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+        plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
+    im = v06_funct(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
     return im
 
-def make_2d_v06_psf(pars, distmatrix):
+def make_2d_v06_psf(pars, distmatrix, r500):
     """
     Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
     """
@@ -303,7 +340,7 @@ def make_2d_v06_psf(pars, distmatrix):
     gamma = pars['gamma'].value
     epsilon = pars['epsilon'].value
 
-    im_output = make_2d_v06(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
+    im_output = make_2d_v06(distmatrix, r500, rc, rs, n0, alpha, beta, gamma, epsilon)
 
     if APPLY_PSF:
     # create PSF

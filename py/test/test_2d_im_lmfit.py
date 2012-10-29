@@ -375,7 +375,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     # if zero padded image for testing - this to check normalizations
     # - works fine
-    rmax = 75.0                 # [pix], should be 1.5 r500
+    rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
     xsize_obj = 100
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
@@ -396,7 +396,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     im_conv = zeros(imsize)
     distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
 
-    im_conv = make_2d_v06_psf(pars, distmatrix)
+    im_conv = make_2d_v06_psf(pars, distmatrix, r500_pix)
     # im_conv = num_cts * im_conv/im_conv.sum()
 
     # setup data for the profile extraction - for speed-up
@@ -416,7 +416,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-    show_in_ds9(imname)
+    # show_in_ds9(imname)
 
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
@@ -784,42 +784,28 @@ if __name__ == '__main__':
     pars_true.add('gamma', value=gamma, vary=False)
     pars_true.add('epsilon', value=epsilon, vary=False)
 
-    # test_create_v06_psf_im()
-
-    bgrid = arange(0, r500_pix + 1, 1, dtype='float') # projected radius
-
-    lmin = 0
-    lmax = r500
-
-    int_sb = [integrate.quad(v06_funct_los, lmin, lmax,
-                             args=(b, rc, rs, n0, alpha, beta, gamma, epsilon))[0]
-              for b in bgrid]
-
-    # integrate in rings
-    # print integrate.dblquad(func, -pi/2, pi/2, lambda x:-pi/2, lambda x:pi/2)[0]
-
-    QUICK_PLOT = True
-    if QUICK_PLOT:
-        # interactive quick plot
-        plt.figure()
-        plt.ion()
-        plt.clf()
-        plt.plot(bgrid, int_sb,
-            color='black',
-            linestyle='-',              # -/--/-./:
-            linewidth=1,                # linewidth=1
-            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-            markerfacecolor='black',
-            markersize=0,               # markersize=6
-            label=r"data"               # '__nolegend__'
-            )
-        plt.xscale("log")
-        plt.yscale("log")
-        plt.show()
-        plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
-        plt.get_current_fig_manager().window.wm_geometry(plotPosition)
-
+    test_create_v06_psf_im()
 
     print "done!"
 
 
+    # QUICK_PLOT = True
+    # if QUICK_PLOT:
+    #     # interactive quick plot
+    #     plt.figure()
+    #     plt.ion()
+    #     plt.clf()
+    #     plt.plot(bgrid, int_sb,
+    #         color='black',
+    #         linestyle='-',              # -/--/-./:
+    #         linewidth=1,                # linewidth=1
+    #         marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+    #         markerfacecolor='black',
+    #         markersize=0,               # markersize=6
+    #         label=r"data"               # '__nolegend__'
+    #         )
+    #     plt.xscale("log")
+    #     plt.yscale("log")
+    #     plt.show()
+    #     plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+    #     plt.get_current_fig_manager().window.wm_geometry(plotPosition)
