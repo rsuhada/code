@@ -360,7 +360,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     Validated wrt test_2d_im routines (minuit)
     """
     # settings
-    POISSONIZE_IMAGE   = False            # poissonize image?
+    POISSONIZE_IMAGE   = True            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -383,6 +383,8 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     imsize = (xsize_obj, xsize_obj)
 
+    psf_pars = (instrument, theta, energy)
+
     # init model
     pars = lm.Parameters()
     pars.add('rc', value=rc)
@@ -397,7 +399,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
     bgrid = unique(distmatrix.flat)
 
-    im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix)
+    im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
@@ -575,10 +577,9 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                            output_figure, profile_norm_err,
                            r_true, profile_norm_true)
 
-def test_full_model():
+def test_prof_extraction_full():
     """
-    Run lmfitting on a full image incl. exposure map, masking and
-    background
+    Run profile extraction on real image
     """
     # load images
     im_full, hdr = load_fits_im(im_file)
@@ -755,11 +756,21 @@ if __name__ == '__main__':
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"
 
-    # test_full_model()
+    # test_prof_extraction_full()
 
     ######################################################################
     # creating a v06 model
 
+    # coordinates FIXME - not yet respected
+    # ds9 center in ds9 im coords
+    xcen_ds9 = 408.61525
+    ycen_ds9 = 439.05376
+
+    # the ds9 coordinates have to be transformed
+    xcen = ds9imcoord2py(ycen_ds9) # need to cross the order
+    ycen = ds9imcoord2py(xcen_ds9) # need to cross the order
+
+    # model pars
     r500 = 1.0e3                # r500 [kpc]
     r500_pix = 100              # r500 in im pixels
     n0 = 1.0e-3
@@ -770,6 +781,7 @@ if __name__ == '__main__':
     gamma = 3.0                 # fix = 3
     epsilon = 2.5               # <5
 
+    # convert prs to lmfit structure
     pars_true = lm.Parameters()
     pars_true.add('n0', value=n0, vary=False)
     pars_true.add('rc', value=rc, vary=False)
@@ -779,7 +791,22 @@ if __name__ == '__main__':
     pars_true.add('gamma', value=gamma, vary=False)
     pars_true.add('epsilon', value=epsilon, vary=False)
 
-    test_create_v06_psf_im()
+    model_im_name = 'v06_image_cts.fits'
+
+    # creates the model image
+    # Mon Oct 29 17:55:08 2012
+    test_create_v06_psf_im()    # FIXME
+
+
+    # create the full synthetic observation
+    im_file = model_im_name
+    expmap_file = "pn-test-exp.fits"
+    bgmap_file  = "pn-test-bg-2cp.fits"
+    maskmap_file= "pn-test-mask.fits"
+    outfile_file= "cluster-im-v06-psf.fits"
+
+    # make_synthetic_observation(im_file, expmap_file,
+    #                            bgmap_file, maskmap_file, outfile_file)
 
     print "done!"
 

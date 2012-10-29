@@ -372,12 +372,7 @@ def extract_profile_generic(im, xcen, ycen):
     # FIXME: 1. rmax as argument, 2. look at speed improvement in
     # sqdist
 
-    t1 = time.clock()
-
     distmatrix = sqrt(sqdist_matrix(im, xcen, ycen))
-
-    t2 = time.clock()
-    print "dist matrix took: ", t2-t1, " s"
 
     # rgrid = arange(1, distmatrix.max()+1, 1.0)  # maximal possible distance (to corner)
     rgrid = arange(1, im.shape[0]/2+1, 1.0)  # maximal possible distance (to side)
@@ -385,8 +380,6 @@ def extract_profile_generic(im, xcen, ycen):
 
     x = zeros(n, dtype=float)   # profile
     geometric_area = zeros(n, dtype=float)  # area normalised profile
-
-    t1 = time.clock()
 
     # starting bin
     i=0
@@ -399,9 +392,6 @@ def extract_profile_generic(im, xcen, ycen):
         ids = where((distmatrix <= rgrid[i]) & (distmatrix >= (rgrid[i-1])))
         geometric_area[i] = len(ids[0])      # [pix]
         x[i] = sum(im[ids])
-
-    t2 = time.clock()
-    print "extraction took: ", t2-t1, " s"
 
     return (rgrid, x, geometric_area)
 

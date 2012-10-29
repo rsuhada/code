@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_utils import sqdistance, distance_matrix, load_fits_im
-from test_2d_im import make_2d_beta, extract_profile_generic, extract_profile_fast, make_2d_king, trim_fftconvolve, zero_pad_image
+from test_2d_im import make_2d_beta, extract_profile_generic, extract_profile_fast, make_2d_king, make_2d_king_old, trim_fftconvolve, zero_pad_image
 from scipy import integrate
 from scipy.stats import poisson
 
@@ -304,11 +304,11 @@ def make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0, alpha, beta, gamma, epsilon
 
     return im
 
-def make_2d_v06_psf(pars, distmatrix, bgrid, r500):
+def make_2d_v06_psf(pars, distmatrix, bgrid, r500, psf_pars):
     """
     Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
     """
-    APPLY_PSF = False
+    APPLY_PSF = True
 
     rc = pars['rc'].value
     rs = pars['rs'].value
@@ -322,8 +322,10 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500):
                             alpha, beta, gamma, epsilon)
 
     if APPLY_PSF:
-    # create PSF
-        im_psf = make_2d_king(distmatrix, instrument, theta, energy)
+        # create PSF
+        im_psf = make_2d_king(distmatrix, psf_pars[0], psf_pars[1],
+                              psf_pars[2])
+
         # convolve
         im_output = fftconvolve(im_output.astype(float),
                                 im_psf.astype(float), mode = 'same')
