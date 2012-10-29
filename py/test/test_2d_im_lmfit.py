@@ -395,14 +395,9 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     im_conv = zeros(imsize)
     distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
+    bgrid = unique(distmatrix.flat)
 
-    im_conv = make_2d_v06_psf(pars, distmatrix, r500_pix)
-    # im_conv = num_cts * im_conv/im_conv.sum()
-
-    # setup data for the profile extraction - for speed-up
-    # rgrid_length = im_conv.shape[0]/2
-    # rgrid = arange(0, rgrid_length, 1.0)
-    # (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
+    im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix)
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
@@ -788,24 +783,3 @@ if __name__ == '__main__':
 
     print "done!"
 
-
-    # QUICK_PLOT = True
-    # if QUICK_PLOT:
-    #     # interactive quick plot
-    #     plt.figure()
-    #     plt.ion()
-    #     plt.clf()
-    #     plt.plot(bgrid, int_sb,
-    #         color='black',
-    #         linestyle='-',              # -/--/-./:
-    #         linewidth=1,                # linewidth=1
-    #         marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-    #         markerfacecolor='black',
-    #         markersize=0,               # markersize=6
-    #         label=r"data"               # '__nolegend__'
-    #         )
-    #     plt.xscale("log")
-    #     plt.yscale("log")
-    #     plt.show()
-    #     plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
-    #     plt.get_current_fig_manager().window.wm_geometry(plotPosition)

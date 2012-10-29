@@ -278,7 +278,7 @@ def v06_full_funct_los(l, b, rc, rs, n0, alpha, beta, gamma, epsilon, n02, rc2, 
 
     return f
 
-def make_2d_v06(distmatrix, r500, rc, rs, n0, alpha, beta, gamma, epsilon):
+def make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0, alpha, beta, gamma, epsilon):
     """
     Creates a 2D image of a projected v06 model (cylindrical
     projection)
@@ -286,47 +286,25 @@ def make_2d_v06(distmatrix, r500, rc, rs, n0, alpha, beta, gamma, epsilon):
     Arguments:
     """
 
-    rmin = 1                                      # minimal radius seems to be 10kpc
-    bgrid = arange(rmin, r500 + 1, 1, dtype='float') # projected radius -
-                                                  # need only for
-                                                  # plotting
+    rmin = 1    # minimal radius seems to be 10kpc need only for
+                # plotting
 
     lmin = 0
     lmax = 3.0 * r500
 
-    int_sb = [integrate.quad(v06_funct_los, lmin, lmax,
+    # do the LOS integration
+    dens_prof_los = [integrate.quad(v06_funct_los, lmin, lmax,
                              args=(b, rc, rs, n0, alpha, beta, gamma, epsilon))[0]
               for b in bgrid]
 
-    print bgrid[0:4]
-    print int_sb[0:4]
-    print distmatrix.min()
+    # create the 2d image
+    im = zeros(distmatrix.shape)
+    for i, b in enumerate(bgrid):
+        im[where(distmatrix==b)] =  dens_prof_los[i]
 
-    QUICK_PLOT = True
-    if QUICK_PLOT:
-        # interactive quick plot
-        plt.figure()
-        plt.ion()
-        plt.clf()
-        plt.plot(bgrid, int_sb,
-            color='black',
-            linestyle='-',              # -/--/-./:
-            linewidth=1,                # linewidth=1
-            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-            markerfacecolor='black',
-            markersize=0,               # markersize=6
-            label=r"data"               # '__nolegend__'
-            )
-        plt.xscale("log")
-        plt.yscale("log")
-        plt.show()
-        plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
-        plt.get_current_fig_manager().window.wm_geometry(plotPosition)
-
-    im = v06_funct(distmatrix, rc, rs, n0, alpha, beta, gamma, epsilon)
     return im
 
-def make_2d_v06_psf(pars, distmatrix, r500):
+def make_2d_v06_psf(pars, distmatrix, bgrid, r500):
     """
     Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
     """
@@ -340,19 +318,24 @@ def make_2d_v06_psf(pars, distmatrix, r500):
     gamma = pars['gamma'].value
     epsilon = pars['epsilon'].value
 
-    im_output = make_2d_v06(distmatrix, r500, rc, rs, n0, alpha, beta, gamma, epsilon)
+    im_output = make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0,
+                            alpha, beta, gamma, epsilon)
 
     if APPLY_PSF:
     # create PSF
         im_psf = make_2d_king(distmatrix, instrument, theta, energy)
         # convolve
-        im_output = fftconvolve(im_output.astype(float), im_psf.astype(float), mode = 'same')
+        im_output = fftconvolve(im_output.astype(float),
+                                im_psf.astype(float), mode = 'same')
         im_output = trim_fftconvolve(im_output)
 
     return im_output
 
 
-def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD, data_profile=None, data_profile_err=None):
+def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
+                              instrument, theta, energy, APPLY_PSF,
+                              DO_ZERO_PAD, data_profile=None,
+                              data_profile_err=None):
     """
     Fits the surface brightness profile by creating a 2D model of the
     image - beta model x psf
