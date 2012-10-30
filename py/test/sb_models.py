@@ -177,6 +177,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     Creates a 2D image of a beta model convolved with psf
     Arguments:
     """
+    # FIXME: the _object coordinates are not needed anymore
 
     hdr = pyfits.getheader('pn-test.fits')
 
@@ -189,7 +190,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     t1 = time.clock()
 
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
-    # FIXME: CRITICAL  - verify if this is where you want to have it
 
     # hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here

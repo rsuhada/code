@@ -291,6 +291,8 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     Create a simple testimage - poissonized beta model x psf
     Validated wrt test_2d_im routines (minuit)
     """
+    print  "Creating beta x psf image"
+
     # settings
     APPLY_PSF          = True
     POISSONIZE_IMAGE   = True            # poissonize image?
@@ -359,6 +361,8 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     Create a simple testimage - poissonized beta model x psf
     Validated wrt test_2d_im routines (minuit)
     """
+    print "Creating V06 x PSF image!"
+
     # settings
     POISSONIZE_IMAGE   = True            # poissonize image?
 
@@ -376,12 +380,14 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # if zero padded image for testing - this to check normalizations
     # - works fine
     rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
-    xsize_obj = 100
+
+    xsize_obj = 900
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
 
     imsize = (xsize_obj, xsize_obj)
+    # imsize = (xsize, xsize)
 
     psf_pars = (instrument, theta, energy)
 
@@ -397,6 +403,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     im_conv = zeros(imsize)
     distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
+    # distmatrix = distance_matrix(im_conv, xcen, ycen) + 1
     bgrid = unique(distmatrix.flat)
 
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
@@ -413,7 +420,6 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
 
-    # show_in_ds9(imname)
 
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     """
@@ -781,7 +787,7 @@ if __name__ == '__main__':
     gamma = 3.0                 # fix = 3
     epsilon = 2.5               # <5
 
-    # convert prs to lmfit structure
+    # convert pars to lmfit structure
     pars_true = lm.Parameters()
     pars_true.add('n0', value=n0, vary=False)
     pars_true.add('rc', value=rc, vary=False)
@@ -794,9 +800,7 @@ if __name__ == '__main__':
     model_im_name = 'v06_image_cts.fits'
 
     # creates the model image
-    # Mon Oct 29 17:55:08 2012
-    test_create_v06_psf_im()    # FIXME
-
+    test_create_v06_psf_im(model_im_name)
 
     # create the full synthetic observation
     im_file = model_im_name

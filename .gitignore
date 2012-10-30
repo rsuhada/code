@@ -3,6 +3,7 @@
 # foo.txt
 # Ignore (generated) html files,
 # *.html
+*.ignore_me
 *.pyc
 *.png
 *.fits
