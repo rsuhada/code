@@ -382,6 +382,41 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
 
         return residuals
 
+def v06_psf_2d_lmfit_profile(pars, distmatrix, bgrid, r500, psf_pars,
+                             xsize_obj, ysize_obj,
+                             data_profile=None, data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image - v06 model (without the central beta model) x psf
+    No bg.
+    Also allows to return directly residuals.
+    """
+    USE_ERROR=True             # debug option
+
+    # this is the new version
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+
+    # make first a 2D image
+    model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
+                                  psf_pars)
+
+    # profile extraction
+    # r_length = model_image.shape[0]/2 + 1 # r500?
+    r_length = r500             # factor out r500
+    r = arange(0, r_length, 1.0)
+    (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
+    model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
+
+    if data_profile == None:
+        return (r, model_profile)
+    else:
+        residuals = data_profile - model_profile
+        # is this biasing?
+        if USE_ERROR: residuals = residuals / data_profile_err
+
+        return residuals
+
 def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile):
     """
     Take a synthetic sb model and turn it into a "observation" by

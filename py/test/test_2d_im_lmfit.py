@@ -587,6 +587,159 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
                            output_figure, profile_norm_err,
                            r_true, profile_norm_true)
 
+def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
+    """
+    Testing simple 1D fit of v06 model with psf convolution
+    """
+    APPLY_PSF = True
+    DO_ZERO_PAD = True
+
+    input_im, hdr = load_fits_im(fname)
+
+    ######################################################################
+    # image setup
+
+    xsize = input_im.shape[0]
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+    imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+
+    xsize_obj = 100
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    r_aper = xsize_obj  / 2        # aperture for the fitting
+
+    ######################################################################
+    # getting the "data"
+
+    # cut out the relevant part of the image
+    data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    imsize = data.shape
+
+    # profile_norm = profile / geometric_area
+
+    # setup data for the profile extraction - for speedup
+    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
+    r_length = data.shape[0]/2
+    r = arange(0, r_length, 1.0)
+    (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+    profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
+
+    # normalize and get errors
+    profile_norm_err = sqrt(profile_norm)
+    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning?
+
+    ######################################################################
+    # init model
+    pars = lm.Parameters()
+
+    # pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(input_im))
+    # pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
+    # pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
+
+    # pars.add('xcen', value=xcen_obj, vary=False)
+    # pars.add('ycen', value=ycen_obj, vary=False)
+
+    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
+                   energy, APPLY_PSF, DO_ZERO_PAD, profile_norm,
+                   profile_norm_err)
+
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
+
+    ######################################################################
+    # do the fit
+    DO_FIT = False
+
+    if DO_FIT:
+        print "starting fit"
+        t1 = time.clock()
+
+        result = lm.minimize(v06_psf_2d_lmfit_profile,
+                             pars,
+                             args=nonfit_args,
+                             **leastsq_kws
+                             )
+
+        result.leastsq()
+
+        t2 = time.clock()
+        print "fitting took: ", t2-t1, " s"
+
+    # get the output model
+    (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
+                                                              imsize,
+                                                              xsize_obj,
+                                                              ysize_obj,
+                                                              instrument,
+                                                              theta,
+                                                              energy,
+                                                              APPLY_PSF,
+                                                              DO_ZERO_PAD)
+
+    ######################################################################
+    # output
+
+    if DO_FIT:
+        print_result_tab(pars_true, pars)
+        lm.printfuncs.report_errors(result.params)
+
+    ######################################################################
+    # confidence intervals
+
+    CALC_1D_CI = False
+    CALC_2D_CI = False
+
+    if CALC_1D_CI:
+        print "Calculating 1D confidence intervals"
+        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        sigmas = [0.682689492137, 0.954499736104]
+        ci_pars = ['rcore', 'beta']
+
+        ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                              trace=True, verbose=True, maxiter=1)
+
+        lm.printfuncs.report_ci(ci)
+
+    if CALC_2D_CI:
+        from timer import Timer
+
+        with Timer() as t:
+            print "Calculating 2D confidence intervals"
+            x, y, prob = lm.conf_interval2d(result,'rcore','beta',20,20)
+            plt.contourf(x,y,grid)
+
+        print "elasped time:", t.secs, " s"
+
+    ######################################################################
+    # plot profiles
+
+    pars_true.add('xcen', value=50.0, vary=False)
+    pars_true.add('ycen', value=50.0, vary=False)
+
+    result = lm.minimize(beta_psf_2d_lmfit_profile,
+                         pars_true,
+                         args=nonfit_args,
+                         **leastsq_kws)
+
+    (r_true, profile_norm_true) = beta_psf_2d_lmfit_profile(pars_true,
+                                                            imsize,
+                                                            xsize_obj,
+                                                            ysize_obj,
+                                                            instrument,
+                                                            theta,
+                                                            energy,
+                                                            APPLY_PSF,
+                                                            DO_ZERO_PAD)
+
+    output_figure = 'lmfit_beta_psf_1d.png'
+
+    plot_data_model_simple(r, profile_norm,
+                           r_model, profile_norm_model,
+                           output_figure, profile_norm_err,
+                           r_true, profile_norm_true)
+
 def test_prof_extraction_full():
     """
     Run profile extraction on real image
