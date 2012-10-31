@@ -295,7 +295,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     # settings
     APPLY_PSF          = True
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = True
     DO_ZERO_PAD        = True
     APPLY_EXPOSURE_MAP = False
     ADD_BACKGROUND     = False
@@ -349,7 +349,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
         # elements (ok - we're poissonizing the model)
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
-        # print "poisson sum:", im_conv.sum()
+        print "poisson sum:", im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -381,7 +381,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # - works fine
     rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
 
-    xsize_obj = 900
+    xsize_obj = 900           # change to 900 if you want a big image
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -413,7 +413,11 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
         # elements (ok - we're poissonizing the model)
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
-        # print "poisson sum:", im_conv.sum()
+
+    # FIXME: better to set n0 to the integral in r500 and then
+    # poissonize
+    # im_conv = num_cts * im_conv/im_conv.sum()
+    print "poisson sum:", im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -680,14 +684,6 @@ if __name__ == '__main__':
     instrument = "pn"
     instid = get_instrument_id(instrument)
 
-    # setup for the gaussian test
-    a_sigmax = 15.0               # [pix]
-    a_sigmay = 15.0               # [pix]
-    b_sigmax = 20.0               # [pix]
-    b_sigmay = 20.0               # [pix]
-    c_sigmax = sqrt(a_sigmax**2 + b_sigmax**2)              # [pix]
-    c_sigmay = sqrt(a_sigmay**2 + b_sigmay**2)              # [pix]
-
     # setup for the beta model
     num_cts       = 2.0e5             # Will be the normalization
     rcore         = 10.0              # [pix]
@@ -708,6 +704,7 @@ if __name__ == '__main__':
     ######################################################################
     # images for fitting tests
     # test_create_beta_im(imname)
+
     # test_create_beta_psf_im(imname)
 
     ######################################################################
@@ -779,7 +776,7 @@ if __name__ == '__main__':
     # model pars
     r500 = 1.0e3                # r500 [kpc]
     r500_pix = 100              # r500 in im pixels
-    n0 = 1.0e-3
+    n0 = 7e+0
     rc = 10.0                   # ballpark 0.1 r500
     beta = 2.0/3.0
     rs = 90.0                   # ballpark 0.5-1 r500
@@ -803,14 +800,16 @@ if __name__ == '__main__':
     test_create_v06_psf_im(model_im_name)
 
     # create the full synthetic observation
-    im_file = model_im_name
+    im_file = 'v06_image_cts_2e5.fits'
     expmap_file = "pn-test-exp.fits"
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"
-    outfile_file= "cluster-im-v06-psf.fits"
+    outfile_file= "cluster-im-v06-psf_2e5.fits"
 
     # make_synthetic_observation(im_file, expmap_file,
-    #                            bgmap_file, maskmap_file, outfile_file)
+                               # bgmap_file, maskmap_file, outfile_file)
+
+    test_lmfit_v06_psf_1d(imname)
 
     print "done!"
 
