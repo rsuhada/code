@@ -389,8 +389,6 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     imsize = (xsize_obj, xsize_obj)
     # imsize = (xsize, xsize)
 
-    psf_pars = (instrument, theta, energy)
-
     # init model
     pars = lm.Parameters()
     pars.add('rc', value=rc)
@@ -605,7 +603,8 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     ycen = ysize/2
     imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
-    xsize_obj = 100
+    rmax = 1.5 * r500_pix
+    xsize_obj = 2 * rmax
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -618,12 +617,14 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     imsize = data.shape
 
-    # profile_norm = profile / geometric_area
-
     # setup data for the profile extraction - for speedup
-    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
+    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) + 1 # +1 bc divergence
+
+    bgrid = unique(distmatrix.flat)
+
     r_length = data.shape[0]/2
     r = arange(0, r_length, 1.0)
+
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
@@ -631,22 +632,46 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning?
 
-    ######################################################################
-    # init model
+    # # conver size to image post convolution
+    # distmatrix = trim_fftconvolve(distmatrix)
+
+    # init parameters
+    n0 = 1e+0
+    rc = 20.0
+    beta = 4.0/3.0
+    rs = 20.0
+    alpha = 1.5
+    gamma = 3.0
+    epsilon = 1.5
+
+    # convert pars to lmfit structure
     pars = lm.Parameters()
+    pars.add('n0'      , value=n0, vary=True)
+    pars.add('rc'      , value=rc, vary=True)
+    pars.add('beta'    , value=beta, vary=True)
+    pars.add('rs'      , value=rs, vary=True)
+    pars.add('alpha'   , value=alpha, vary=True)
+    pars.add('gamma'   , value=gamma, vary=False)
+    pars.add('epsilon' , value=epsilon, vary=True) # add constraint
 
-    # pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(input_im))
-    # pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
-    # pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
-
-    # pars.add('xcen', value=xcen_obj, vary=False)
-    # pars.add('ycen', value=ycen_obj, vary=False)
-
-    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
-                   energy, APPLY_PSF, DO_ZERO_PAD, profile_norm,
-                   profile_norm_err)
+    nonfit_args = (distmatrix, bgrid, r500, psf_pars, xcen_obj, ycen_obj)
 
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
+
+    (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
+                                                           distmatrix,
+                                                           bgrid, r500, psf_pars, xcen_obj,
+                                                           ycen_obj,data_profile=None,
+                                                           data_profile_err=None)
+
+
+    # output_figure = 'lmfit_v06_psf_1d.png'
+
+    # plot_data_model_simple(r, profile_norm,
+    #                        r_model, profile_norm_model,
+    #                        output_figure, profile_norm_err,
+    #                        r_true, profile_norm_true)
+
 
     ######################################################################
     # do the fit
@@ -667,16 +692,16 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-    # get the output model
-    (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
-                                                              imsize,
-                                                              xsize_obj,
-                                                              ysize_obj,
-                                                              instrument,
-                                                              theta,
-                                                              energy,
-                                                              APPLY_PSF,
-                                                              DO_ZERO_PAD)
+        # get the output model
+        (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
+                                                                 imsize,
+                                                                 xsize_obj,
+                                                                 ysize_obj,
+                                                                 instrument,
+                                                                 theta,
+                                                                 energy,
+                                                                 APPLY_PSF,
+                                                                 DO_ZERO_PAD)
 
     ######################################################################
     # output
@@ -715,30 +740,34 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     ######################################################################
     # plot profiles
 
-    pars_true.add('xcen', value=50.0, vary=False)
-    pars_true.add('ycen', value=50.0, vary=False)
+    PLOT_PROFILE = False
 
-    result = lm.minimize(beta_psf_2d_lmfit_profile,
-                         pars_true,
-                         args=nonfit_args,
-                         **leastsq_kws)
+    if PLOT_PROFILE:
+        pars_true.add('xcen', value=50.0, vary=False)
+        pars_true.add('ycen', value=50.0, vary=False)
 
-    (r_true, profile_norm_true) = beta_psf_2d_lmfit_profile(pars_true,
-                                                            imsize,
-                                                            xsize_obj,
-                                                            ysize_obj,
-                                                            instrument,
-                                                            theta,
-                                                            energy,
-                                                            APPLY_PSF,
-                                                            DO_ZERO_PAD)
+        # pretend to fit to get the resukt structure
+        result = lm.minimize(v06_psf_2d_lmfit_profile,
+                             pars_true,
+                             args=nonfit_args,
+                             **leastsq_kws)
 
-    output_figure = 'lmfit_beta_psf_1d.png'
+        (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
+                                                               imsize,
+                                                               xsize_obj,
+                                                               ysize_obj,
+                                                               instrument,
+                                                               theta,
+                                                               energy,
+                                                               APPLY_PSF,
+                                                               DO_ZERO_PAD)
 
-    plot_data_model_simple(r, profile_norm,
-                           r_model, profile_norm_model,
-                           output_figure, profile_norm_err,
-                           r_true, profile_norm_true)
+        output_figure = 'lmfit_v06_psf_1d.png'
+
+        plot_data_model_simple(r, profile_norm,
+                               r_model, profile_norm_model,
+                               output_figure, profile_norm_err,
+                               r_true, profile_norm_true)
 
 def test_prof_extraction_full():
     """
@@ -835,7 +864,8 @@ if __name__ == '__main__':
     theta = 65.8443 / 60.0
     energy = 1.5
     instrument = "pn"
-    instid = get_instrument_id(instrument)
+
+    psf_pars = (instrument, theta, energy)
 
     # setup for the beta model
     num_cts       = 2.0e5             # Will be the normalization
@@ -929,6 +959,7 @@ if __name__ == '__main__':
     # model pars
     r500 = 1.0e3                # r500 [kpc]
     r500_pix = 100              # r500 in im pixels
+
     n0 = 7e+0
     rc = 10.0                   # ballpark 0.1 r500
     beta = 2.0/3.0
@@ -950,7 +981,7 @@ if __name__ == '__main__':
     model_im_name = 'v06_image_cts.fits'
 
     # creates the model image
-    test_create_v06_psf_im(model_im_name)
+    # test_create_v06_psf_im(model_im_name)
 
     # create the full synthetic observation
     im_file = 'v06_image_cts_2e5.fits'
@@ -962,7 +993,7 @@ if __name__ == '__main__':
     # make_synthetic_observation(im_file, expmap_file,
                                # bgmap_file, maskmap_file, outfile_file)
 
-    test_lmfit_v06_psf_1d(imname)
+    test_lmfit_v06_psf_1d(im_file)
 
     print "done!"
 

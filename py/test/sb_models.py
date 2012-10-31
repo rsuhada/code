@@ -382,9 +382,9 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
 
         return residuals
 
-def v06_psf_2d_lmfit_profile(pars, distmatrix, bgrid, r500, psf_pars,
-                             xsize_obj, ysize_obj,
-                             data_profile=None, data_profile_err=None):
+def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
+                            xcen_obj,ycen_obj,data_profile=None,
+                            data_profile_err=None):
     """
     Fits the surface brightness profile by creating a 2D model of the
     image - v06 model (without the central beta model) x psf
@@ -393,13 +393,14 @@ def v06_psf_2d_lmfit_profile(pars, distmatrix, bgrid, r500, psf_pars,
     """
     USE_ERROR=True             # debug option
 
-    # this is the new version
-    xcen_obj = xsize_obj / 2
-    ycen_obj = ysize_obj / 2
-
     # make first a 2D image
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
+
+    # conver size to image post convolution
+    distmatrix = trim_fftconvolve(distmatrix)
+
+    print "**" , model_image.shape, distmatrix.shape
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?
