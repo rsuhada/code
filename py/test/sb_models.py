@@ -397,10 +397,8 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
-    # conver size to image post convolution
+    # trim distmatrix size to image post convolution
     distmatrix = trim_fftconvolve(distmatrix)
-
-    print "**" , model_image.shape, distmatrix.shape
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?

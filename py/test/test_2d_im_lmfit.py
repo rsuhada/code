@@ -614,16 +614,25 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # getting the "data"
 
     # cut out the relevant part of the image
-    data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+    subidx1 = xcen-xsize_obj/2
+    subidx2 = xcen+xsize_obj/2
+    subidy1 = ycen-ysize_obj/2
+    subidy2 = ycen+ysize_obj/2
+
+    data = input_im[subidx1:subidx2, subidy1:subidy2]
     imsize = data.shape
 
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) + 1 # +1 bc divergence
-
     bgrid = unique(distmatrix.flat)
 
+    # defining the binning scheme
     r_length = data.shape[0]/2
     r = arange(0, r_length, 1.0)
+
+    # extract profile for *data*
+
+    print '@@', distmatrix.shape, data.shape
 
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
@@ -631,9 +640,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # normalize and get errors
     profile_norm_err = sqrt(profile_norm)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning?
-
-    # # conver size to image post convolution
-    # distmatrix = trim_fftconvolve(distmatrix)
 
     # init parameters
     n0 = 1e+0
@@ -654,16 +660,16 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     pars.add('gamma'   , value=gamma, vary=False)
     pars.add('epsilon' , value=epsilon, vary=True) # add constraint
 
+    # set the ancilarry parameters
     nonfit_args = (distmatrix, bgrid, r500, psf_pars, xcen_obj, ycen_obj)
-
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
+    # extract profile
     (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
                                                            distmatrix,
                                                            bgrid, r500, psf_pars, xcen_obj,
                                                            ycen_obj,data_profile=None,
                                                            data_profile_err=None)
-
 
     # output_figure = 'lmfit_v06_psf_1d.png'
 
