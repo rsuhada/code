@@ -610,8 +610,8 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     rmax = 1.5 * r500_pix
     xsize_obj = 2 * rmax
     ysize_obj = xsize_obj
-    xcen_obj = xsize_obj / 2 + 1
-    ycen_obj = ysize_obj / 2 + 1
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
 
     ######################################################################
     # getting the "data"
@@ -691,6 +691,7 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     print data[xcen_obj, xcen_obj], input_im[xcen+1, ycen+1]
     print
     print where(distmatrix==1), distmatrix.min()
+    print r_data[0], profile_data[0]
 
     # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
     # print r_true[idx], profile_norm_true[1]
