@@ -404,6 +404,14 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # distmatrix = distance_matrix(im_conv, xcen, ycen) + 1
     bgrid = unique(distmatrix.flat)
 
+    print 30*'#'+'DATA'
+    print pars
+    print distmatrix.shape, where(distmatrix.min()), distmatrix.min()
+    print bgrid.max()
+    print r500_pix
+    print psf_pars
+    print 30*'#'
+
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
 
     if POISSONIZE_IMAGE:
@@ -683,19 +691,22 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
                            output_figure, profile_norm_data_err,
                            r_true, profile_norm_true)
 
-    idx = 1
+    idx = 0
     # print sum(data[where(distmatrix==1)])/8
-    print data[where(distmatrix==1)], data.max(), input_im.max()
-    print xcen, ycen
-    print xcen_obj, ycen_obj
-    print data[xcen_obj, xcen_obj], input_im[xcen+1, ycen+1]
-    print
-    print where(distmatrix==1), distmatrix.min()
-    print r_data[0], profile_data[0]
 
-    # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    # print r_true[idx], profile_norm_true[1]
+    # print data[where(distmatrix==1)], data.max(), input_im.max()
+    # print xcen, ycen
+    # print xcen_obj, ycen_obj
+    # print data[xcen_obj, xcen_obj], input_im[xcen+1, ycen+1]
+    # print
+    # print where(distmatrix==1), distmatrix.min()
+    # print r_data[0], profile_data[0]
 
+    print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
+    print r_true[idx], profile_norm_true[idx], profile_norm_true[idx]
+
+# in: 246
+# model: 250
 
 
     ######################################################################

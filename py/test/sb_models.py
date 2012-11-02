@@ -6,6 +6,7 @@ import pyfits
 import time
 from numpy import *
 from scipy.signal import fftconvolve
+from scipy.ndimage.interpolation import shift
 from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
@@ -397,14 +398,37 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
+    print 30*'#'+'MODEL'
+    print pars
+    print distmatrix.shape, where(distmatrix.min()), distmatrix.min()
+    print bgrid.max()
+    print r500
+    print psf_pars
+    print 30*'#'
+
     tmp, hdr = load_fits_im('pn-test.fits')
     hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('tmp.fits', clobber=True)
+    hdulist.writeto('testdump.fits', clobber=True)
 
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('d3.fits', clobber=True)
 
+    print where(distmatrix==1), '@'
     # trim distmatrix size to image post convolution
+    shift(distmatrix, (-1,1), output=distmatrix)
     distmatrix = trim_fftconvolve(distmatrix)
+    print where(distmatrix==1), '@'
+
+    idx = where(distmatrix==1)
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('d4.fits', clobber=True)
+
+    # print '@', idx, model_image[idx], model_image[xcen_obj, ycen_obj]
+    # print model_image.shape, distmatrix.shape
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?
