@@ -364,7 +364,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     print "Creating V06 x PSF image!"
 
     # settings
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -381,7 +381,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # - works fine
     rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
 
-    xsize_obj = 900           # change to 900 if you want a big image
+    xsize_obj = 100           # 900 if you want a big image, *has* to be > 3xr500
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -421,6 +421,10 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])          # list all extensions here
+    hdulist.writeto('d1.fits', clobber=True)
 
 
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
@@ -599,16 +603,15 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
 
     xsize = input_im.shape[0]
     ysize = xsize
-    xcen = xsize/2
-    ycen = ysize/2
+    xcen = xsize/2 + 1
+    ycen = ysize/2 + 1
     imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
     rmax = 1.5 * r500_pix
     xsize_obj = 2 * rmax
     ysize_obj = xsize_obj
-    xcen_obj = xsize_obj / 2
-    ycen_obj = ysize_obj / 2
-    r_aper = xsize_obj  / 2        # aperture for the fitting
+    xcen_obj = xsize_obj / 2 + 1
+    ycen_obj = ysize_obj / 2 + 1
 
     ######################################################################
     # getting the "data"
@@ -623,23 +626,22 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     imsize = data.shape
 
     # setup data for the profile extraction - for speedup
-    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) + 1 # +1 bc divergence
+    # distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) + 1 # +1 bc divergence
+    distmatrix = distance_matrix(data, xcen_obj, ycen_obj) + 1
     bgrid = unique(distmatrix.flat)
 
     # defining the binning scheme
     r_length = data.shape[0]/2
-    r = arange(0, r_length, 1.0)
+    r_data = arange(0, r_length, 1.0)
 
     # extract profile for *data*
-
-    print '@@', distmatrix.shape, data.shape
-
-    (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
-    profile_norm = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
+    # (profile_data, geometric_area_data) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+    (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
+    profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
     # normalize and get errors
-    profile_norm_err = sqrt(profile_norm)
-    profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max()) # FIXME - CRITICAL! - need binning?
+    profile_norm_data_err = sqrt(profile_norm_data)
+    profile_norm_data_err[profile_norm_data_err==0.0] = sqrt(profile_norm_data.max()) # FIXME - CRITICAL! - need binning?
 
     # init parameters
     n0 = 1e+0
@@ -660,23 +662,39 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     pars.add('gamma'   , value=gamma, vary=False)
     pars.add('epsilon' , value=epsilon, vary=True) # add constraint
 
+    tmp, hdr = load_fits_im('pn-test.fits')
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('d2.fits', clobber=True)
+
     # set the ancilarry parameters
-    nonfit_args = (distmatrix, bgrid, r500, psf_pars, xcen_obj, ycen_obj)
+    nonfit_args = (distmatrix, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
-    # extract profile
     (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                           distmatrix,
-                                                           bgrid, r500, psf_pars, xcen_obj,
-                                                           ycen_obj,data_profile=None,
+                                                           *nonfit_args,
+                                                           data_profile=None,
                                                            data_profile_err=None)
 
-    # output_figure = 'lmfit_v06_psf_1d.png'
+    output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
-    # plot_data_model_simple(r, profile_norm,
-    #                        r_model, profile_norm_model,
-    #                        output_figure, profile_norm_err,
-    #                        r_true, profile_norm_true)
+    plot_data_model_simple(r_data, profile_norm_data,
+                           r_true, profile_norm_true,
+                           output_figure, profile_norm_data_err,
+                           r_true, profile_norm_true)
+
+    idx = 1
+    # print sum(data[where(distmatrix==1)])/8
+    print data[where(distmatrix==1)], data.max(), input_im.max()
+    print xcen, ycen
+    print xcen_obj, ycen_obj
+    print data[xcen_obj, xcen_obj], input_im[xcen+1, ycen+1]
+    print
+    print where(distmatrix==1), distmatrix.min()
+
+    # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
+    # print r_true[idx], profile_norm_true[1]
+
 
 
     ######################################################################
@@ -686,7 +704,7 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     if DO_FIT:
         print "starting fit"
         t1 = time.clock()
-
+        # FIXME: missing data in nonfit_args?
         result = lm.minimize(v06_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
@@ -964,7 +982,7 @@ if __name__ == '__main__':
 
     # model pars
     r500 = 1.0e3                # r500 [kpc]
-    r500_pix = 100              # r500 in im pixels
+    r500_pix = 30              # r500 in im pixels
 
     n0 = 7e+0
     rc = 10.0                   # ballpark 0.1 r500
@@ -987,10 +1005,12 @@ if __name__ == '__main__':
     model_im_name = 'v06_image_cts.fits'
 
     # creates the model image
-    # test_create_v06_psf_im(model_im_name)
+    test_create_v06_psf_im(model_im_name)
 
     # create the full synthetic observation
-    im_file = 'v06_image_cts_2e5.fits'
+    # im_file = 'v06_image_cts_2e5.fits'
+    # im_file = 'v06_image_cts_nonoise.fits'
+    im_file = 'v06_image_cts.fits'
     expmap_file = "pn-test-exp.fits"
     bgmap_file  = "pn-test-bg-2cp.fits"
     maskmap_file= "pn-test-mask.fits"

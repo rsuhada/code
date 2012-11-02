@@ -406,11 +406,26 @@ def extract_profile_fast(im, distmatrix, xcen, ycen):
     Arguments:
     - `im`: 2D array
     - `distmatrix`: 2D array distmatrix - has to be int type
-    - `xcen`: center x coordinate
-    - `ycen`: center y coordinate
+    - `xcen`: center x coordinate # FIXME: [not needed!]
+    - `ycen`: center y coordinate # FIXME: [not needed!]
     """
     geometric_area = bincount(distmatrix.flat)
     profile = bincount(distmatrix.flat, weights=im.flat)
+
+    return (profile, geometric_area)
+
+def extract_profile_fast2(im, distmatrix, rgrid):
+    """
+    Same as extract_profile_fast except using histogram instead
+    bincout.
+
+    Arguments:
+    - `im`: 2D array
+    - `distmatrix`: 2D array distmatrix
+    - `rgrid`: 1D grid with bin boundaries (not necessarily equidistant)
+    """
+    geometric_area = array(histogram(distmatrix, bins=rgrid)[0]) # geometric area
+    profile = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
 
     return (profile, geometric_area)
 

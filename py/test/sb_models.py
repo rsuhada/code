@@ -10,8 +10,8 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-from sb_utils import sqdistance, distance_matrix, load_fits_im
-from test_2d_im import make_2d_beta, extract_profile_generic, extract_profile_fast, make_2d_king, make_2d_king_old, trim_fftconvolve, zero_pad_image
+from sb_utils import sqdistance, distance_matrix, load_fits_im, extract_profile_fast, extract_profile_fast2
+from test_2d_im import make_2d_beta, extract_profile_generic, make_2d_king, make_2d_king_old, trim_fftconvolve, zero_pad_image
 from scipy import integrate
 from scipy.stats import poisson
 
@@ -383,8 +383,8 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
         return residuals
 
 def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
-                            xcen_obj,ycen_obj,data_profile=None,
-                            data_profile_err=None):
+                             xcen_obj,ycen_obj,data_profile=None,
+                             data_profile_err=None):
     """
     Fits the surface brightness profile by creating a 2D model of the
     image - v06 model (without the central beta model) x psf
@@ -397,6 +397,12 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
+    tmp, hdr = load_fits_im('pn-test.fits')
+    hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('tmp.fits', clobber=True)
+
+
     # trim distmatrix size to image post convolution
     distmatrix = trim_fftconvolve(distmatrix)
 
@@ -404,7 +410,8 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     # r_length = model_image.shape[0]/2 + 1 # r500?
     r_length = r500             # factor out r500
     r = arange(0, r_length, 1.0)
-    (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
+    # (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
+    (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
     if data_profile == None:
