@@ -12,7 +12,8 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 
 def show_in_ds9(fits_image):
     """
-    Spawn a ds9 process showing a file
+    Spawn a ds9 process showing fits file(s). Argument can be full ds9
+    par string.
 
     Arguments:
     - `fits_image`: fits to open

@@ -404,6 +404,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     print bgrid.max()
     print r500
     print psf_pars
+    print where(distmatrix==distmatrix.min()), model_image[where(distmatrix==distmatrix.min())]
     print 30*'#'
 
     tmp, hdr = load_fits_im('pn-test.fits')
@@ -411,35 +412,38 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto('testdump.fits', clobber=True)
 
+    ######################################################################
     hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d3.fits', clobber=True)
+    hdulist.writeto('dmodel1.fits', clobber=True)
+    ######################################################################
 
-    print where(distmatrix==1), '@'
     # trim distmatrix size to image post convolution
-    shift(distmatrix, (-1,1), output=distmatrix)
+    shift(distmatrix, (1,1), output=distmatrix)
     distmatrix = trim_fftconvolve(distmatrix)
-    print where(distmatrix==1), '@'
 
-    idx = where(distmatrix==1)
-
+    ######################################################################
     hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d4.fits', clobber=True)
-
-    # print '@', idx, model_image[idx], model_image[xcen_obj, ycen_obj]
-    # print model_image.shape, distmatrix.shape
+    hdulist.writeto('dmodel2.fits', clobber=True)
+    ######################################################################
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?
     r_length = r500             # factor out r500
     r = arange(0, r_length, 1.0)
     # (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
+
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('dmodel3.fits', clobber=True)
+
+
     if data_profile == None:
-        return (r, model_profile)
+        return (r, model_profile, geometric_area)
     else:
         residuals = data_profile - model_profile
         # is this biasing?

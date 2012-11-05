@@ -404,15 +404,16 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # distmatrix = distance_matrix(im_conv, xcen, ycen) + 1
     bgrid = unique(distmatrix.flat)
 
+    im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
+
     print 30*'#'+'DATA'
     print pars
     print distmatrix.shape, where(distmatrix.min()), distmatrix.min()
     print bgrid.max()
     print r500_pix
     print psf_pars
+    print where(distmatrix==distmatrix.min()), im_conv[where(distmatrix==distmatrix.min())]
     print 30*'#'
-
-    im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
@@ -429,10 +430,6 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])          # list all extensions here
     hdulist.writeto(imname, clobber=True)
-
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])          # list all extensions here
-    hdulist.writeto('d1.fits', clobber=True)
 
 
 def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
@@ -509,8 +506,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         result = lm.minimize(beta_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
-                             **leastsq_kws
-                             )
+                             **leastsq_kws)
 
         result.leastsq()
 
@@ -643,7 +639,13 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     r_data = arange(0, r_length, 1.0)
 
     # extract profile for *data*
-    # (profile_data, geometric_area_data) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+
+    ######################################################################
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('ddat.fits', clobber=True)
+    ######################################################################
+
     (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
     profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
@@ -676,20 +678,41 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     hdulist.writeto('d2.fits', clobber=True)
 
     # set the ancilarry parameters
-    nonfit_args = (distmatrix, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
+    distmatrix_input = distmatrix.copy()
+
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
-    (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                           *nonfit_args,
-                                                           data_profile=None,
-                                                           data_profile_err=None)
+    # pass the data image
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('dfinito0.fits', clobber=True)
+
+    d1 = distmatrix.copy()
+    print '##1', d1.shape, d1.min()
+
+    (r_true, profile_norm_true, geometric_area_true) = v06_psf_2d_lmfit_profile(pars_true,
+                                                                                *nonfit_args,
+                                                                                data_profile=None,
+                                                                                data_profile_err=None)
+
+    d2 = distmatrix.copy()
+    print '##2', d2.shape, d2.min()
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('dmodel4.fits', clobber=True)
+
+    print d1.shape, d2.shape, sum(d1-d2)
+
 
     output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
-    plot_data_model_simple(r_data, profile_norm_data,
-                           r_true, profile_norm_true,
-                           output_figure, profile_norm_data_err,
-                           r_true, profile_norm_true)
+    # plot_data_model_simple(r_data, profile_norm_data,
+    #                        r_true, profile_norm_true,
+    #                        output_figure, profile_norm_data_err,
+    #                        r_true, profile_norm_true)
 
     idx = 0
     # print sum(data[where(distmatrix==1)])/8
@@ -703,7 +726,32 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # print r_data[0], profile_data[0]
 
     print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    print r_true[idx], profile_norm_true[idx], profile_norm_true[idx]
+    print r_true[idx], profile_norm_true[idx], geometric_area_true[idx]
+    print
+
+
+    ######################################################################
+
+    # hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    # hdulist.writeto('dfinito1.fits', clobber=True)
+
+    true, hdr = load_fits_im('testdump.fits')
+    # trim distmatrix size to image post convolution
+    shift(distmatrix, (1,1), output=distmatrix)
+    distmatrix = trim_fftconvolve(distmatrix)
+
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('dfinito2.fits', clobber=True)
+
+    print true.max(), true.shape, where(true==true.max()), where(distmatrix==distmatrix.min()), distmatrix.min()
+
+    # (profile_true, geometric_area_true) = extract_profile_fast2(true, distmatrix, bgrid)
+    # profile_norm_true = profile_true[0:r_length] / geometric_area_true[0:r_length]    # trim the corners
+
+    # print profile_norm_data, geometric_area_data
+    # print profile_norm_true, geometric_area_true
 
 # in: 246
 # model: 250
@@ -804,6 +852,7 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
                                r_model, profile_norm_model,
                                output_figure, profile_norm_err,
                                r_true, profile_norm_true)
+
 
 def test_prof_extraction_full():
     """
