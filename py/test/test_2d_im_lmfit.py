@@ -684,28 +684,10 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
     # pass the data image
-
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dfinito0.fits', clobber=True)
-
-    d1 = distmatrix.copy()
-    print '##1', d1.shape, d1.min()
-
     (r_true, profile_norm_true, geometric_area_true) = v06_psf_2d_lmfit_profile(pars_true,
                                                                                 *nonfit_args,
                                                                                 data_profile=None,
                                                                                 data_profile_err=None)
-
-    d2 = distmatrix.copy()
-    print '##2', d2.shape, d2.min()
-
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dmodel4.fits', clobber=True)
-
-    print d1.shape, d2.shape, sum(d1-d2)
-
 
     output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
@@ -736,22 +718,43 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     # hdulist.writeto('dfinito1.fits', clobber=True)
 
-    true, hdr = load_fits_im('testdump.fits')
-    # trim distmatrix size to image post convolution
-    shift(distmatrix, (1,1), output=distmatrix)
-    distmatrix = trim_fftconvolve(distmatrix)
+    model, hdr = load_fits_im('testdump.fits')
 
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    distmatrix_trim = distmatrix.copy()
+    # trim distmatrix_trim size to image post convolution
+    shift(distmatrix_trim, (1,1), output=distmatrix_trim)
+    distmatrix_trim = trim_fftconvolve(distmatrix_trim)
+
+    # print model.max(), model.shape, where(model==model.max()), where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min()
+
+    # data
+    print 'data:', data.shape, distmatrix.shape, distmatrix.min(), bgrid.max()
+    (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
+    profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
+
+    model = data.copy()
+
+    # Mon Nov  5 17:18:58 2012
+    # start here! some problem
+
+    print sum(model)
+    shift(model, (1,1), output=model)
+    model = trim_fftconvolve(model)
+    print sum(model)
+
+    # model
+    print 'model:', model.shape, distmatrix_trim.shape, distmatrix_trim.min(), bgrid.max()
+    (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
+    profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
+
+    hdu = pyfits.PrimaryHDU(model, hdr)    # extension - array, header
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dfinito2.fits', clobber=True)
+    hdulist.writeto('d.fits', clobber=True)
 
-    print true.max(), true.shape, where(true==true.max()), where(distmatrix==distmatrix.min()), distmatrix.min()
 
-    # (profile_true, geometric_area_true) = extract_profile_fast2(true, distmatrix, bgrid)
-    # profile_norm_true = profile_true[0:r_length] / geometric_area_true[0:r_length]    # trim the corners
-
-    # print profile_norm_data, geometric_area_data
-    # print profile_norm_true, geometric_area_true
+    print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
+    print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
+    print
 
 # in: 246
 # model: 250

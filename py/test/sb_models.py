@@ -412,21 +412,9 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto('testdump.fits', clobber=True)
 
-    ######################################################################
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dmodel1.fits', clobber=True)
-    ######################################################################
-
     # trim distmatrix size to image post convolution
     shift(distmatrix, (1,1), output=distmatrix)
     distmatrix = trim_fftconvolve(distmatrix)
-
-    ######################################################################
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dmodel2.fits', clobber=True)
-    ######################################################################
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?
@@ -436,11 +424,6 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
 
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
-
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('dmodel3.fits', clobber=True)
-
 
     if data_profile == None:
         return (r, model_profile, geometric_area)
