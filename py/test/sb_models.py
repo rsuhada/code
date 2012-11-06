@@ -6,7 +6,6 @@ import pyfits
 import time
 from numpy import *
 from scipy.signal import fftconvolve
-from scipy.ndimage.interpolation import shift
 from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
@@ -413,7 +412,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     hdulist.writeto('testdump.fits', clobber=True)
 
     # trim distmatrix size to image post convolution
-    shift(distmatrix, (1,1), output=distmatrix)
+    distmatrix = roll(roll(distmatrix,1,axis=0),1,axis=1)
     distmatrix = trim_fftconvolve(distmatrix)
 
     # profile extraction

@@ -641,8 +641,8 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # extract profile for *data*
 
     ######################################################################
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)  # extension - array, header
+    hdulist = pyfits.HDUList([hdu])           # list all extensions here
     hdulist.writeto('ddat.fits', clobber=True)
     ######################################################################
 
@@ -691,45 +691,18 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
 
     output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
-    # plot_data_model_simple(r_data, profile_norm_data,
-    #                        r_true, profile_norm_true,
-    #                        output_figure, profile_norm_data_err,
-    #                        r_true, profile_norm_true)
-
-    idx = 0
-    # print sum(data[where(distmatrix==1)])/8
-
-    # print data[where(distmatrix==1)], data.max(), input_im.max()
-    # print xcen, ycen
-    # print xcen_obj, ycen_obj
-    # print data[xcen_obj, xcen_obj], input_im[xcen+1, ycen+1]
-    # print
-    # print where(distmatrix==1), distmatrix.min()
-    # print r_data[0], profile_data[0]
-
-    print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    print r_true[idx], profile_norm_true[idx], geometric_area_true[idx]
-    print
-
+    plot_data_model_simple(r_data, profile_norm_data,
+                           r_true, profile_norm_true,
+                           output_figure, profile_norm_data_err,
+                           r_true, profile_norm_true)
 
     ######################################################################
-
-    # hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto('dfinito1.fits', clobber=True)
 
     model, hdr = load_fits_im('testdump.fits')
 
     distmatrix_trim = distmatrix.copy()
-    # trim distmatrix_trim size to image post convolution
-    shift(distmatrix_trim, (1,1), output=distmatrix_trim)
+    distmatrix_trim = roll(roll(distmatrix_trim,1,axis=0),1,axis=1)
     distmatrix_trim = trim_fftconvolve(distmatrix_trim)
-
-    distmatrix_trim2 = distmatrix.copy()
-    distmatrix_trim2 = roll(roll(distmatrix_trim2,1,axis=0),1,axis=1)
-    distmatrix_trim2 = trim_fftconvolve(distmatrix_trim2)
-
-    # print model.max(), model.shape, where(model==model.max()), where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min()
 
     # data
     print 'data:', data.shape, distmatrix.shape, distmatrix.min(), bgrid.max()
@@ -741,88 +714,13 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
     profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
 
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d1.fits', clobber=True)
-
-    hdu = pyfits.PrimaryHDU(distmatrix_trim, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d2.fits', clobber=True)
-
-    hdu = pyfits.PrimaryHDU(distmatrix_trim2, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d3.fits', clobber=True)
-
     # print
     # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
     # print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
     # print
 
-    # # bgrid[1] = 1.99
-    # print
-    # print 'MODEL'
-    # print bgrid[0], bgrid[1]
-    # idx = where(logical_and((distmatrix_trim>=bgrid[0]), (distmatrix_trim<bgrid[1])))
-    # idx = where(distmatrix_trim<2.0)
-    # print distmatrix_trim.min(), 'min'
-    # print zip(idx[0]+1, idx[1]+1)
-    # print model[idx]
-    # print distmatrix_trim[idx]
-
-
-    print
-    print
-    print
-    print 70*'#'
-    print
-
-    a =  distmatrix_trim2[44:47,44:47]
-    print a
-    print
-
-    # idx = where(a < 2.0)
-    # print zip(idx[0], idx[1])
-
-    print a<2
-    print a[1,0], a[1,0]<2
-    print a[1,2], a[1,2]<2
-    print ("%20.20f" % a[1,0])
-    print ("%20.20f" % a[1,2])
-
-    # print
-    # print 'DATA'
-    # print bgrid[0], bgrid[1]
-    # idx = where(logical_and((distmatrix>=bgrid[0]), (distmatrix<bgrid[1])))
-    # print zip(idx[0]+1, idx[1]+1)
-    # print data[idx]
-    # print distmatrix[idx]
-
-    # hdu = pyfits.PrimaryHDU(model, hdr)    # extension - array, header
-    # hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    # hdulist.writeto('model.fits', clobber=True)
-
-    # print
-    # print 70*'#'
-    # print
-    # info(distmatrix_trim)
-    # info(a)
-    # print
-    # print 70*'#'
-    # print
-
-    # print
-    # print 70*'#'
-    # print
-    # info(distmatrix)
-    # print
-    # print 70*'#'
-    # print
-
-
-
 # in: 246
 # model: 250
-
 
     ######################################################################
     # do the fit
