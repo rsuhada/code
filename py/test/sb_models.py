@@ -411,9 +411,29 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     hdulist = pyfits.HDUList([hdu])                  # list all extensions here
     hdulist.writeto('testdump.fits', clobber=True)
 
+    print '>>>', xcen_obj, ycen_obj
+    print '>>>', distmatrix[xcen_obj, ycen_obj], model_image[xcen_obj, ycen_obj]
+
+    idx=where(distmatrix==1)
+    idx2=where(model_image==model_image.max())
+    print '>>>', model_image[idx], model_image[idx2]
+    print '>>>', idx, idx2
+
+
     # trim distmatrix size to image post convolution
-    distmatrix = roll(roll(distmatrix,1,axis=0),1,axis=1)
+    distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
     distmatrix = trim_fftconvolve(distmatrix)
+
+    print '>>>', distmatrix[xcen_obj, ycen_obj], model_image[xcen_obj, ycen_obj]
+    idx=where(distmatrix==1)
+    idx2=where(model_image==model_image.max())
+    print '>>>', model_image[idx], model_image[idx2]
+    print '>>>', idx, idx2
+
+    tmp, hdr = load_fits_im('pn-test.fits')
+    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('testdumpd.fits', clobber=True)
 
     # profile extraction
     # r_length = model_image.shape[0]/2 + 1 # r500?

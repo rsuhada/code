@@ -406,6 +406,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
 
+    print im_conv.shape
     print 30*'#'+'DATA'
     print pars
     print distmatrix.shape, where(distmatrix.min()), distmatrix.min()
@@ -609,10 +610,17 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     ysize = xsize
     xcen = xsize/2 + 1
     ycen = ysize/2 + 1
+
+    # xcen = xsize/2              # @
+    # ycen = ysize/2              # @
+
     imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
     rmax = 1.5 * r500_pix
     xsize_obj = 2 * rmax
+
+    xsize_obj = 100             # @
+
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -639,13 +647,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     r_data = arange(0, r_length, 1.0)
 
     # extract profile for *data*
-
-    ######################################################################
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)  # extension - array, header
-    hdulist = pyfits.HDUList([hdu])           # list all extensions here
-    hdulist.writeto('ddat.fits', clobber=True)
-    ######################################################################
-
     (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
     profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
@@ -672,11 +673,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     pars.add('gamma'   , value=gamma, vary=False)
     pars.add('epsilon' , value=epsilon, vary=True) # add constraint
 
-    tmp, hdr = load_fits_im('pn-test.fits')
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('d2.fits', clobber=True)
-
     # set the ancilarry parameters
     distmatrix_input = distmatrix.copy()
 
@@ -696,28 +692,33 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
                            output_figure, profile_norm_data_err,
                            r_true, profile_norm_true)
 
+    print r_data[0], profile_norm_data[0]
+    print r_true[0], profile_norm_true[0]
+
     ######################################################################
 
     model, hdr = load_fits_im('testdump.fits')
 
+    print '@@@:', model.shape
+
     distmatrix_trim = distmatrix.copy()
-    distmatrix_trim = roll(roll(distmatrix_trim,1,axis=0),1,axis=1)
+    distmatrix_trim = roll(roll(distmatrix_trim,2,axis=0),2,axis=1)
     distmatrix_trim = trim_fftconvolve(distmatrix_trim)
 
     # data
-    print 'data:', data.shape, distmatrix.shape, distmatrix.min(), bgrid.max()
     (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
     profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
     # model
-    print 'model:', model.shape, distmatrix_trim.shape, distmatrix_trim.min(), bgrid.max()
     (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
     profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
 
     # print
-    # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    # print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
-    # print
+
+    idx = 0
+    print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
+    print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
+    print xcen, ycen, where(distmatrix_input==1.0), model[50,50], xcen_obj, ycen_obj
 
 # in: 246
 # model: 250
