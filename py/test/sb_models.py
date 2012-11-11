@@ -403,7 +403,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     print bgrid.max()
     print r500
     print psf_pars
-    print where(distmatrix==distmatrix.min()), model_image[where(distmatrix==distmatrix.min())]
+    print where(distmatrix==distmatrix.min()), model_image[where(distmatrix==distmatrix.min())], model_image.max()
     print 30*'#'
 
     tmp, hdr = load_fits_im('pn-test.fits')

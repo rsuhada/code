@@ -617,9 +617,8 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
     rmax = 1.5 * r500_pix
-    xsize_obj = 2 * rmax
-
-    xsize_obj = 100             # @
+    xsize_obj = 2 * rmax   # has to be at least 1 pix less than the
+                           # "data" image
 
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
@@ -679,7 +678,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
-    # pass the data image
     (r_true, profile_norm_true, geometric_area_true) = v06_psf_2d_lmfit_profile(pars_true,
                                                                                 *nonfit_args,
                                                                                 data_profile=None,
@@ -687,41 +685,48 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
 
     output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
-    plot_data_model_simple(r_data, profile_norm_data,
-                           r_true, profile_norm_true,
-                           output_figure, profile_norm_data_err,
-                           r_true, profile_norm_true)
-
-    print r_data[0], profile_norm_data[0]
-    print r_true[0], profile_norm_true[0]
-
+    ######################################################################
     ######################################################################
 
     model, hdr = load_fits_im('testdump.fits')
 
-    print '@@@:', model.shape
+    # distmatrix_trim = distmatrix.copy()
+    # distmatrix_trim = roll(roll(distmatrix_trim,2,axis=0),2,axis=1)
+    # distmatrix_trim = trim_fftconvolve(distmatrix_trim)
 
-    distmatrix_trim = distmatrix.copy()
-    distmatrix_trim = roll(roll(distmatrix_trim,2,axis=0),2,axis=1)
-    distmatrix_trim = trim_fftconvolve(distmatrix_trim)
+    distmatrix_trim = distance_matrix(model, xcen_obj, ycen_obj) + 1
 
     # data
-    (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
-    profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
+    # (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
+    # profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
     # model
     (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
     profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
 
-    # print
+    # print where(data==data.max()), where(distmatrix==distmatrix.min()), xcen_obj
+    # print where(model==model.max()), where(distmatrix_trim==distmatrix_trim.min()), xcen_obj
+    # from time import sleep
+    # sleep(100)
+
 
     idx = 0
     print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
     print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
     print xcen, ycen, where(distmatrix_input==1.0), model[50,50], xcen_obj, ycen_obj
 
+    print where(model==model.max()), model.max(), xsize_obj, xcen_obj
+    print where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min(), xsize_obj, xcen_obj
+    print model[xcen_obj+1, ycen_obj+1]
+
 # in: 246
 # model: 250
+
+    # plot_data_model_simple(r_data, profile_norm_data,
+    #                    r_true, profile_norm_true,
+    #                    output_figure, profile_norm_data_err,
+    #                    r_true, profile_norm_true)
+
 
     ######################################################################
     # do the fit
