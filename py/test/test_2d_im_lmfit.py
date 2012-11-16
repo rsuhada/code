@@ -406,16 +406,6 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
 
-    print im_conv.shape
-    print 30*'#'+'DATA'
-    print pars
-    print distmatrix.shape, where(distmatrix.min()), distmatrix.min()
-    print bgrid.max()
-    print r500_pix
-    print psf_pars
-    print where(distmatrix==distmatrix.min()), im_conv[where(distmatrix==distmatrix.min())]
-    print 30*'#'
-
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
         # elements (ok - we're poissonizing the model)
@@ -637,7 +627,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     imsize = data.shape
 
     # setup data for the profile extraction - for speedup
-    # distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) + 1 # +1 bc divergence
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj) + 1
     bgrid = unique(distmatrix.flat)
 
@@ -689,43 +678,28 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     ######################################################################
 
     model, hdr = load_fits_im('testdump.fits')
-
-    # distmatrix_trim = distmatrix.copy()
-    # distmatrix_trim = roll(roll(distmatrix_trim,2,axis=0),2,axis=1)
-    # distmatrix_trim = trim_fftconvolve(distmatrix_trim)
-
     distmatrix_trim = distance_matrix(model, xcen_obj, ycen_obj) + 1
-
-    # data
-    # (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
-    # profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
     # model
     (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
     profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
 
-    # print where(data==data.max()), where(distmatrix==distmatrix.min()), xcen_obj
-    # print where(model==model.max()), where(distmatrix_trim==distmatrix_trim.min()), xcen_obj
-    # from time import sleep
-    # sleep(100)
+    # idx = 0
+    # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
+    # print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
+    # print xcen, ycen, where(distmatrix_input==1.0), model[50,50], xcen_obj, ycen_obj
 
-
-    idx = 0
-    print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
-    print xcen, ycen, where(distmatrix_input==1.0), model[50,50], xcen_obj, ycen_obj
-
-    print where(model==model.max()), model.max(), xsize_obj, xcen_obj
-    print where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min(), xsize_obj, xcen_obj
-    print model[xcen_obj+1, ycen_obj+1]
+    # print where(model==model.max()), model.max(), xsize_obj, xcen_obj
+    # print where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min(), xsize_obj, xcen_obj
+    # print model[xcen_obj+1, ycen_obj+1]
 
 # in: 246
 # model: 250
 
-    # plot_data_model_simple(r_data, profile_norm_data,
-    #                    r_true, profile_norm_true,
-    #                    output_figure, profile_norm_data_err,
-    #                    r_true, profile_norm_true)
+    plot_data_model_simple(r_data, profile_norm_data,
+                           r_true, profile_norm_true,
+                           output_figure, profile_norm_data_err,
+                           r_true, profile_norm_true)
 
 
     ######################################################################

@@ -934,8 +934,7 @@ def plot_data_model_simple(r_data, profile_data,
     plt.legend(loc=0, prop=prop, numpoints=1)
 
     plt.draw()
-    # plt.get_current_fig_manager().window.wm_geometry("+1100+0")
-    plt.get_current_fig_manager().window.wm_geometry("+640+0")
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
     plt.show()
 
     if output_figure:
