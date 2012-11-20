@@ -176,6 +176,19 @@ fit 100000000
 fit 100000000
 fit 100000000
 
+# write a flux/luminosity log - abosrbed fx/lumin
+log ${cluster}-${fitid}-fx-lx-err.log
+# dummyrsp
+flux 0.5 2 err 1000 68.2689
+flux 2 10 err 1000 68.2689
+flux 0.5 7.0 err 1000 68.2689
+flux 1.1 7.0 err 1000 68.2689
+lumin 0.5 2.0 ${redshift} err 1000 68.2689
+lumin 2.0 10.0 ${redshift} err 1000 68.2689
+lumin 0.001 100.0 ${redshift} err 1000 68.2689
+lumin 0.5 7.0 ${redshift} err 1000 68.2689
+log none
+
 setplot rebin ${plot_bin_sigma} ${plot_bin_cts}
 plot ldata
 
@@ -208,7 +221,7 @@ time off
 hardcopy ${cluster}-${fitid}-uf.ps/cps
 exit
 
-# plot ufspec
+plot ufspec
 
 iplot ldata res
 csize 1.3
@@ -246,16 +259,19 @@ exit
 # write a flux/luminosity log
 log ${cluster}-${fitid}-fx-lx.log
 dummyrsp
-flux 0.5 2
+flux 0.5 2 err 1000 68.2689
 flux 2 10
 flux 0.5 7.0
 flux 1.1 7.0
 
 newpar 1 0
 cosmo 70 0 0.7
+
 lumin 0.5 2.0 ${redshift}
 lumin 2.0 10.0 ${redshift}
 lumin 0.001 100.0 ${redshift}
+lumin 0.5 7.0 ${redshift}
+log none
 
 exit
 y

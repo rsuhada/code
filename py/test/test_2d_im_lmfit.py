@@ -364,7 +364,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     print "Creating V06 x PSF image!"
 
     # settings
-    POISSONIZE_IMAGE   = False            # poissonize image?
+    POISSONIZE_IMAGE   = True            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -665,12 +665,11 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     distmatrix_input = distmatrix.copy()
 
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
-    (r_true, profile_norm_true, geometric_area_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                                                *nonfit_args,
-                                                                                data_profile=None,
-                                                                                data_profile_err=None)
+    (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
+                                                           *nonfit_args,
+                                                            data_profile=None,
+                                                            data_profile_err=None)
 
     output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
@@ -684,27 +683,17 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
     profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
 
-    # idx = 0
-    # print r_data[idx], profile_norm_data[idx], geometric_area_data[idx]
-    # print r_true[idx], profile_norm_model[idx], geometric_area_model[idx]
-    # print xcen, ycen, where(distmatrix_input==1.0), model[50,50], xcen_obj, ycen_obj
-
-    # print where(model==model.max()), model.max(), xsize_obj, xcen_obj
-    # print where(distmatrix_trim==distmatrix_trim.min()), distmatrix_trim.min(), xsize_obj, xcen_obj
-    # print model[xcen_obj+1, ycen_obj+1]
-
-# in: 246
-# model: 250
-
-    plot_data_model_simple(r_data, profile_norm_data,
-                           r_true, profile_norm_true,
-                           output_figure, profile_norm_data_err,
-                           r_true, profile_norm_true)
+    # plot_data_model_simple(r_data, profile_norm_data,
+                           # r_true, profile_norm_true,
+                           # output_figure, profile_norm_data_err,
+                           # r_true, profile_norm_true)
 
 
     ######################################################################
     # do the fit
-    DO_FIT = False
+    DO_FIT = True
+
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
 
     if DO_FIT:
         print "starting fit"
@@ -713,24 +702,18 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
         result = lm.minimize(v06_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
-                             **leastsq_kws
-                             )
+                             **leastsq_kws)
 
         result.leastsq()
 
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-        # get the output model
-        (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
-                                                                 imsize,
-                                                                 xsize_obj,
-                                                                 ysize_obj,
-                                                                 instrument,
-                                                                 theta,
-                                                                 energy,
-                                                                 APPLY_PSF,
-                                                                 DO_ZERO_PAD)
+        # get the fitted
+
+    (r, profile_norm) = v06_psf_2d_lmfit_profile(pars, *nonfit_args,
+                                                 data_profile=None,
+                                                 data_profile_err=None)
 
     ######################################################################
     # output
@@ -1011,7 +994,7 @@ if __name__ == '__main__':
     model_im_name = 'v06_image_cts.fits'
 
     # creates the model image
-    test_create_v06_psf_im(model_im_name)
+    # test_create_v06_psf_im(model_im_name)
 
     # create the full synthetic observation
     # im_file = 'v06_image_cts_2e5.fits'

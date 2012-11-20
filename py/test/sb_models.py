@@ -427,7 +427,8 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
     if data_profile == None:
-        return (r, model_profile, geometric_area)
+        # return (r, model_profile, geometric_area)
+        return (r, model_profile)
     else:
         residuals = data_profile - model_profile
         # is this biasing?

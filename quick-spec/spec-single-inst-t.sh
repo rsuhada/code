@@ -42,7 +42,6 @@ grppha infile=${single_inst}-${bgid}.pha outfile=${single_inst}-${bgid}.grp.pha 
 # source spectra
 grppha infile=${single_inst}-${SRC_REGION_ID}.pha outfile=${single_inst}.grp.pha chatter=0 comm=" group min ${group_min} & chkey RESPFILE ${single_inst}-${SRC_REGION_ID}.rmf & chkey ANCRFILE ${single_inst}-${SRC_REGION_ID}.arf & chkey BACKFILE ${single_inst}-${bgid}.grp.pha & exit" clobber=yes
 
-
 echo -e "
 data 1:1 ${single_inst}.grp.pha
 

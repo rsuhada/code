@@ -54,8 +54,6 @@ cp ${esas_caldb}/mos1-diag.rsp.gz ./analysis/
 cp ${esas_caldb}/mos2-diag.rsp.gz ./analysis/
 cp ${esas_caldb}/pn-diag.rsp.gz ./analysis/
 
-
-
 cd $here
 echo -e "\nodf directory prepared"
 exit 0
