@@ -346,13 +346,6 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
     """
     USE_ERROR=True             # debug option
 
-    # unpack parameters
-    xcen   = pars['xcen'].value
-    ycen   = pars['ycen'].value
-    norm   = pars['norm'].value
-    rcore  = pars['rcore'].value
-    beta   = pars['beta'].value
-
     # model in 2d image beta x PSF = and extract profile
     model_image = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                    instrument, theta, energy,
@@ -397,11 +390,6 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
-    tmp, hdr = load_fits_im('pn-test.fits')
-    hdu = pyfits.PrimaryHDU(model_image, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('testdump.fits', clobber=True)
-
     idx=where(distmatrix==1)
     idx2=where(model_image==model_image.max())
 
@@ -412,28 +400,24 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     idx=where(distmatrix==1)
     idx2=where(model_image==model_image.max())
 
-    tmp, hdr = load_fits_im('pn-test.fits')
-    hdu = pyfits.PrimaryHDU(distmatrix, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('testdumpd.fits', clobber=True)
-
     # profile extraction
-    # r_length = model_image.shape[0]/2 + 1 # r500?
     r_length = r500             # factor out r500
     r = arange(0, r_length, 1.0)
-    # (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
 
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
+
+    print pars
 
     if data_profile == None:
         # return (r, model_profile, geometric_area)
         return (r, model_profile)
     else:
-        residuals = data_profile - model_profile
+        residuals = data_profile[0:r_length] - model_profile
         # is this biasing?
-        if USE_ERROR: residuals = residuals / data_profile_err
+        if USE_ERROR: residuals = residuals / data_profile_err[0:r_length]
 
+        # return residuals
         return residuals
 
 def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile):

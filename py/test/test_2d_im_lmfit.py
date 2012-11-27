@@ -454,10 +454,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     data = input_im[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
     imsize = data.shape
 
-    # extract data profile
-    # (r, profile, geometric_area) = extract_profile_generic(data, xcen_obj, ycen_obj)
-    # profile_norm = profile / geometric_area
-
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2
@@ -601,9 +597,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     xcen = xsize/2 + 1
     ycen = ysize/2 + 1
 
-    # xcen = xsize/2              # @
-    # ycen = ysize/2              # @
-
     imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
 
     rmax = 1.5 * r500_pix
@@ -664,41 +657,45 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     # set the ancilarry parameters
     distmatrix_input = distmatrix.copy()
 
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars, xcen_obj, ycen_obj)
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+                   xcen_obj, ycen_obj)
 
     (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                           *nonfit_args,
-                                                            data_profile=None,
-                                                            data_profile_err=None)
+                                                           *nonfit_args)
 
-    output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
     ######################################################################
-    ######################################################################
+    # debug/test part
 
-    model, hdr = load_fits_im('testdump.fits')
-    distmatrix_trim = distance_matrix(model, xcen_obj, ycen_obj) + 1
+    # model, hdr = load_fits_im('testdump.fits')
+    # distmatrix_trim = distance_matrix(model, xcen_obj, ycen_obj) + 1
 
-    # model
-    (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
-    profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
+    # # model
+    # (profile_model, geometric_area_model) = extract_profile_fast2(model, distmatrix_trim, bgrid)
+    # profile_norm_model = profile_model[0:r_length] / geometric_area_model[0:r_length]    # trim the corners
+
+    # output_figure = 'lmfit_v06_psf_1d_prof_test.png'
 
     # plot_data_model_simple(r_data, profile_norm_data,
-                           # r_true, profile_norm_true,
-                           # output_figure, profile_norm_data_err,
-                           # r_true, profile_norm_true)
-
+    #                        r_true, profile_norm_true,
+    #                        output_figure, profile_norm_data_err,
+    #                        r_true, profile_norm_true)
 
     ######################################################################
     # do the fit
+
     DO_FIT = True
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0}
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+                   xcen_obj, ycen_obj, profile_norm_data,
+                   profile_norm_data_err)
+
+    leastsq_kws={'xtol': 1.0e-2, 'ftol': 1.0e-2, 'maxfev': 1.0e+4}
 
     if DO_FIT:
         print "starting fit"
         t1 = time.clock()
-        # FIXME: missing data in nonfit_args?
+
         result = lm.minimize(v06_psf_2d_lmfit_profile,
                              pars,
                              args=nonfit_args,
@@ -709,11 +706,10 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
-        # get the fitted
-
-    (r, profile_norm) = v06_psf_2d_lmfit_profile(pars, *nonfit_args,
-                                                 data_profile=None,
-                                                 data_profile_err=None)
+    # get the final fitted model
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+                   xcen_obj, ycen_obj)
+    (r_fit_model, profile_norm_fit_model) = v06_psf_2d_lmfit_profile(pars, *nonfit_args)
 
     ######################################################################
     # output
@@ -853,162 +849,166 @@ def test_prof_extraction_full():
 ######################################################################
 ######################################################################
 
-if __name__ == '__main__':
-    print
-    DEBUG = True
 
-    ######################################################################
-    # devel/debug
-    if DEBUG:
+print
+DEBUG = True
 
-        import test_2d_im
-        import sb_models
-        import sb_utils
-        import esaspi_utils
+######################################################################
+# devel/debug
+if DEBUG:
 
-        reload(test_2d_im)
-        reload(sb_models)
-        reload(sb_utils)
-        reload(esaspi_utils)
-        # module_visible()
+    import test_2d_im
+    import sb_models
+    import sb_utils
+    import esaspi_utils
 
-    ######################################################################
-    # setup basic parameters
-    theta = 65.8443 / 60.0
-    energy = 1.5
-    instrument = "pn"
+    reload(test_2d_im)
+    reload(sb_models)
+    reload(sb_utils)
+    reload(esaspi_utils)
+    # module_visible()
 
-    psf_pars = (instrument, theta, energy)
+######################################################################
+# setup basic parameters
+theta = 65.8443 / 60.0
+energy = 1.5
+instrument = "pn"
 
-    # setup for the beta model
-    num_cts       = 2.0e5             # Will be the normalization
-    rcore         = 10.0              # [pix]
-    beta          = 2.0 / 3.0
-    normalization = 1.0
-    imname='t1.fits'
+psf_pars = (instrument, theta, energy)
 
-    ######################################################################
-    # pars
-    pars_true = lm.Parameters()
+# setup for the beta model
+num_cts       = 2.0e5             # Will be the normalization
+rcore         = 10.0              # [pix]
+beta          = 2.0 / 3.0
+normalization = 1.0
+imname='t1.fits'
 
-    pars_true.add('norm', value=normalization, vary=True)
-    pars_true.add('rcore', value=rcore, vary=False)
-    pars_true.add('beta', value=beta, vary=False)
-    pars_true.add('xcen', value=450, vary=False)
-    pars_true.add('ycen', value=450, vary=False)
+######################################################################
+# pars
+pars_true = lm.Parameters()
 
-    ######################################################################
-    # images for fitting tests
-    # test_create_beta_im(imname)
+pars_true.add('norm', value=normalization, vary=True)
+pars_true.add('rcore', value=rcore, vary=False)
+pars_true.add('beta', value=beta, vary=False)
+pars_true.add('xcen', value=450, vary=False)
+pars_true.add('ycen', value=450, vary=False)
 
-    # test_create_beta_psf_im(imname)
+######################################################################
+# images for fitting tests
+# test_create_beta_im(imname)
 
-    ######################################################################
-    # test lmfit
-    # test_lmfit_beta(imname)
-    # test_lmfit_beta_1d(imname)
+# test_create_beta_psf_im(imname)
 
-    # test_lmfit_beta_psf_1d(imname)
+######################################################################
+# test lmfit
+# test_lmfit_beta(imname)
+# test_lmfit_beta_1d(imname)
 
-    ######################################################################
-    # make a synthetic image from precreated image
+######################################################################
+# test-suite for the beta model version
 
-    # im_file = "t1.fits"
-    # expmap_file = "pn-test-exp.fits"
-    # bgmap_file  = "pn-test-bg-2cp.fits"
-    # maskmap_file= "pn-test-mask.fits"
-    # outfile_file= "cluster-im.fits"
+# test_create_beta_psf_im(imname)
+# test_lmfit_beta_psf_1d(imname)
 
-    # make_synthetic_observation(im_file, expmap_file,
-    #                            bgmap_file, maskmap_file, outfile_file)
-    # show_in_ds9(outfile)
+######################################################################
+# make a synthetic image from precreated image
 
-    ######################################################################
-    # composite test - fitting an image including all instrumental
-    # effects
+# im_file = "t1.fits"
+# expmap_file = "pn-test-exp.fits"
+# bgmap_file  = "pn-test-bg-2cp.fits"
+# maskmap_file= "pn-test-mask.fits"
+# outfile_file= "cluster-im.fits"
 
-    ######################################################################
-    # image setup
+# make_synthetic_observation(im_file, expmap_file,
+#                            bgmap_file, maskmap_file, outfile_file)
+# show_in_ds9(outfile)
 
-    ######################################################################
-    # image: synthetic test
-    # im_file = "cluster-im.fits"
-    # xcen = 450
-    # ycen = 450
-    ######################################################################
+######################################################################
+# composite test - fitting an image including all instrumental
+# effects
 
-    ######################################################################
-    # image: 0205
-    im_file = "pn-test.fits"
+######################################################################
+# image setup
 
-    # ds9 center in ds9 im coords
-    xcen_ds9 = 408.61525
-    ycen_ds9 = 439.05376
+######################################################################
+# image: synthetic test
+# im_file = "cluster-im.fits"
+# xcen = 450
+# ycen = 450
+######################################################################
 
-    # the ds9 coordinates have to be transformed (including order
-    # switch)
-    xcen = ds9imcoord2py(ycen_ds9)
-    ycen = ds9imcoord2py(xcen_ds9)
-    ######################################################################
-    # rest of the input images
-    expmap_file = "pn-test-exp.fits"
-    bgmap_file  = "pn-test-bg-2cp.fits"
-    maskmap_file= "pn-test-mask.fits"
+######################################################################
+# image: 0205
+im_file = "pn-test.fits"
 
-    # test_prof_extraction_full()
+# ds9 center in ds9 im coords
+xcen_ds9 = 408.61525
+ycen_ds9 = 439.05376
 
-    ######################################################################
-    # creating a v06 model
+# the ds9 coordinates have to be transformed (including order
+# switch)
+xcen = ds9imcoord2py(ycen_ds9)
+ycen = ds9imcoord2py(xcen_ds9)
+######################################################################
+# rest of the input images
+expmap_file = "pn-test-exp.fits"
+bgmap_file  = "pn-test-bg-2cp.fits"
+maskmap_file= "pn-test-mask.fits"
 
-    # coordinates FIXME - not yet respected
-    # ds9 center in ds9 im coords
-    xcen_ds9 = 408.61525
-    ycen_ds9 = 439.05376
+# test_prof_extraction_full()
 
-    # the ds9 coordinates have to be transformed
-    xcen = ds9imcoord2py(ycen_ds9) # need to cross the order
-    ycen = ds9imcoord2py(xcen_ds9) # need to cross the order
+######################################################################
+# creating a v06 model
 
-    # model pars
-    r500 = 1.0e3                # r500 [kpc]
-    r500_pix = 30              # r500 in im pixels
+# coordinates FIXME - not yet respected
+# ds9 center in ds9 im coords
+xcen_ds9 = 408.61525
+ycen_ds9 = 439.05376
 
-    n0 = 7e+0
-    rc = 10.0                   # ballpark 0.1 r500
-    beta = 2.0/3.0
-    rs = 90.0                   # ballpark 0.5-1 r500
-    alpha = 1.0                 # <3
-    gamma = 3.0                 # fix = 3
-    epsilon = 2.5               # <5
+# the ds9 coordinates have to be transformed
+xcen = ds9imcoord2py(ycen_ds9) # need to cross the order
+ycen = ds9imcoord2py(xcen_ds9) # need to cross the order
 
-    # convert pars to lmfit structure
-    pars_true = lm.Parameters()
-    pars_true.add('n0', value=n0, vary=False)
-    pars_true.add('rc', value=rc, vary=False)
-    pars_true.add('beta', value=beta, vary=False)
-    pars_true.add('rs', value=rs, vary=False)
-    pars_true.add('alpha', value=alpha, vary=False)
-    pars_true.add('gamma', value=gamma, vary=False)
-    pars_true.add('epsilon', value=epsilon, vary=False)
+# model pars
+r500 = 1.0e3                # r500 [kpc]
+r500_pix = 30              # r500 in im pixels
 
-    model_im_name = 'v06_image_cts.fits'
+n0 = 7e+0
+rc = 10.0                   # ballpark 0.1 r500
+beta = 2.0/3.0
+rs = 90.0                   # ballpark 0.5-1 r500
+alpha = 1.0                 # <3
+gamma = 3.0                 # fix = 3
+epsilon = 2.5               # <5
 
-    # creates the model image
-    # test_create_v06_psf_im(model_im_name)
+# convert pars to lmfit structure
+pars_true = lm.Parameters()
+pars_true.add('n0', value=n0, vary=False)
+pars_true.add('rc', value=rc, vary=False)
+pars_true.add('beta', value=beta, vary=False)
+pars_true.add('rs', value=rs, vary=False)
+pars_true.add('alpha', value=alpha, vary=False)
+pars_true.add('gamma', value=gamma, vary=False)
+pars_true.add('epsilon', value=epsilon, vary=False)
 
-    # create the full synthetic observation
-    # im_file = 'v06_image_cts_2e5.fits'
-    # im_file = 'v06_image_cts_nonoise.fits'
-    im_file = 'v06_image_cts.fits'
-    expmap_file = "pn-test-exp.fits"
-    bgmap_file  = "pn-test-bg-2cp.fits"
-    maskmap_file= "pn-test-mask.fits"
-    outfile_file= "cluster-im-v06-psf_2e5.fits"
+model_im_name = 'v06_image_cts.fits'
 
-    # make_synthetic_observation(im_file, expmap_file,
-                               # bgmap_file, maskmap_file, outfile_file)
+# creates the model image
+# test_create_v06_psf_im(model_im_name)
 
-    test_lmfit_v06_psf_1d(im_file)
+# create the full synthetic observation
+# im_file = 'v06_image_cts_2e5.fits'
+# im_file = 'v06_image_cts_nonoise.fits'
+im_file = 'v06_image_cts.fits'
+expmap_file = "pn-test-exp.fits"
+bgmap_file  = "pn-test-bg-2cp.fits"
+maskmap_file= "pn-test-mask.fits"
+outfile_file= "cluster-im-v06-psf_2e5.fits"
 
-    print "done!"
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, outfile_file)
+
+test_lmfit_v06_psf_1d(im_file)
+
+print "done!"
 

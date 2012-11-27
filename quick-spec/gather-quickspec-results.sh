@@ -1,4 +1,5 @@
 ######################################################################
+
 # collect the files written by a xspec driver script into a directory
 
 if [[ $# == 0 ]]
@@ -34,7 +35,8 @@ then
     echo
 else
     echo "Dir :: " $dir
-    echo "** ERROR: already exists"
+    echo "** ERROR: $dir already exists"
+    echo "results left ungathered!"
     echo
 fi
 
