@@ -407,7 +407,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
-    print pars
+    # print pars
 
     if data_profile == None:
         # return (r, model_profile, geometric_area)
