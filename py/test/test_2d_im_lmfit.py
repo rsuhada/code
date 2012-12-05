@@ -390,14 +390,17 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # imsize = (xsize, xsize)
 
     # init model
-    pars = lm.Parameters()
-    pars.add('rc', value=rc)
-    pars.add('rs', value=rs)
-    pars.add('n0', value=n0)
-    pars.add('alpha', value=alpha)
-    pars.add('beta', value=beta)
-    pars.add('gamma', value=gamma, vary=False)
-    pars.add('epsilon', value=epsilon)
+
+    pars = pars_true
+
+    # pars = lm.Parameters()
+    # pars.add('rc', value=rc)
+    # pars.add('rs', value=rs)
+    # pars.add('n0', value=n0)
+    # pars.add('alpha', value=alpha)
+    # pars.add('beta', value=beta)
+    # pars.add('gamma', value=gamma, vary=False)
+    # pars.add('epsilon', value=epsilon)
 
     im_conv = zeros(imsize)
     distmatrix = distance_matrix(im_conv, xcen_obj, ycen_obj) + 1
@@ -405,6 +408,10 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     bgrid = unique(distmatrix.flat)
 
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
+
+    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('smooth_model.fits', clobber=True)
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
@@ -646,19 +653,20 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
     (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
     profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
 
-    print 'v06', profile_data[0:10]
-    print 'v06', geometric_area_data[0:10]
+    # print 'v06', profile_data[0:10]
+    # print 'v06', geometric_area_data[0:10]
     # print 'v06', profile_norm_data[0:10]
 
     # normalize and get errors
     profile_norm_data_err = sqrt(profile_norm_data)
-    profile_norm_data_err[profile_norm_data_err==0.0] = sqrt(profile_norm_data.max()) # FIXME - CRITICAL! - need binning?
+    profile_norm_data_err[profile_norm_data_err==0.0] = sqrt(profile_norm_data.max())
 
-    plot_data_model_simple(r_data, profile_norm_data, None, None, None, profile_norm_data_err,
-                           None, None)
+    # plot_data_model_simple(r_data, profile_norm_data, None, None, None, profile_norm_data_err,
+    #                        None, None)
 
     ######################################################################
     # init fit parameters
+
     n0 = 7e+0
     rc = 20.0
     beta = 4.0/3.0
@@ -687,6 +695,25 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
                                                            *nonfit_args)
 
     ######################################################################
+    # fits
+
+    fname = 'smooth_model.fits'
+    (model_image, hdr2) = load_fits_im(fname)
+
+    distmatrix = distance_matrix(model_image, xcen_obj, ycen_obj).astype('int') + 1 # +1 bc of the divergence
+    bgrid = unique(distmatrix.flat)
+
+    (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
+    profile_norm_true2 = profile / geometric_area
+    r_true2 = arange(0, len(profile), 1.0)
+
+    # start here
+    # plot_data_model_simple(r_data, profile_norm_data,
+    #                        r_true2, profile_norm_true2,
+    #                        None, profile_norm_data_err,
+    #                        r_true, profile_norm_true)
+
+    ######################################################################
     # do the fit
 
     DO_FIT = True
@@ -695,7 +722,7 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
                    xcen_obj, ycen_obj, profile_norm_data,
                    profile_norm_data_err)
 
-    leastsq_kws={'xtol': 1.0e-2, 'ftol': 1.0e-2, 'maxfev': 1.0e+4}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting fit"
@@ -794,9 +821,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
 
         print 30*'#'
         print
-
-        # (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                               # *nonfit_args)
 
         output_figure = 'lmfit_v06_psf_1d.png'
 
@@ -1056,6 +1080,7 @@ pars_true.add('alpha', value=alpha, vary=False)
 pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
+test_create_v06_psf_im(im_file)
 test_lmfit_v06_psf_1d(im_file)
 
 

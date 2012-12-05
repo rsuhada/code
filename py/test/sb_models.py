@@ -390,15 +390,9 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
-    idx=where(distmatrix==1)
-    idx2=where(model_image==model_image.max())
-
     # trim distmatrix size to image post convolution
     distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
     distmatrix = trim_fftconvolve(distmatrix)
-
-    idx=where(distmatrix==1)
-    idx2=where(model_image==model_image.max())
 
     # profile extraction
     r_length = r500             # factor out r500
@@ -406,8 +400,6 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
 
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
-
-    # print pars
 
     if data_profile == None:
         # return (r, model_profile, geometric_area)
