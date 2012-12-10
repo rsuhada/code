@@ -364,7 +364,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     print "Creating V06 x PSF image!"
 
     # settings
-    POISSONIZE_IMAGE   = False            # poissonize image?
+    POISSONIZE_IMAGE   = True            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -408,10 +408,6 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     bgrid = unique(distmatrix.flat)
 
     im_conv = make_2d_v06_psf(pars, distmatrix, bgrid, r500_pix, psf_pars)
-
-    hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('smooth_model.fits', clobber=True)
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug - poissonize only non-zero
@@ -932,7 +928,7 @@ psf_pars = (instrument, theta, energy)
 num_cts       = 2.0e5             # Will be the normalization
 rcore         = 10.0              # [pix]
 beta          = 2.0 / 3.0
-normalization = -1.0
+normalization = 1.0
 imname='t1.fits'
 
 ######################################################################
@@ -1026,12 +1022,12 @@ r500 = 1.0e3                # r500 [kpc]
 r500_pix = 30              # r500 in im pixels
 
 n0 = 7e+0
-rc = 10.0                   # ballpark 0.1 r500
+rc = 20.0                   # ballpark 0.1 r500
 beta = 2.0/3.0
-rs = 90.0                   # ballpark 0.5-1 r500
-alpha = 1.0                 # <3
+rs = 20.0                   # ballpark 0.5-1 r500
+alpha = 1.5                 # <3
 gamma = 3.0                 # fix = 3
-epsilon = 2.5               # <5
+epsilon = 2.0               # <5
 
 # convert pars to lmfit structure
 pars_true = lm.Parameters()
@@ -1080,7 +1076,7 @@ pars_true.add('alpha', value=alpha, vary=False)
 pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
-test_create_v06_psf_im(im_file)
+# test_create_v06_psf_im(im_file)
 test_lmfit_v06_psf_1d(im_file)
 
 

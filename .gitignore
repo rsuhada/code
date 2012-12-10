@@ -8,6 +8,9 @@
 *.png
 *.fits
 *.im
+*.tab
+*.csv
+*.dat
 .#*
 # except foo.html which is maintained by hand.
 # !foo.html

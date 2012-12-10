@@ -888,8 +888,8 @@ def plot_data_model_simple(r_data, profile_data,
     else:
         plt.plot(r_data-0.5, profile_data,
         color='black',
-        linestyle='',              # -/--/:/-.
-        linewidth=0,                # linewidth=1
+        linestyle='-',              # -/--/:/-.
+        linewidth=1,                # linewidth=1
         marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
         markerfacecolor='black',
         markersize=4,               # markersize=6
@@ -928,7 +928,7 @@ def plot_data_model_simple(r_data, profile_data,
     # plt.xscale("log")
     # plt.yscale("log")
 
-    # plt.ylim(ymin=1e-3,ymax=5e0)
+    # plt.ylim(ymin=1e-2,ymax=1e4)
 
     prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
     plt.legend(loc=0, prop=prop, numpoints=1)
