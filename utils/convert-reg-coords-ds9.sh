@@ -22,7 +22,8 @@ outreg=${region_file%.*.*}
 
 mv $region_file conversion_tmp.reg
 
-/Applications/SAOImage\ DS9.app/Contents/MacOS/ds9 $im \
+DS9BINARY=`which ds9 | sed 's/ds9: aliased to //g'`
+$DS9BINARY $im \
 	-regions format ds9 \
 	-regions load conversion_tmp.reg \
 	-regions system image \
