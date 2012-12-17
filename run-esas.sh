@@ -652,6 +652,16 @@ then
     fi
 fi
 
+if [[ $RADIAL_SPEC -eq 1 ]]
+then
+    ${codedir}/radial-spec/radial-spec-driver.sh ${workdir}
+    if [[ $? -ne 0 ]]
+    then
+        cd $startdir
+        exit 1
+    fi
+fi
+
 ######################################################################
 # temporary hot-fix
 

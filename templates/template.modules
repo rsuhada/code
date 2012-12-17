@@ -84,4 +84,5 @@ export MAKE_QUICK_VIEW_IMS=0
 ######################################################################
 # in development
 
-ITER_SPEC=0                     # has options
+ITER_SPEC=0                       # has options
+RADIAL_SPEC=0                     # has options
