@@ -605,7 +605,6 @@ Mon Sep 10 14:50:08 2012
    make_2d_beta_PSF
    - validate in both modes  - with and without psf
 
-
 2. background
 
 - in imaging pipe need to improve the masking for 2comp/spline: too much exclusion?
