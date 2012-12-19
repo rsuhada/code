@@ -60,9 +60,24 @@ export BG_REGION=${specdir}/${BG_REGION_ID}.phy.reg
 export PS_REGION=${specdir}/${PS_REGION_ID}.phy.reg
 export bgid=${BG_REGION_ID}            # FIXME: refactor redundancy
 
+export LOG_MASTER_FILE="${dir}/${specdir}/conf/${CLNAME}-run-${fitid}-iter-master.tab"
 
 # will need image coordinate point source directory
 cp ${startdir}/${ANALYSIS_DIR}/analysis/${PS_REGION_ID}.im.reg ${specdir}/
+
+echo $LOG_MASTER_FILE
+
+######################################################################
+# check whether we have a non-conflicting run
+
+if [[ -e $LOG_MASTER_FILE ]]
+then
+    echo -e "\n** error: $LOG_MASTER_FILE exists here!"
+    echo -e "*** error: Consider changing fitid: $fitid, or delete the master to force overwrite"
+    echo -e "*** error: in $0\n"
+    cd $startdir
+    exit 1
+fi
 
 ######################################################################
 # get parameters from analysis file
@@ -138,6 +153,7 @@ export rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)
 
 echo $rcore $rcore_phy
 
+init_log_master $LOG_MASTER_FILE
 
 ######################################################################
 # iterator
@@ -386,6 +402,13 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     r_diff=`echo ${r_diff#-}`   # get the absolute value
     reached_r_tolerance=`echo "if($r_diff <= $r_tolerance) 1" | bc`
 
+    ######################################################################
+    # write into the master: note: the current line corresponds to the
+    # spectrum fitted in the (now) r_old aperture
+
+    aper_results=`read_aper_result_file ${spectrumid}/${CLNAME}-${spectrumid}.aper`
+
+    echo $fitid $iter $r_old $r $r_diff $aper_results >> $LOG_MASTER_FILE
     mv formated_pars.out ${CLNAME}-${spectrumid}.fpars
 
     ######################################################################
