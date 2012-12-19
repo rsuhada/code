@@ -176,6 +176,17 @@ function init_log_master {
     echo  "# fitid iter r_fit r_fit_next r_diff norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $__LOG_MASTER_FILE
 }
 
+
+function init_tprofile_log_master {
+    ######################################################################
+    # writes a topcat compliant header line to the master file that
+    # tracks the results of each iteration - verision for t profiler
+
+    local __LOG_MASTER_FILE=$1
+    echo  "# fitid iter r_fit norm norm_err_n norm_err_p t_fit t_fit_err_n t_fit_err_p z z_err_n z_err_p abund abund_err_n abund_err_p t500 t500_err m500 m500_err r500 r500_ang rcore_ang" > $__LOG_MASTER_FILE
+}
+
+
 function make-im-standard {
     ######################################################################
     # extracts an image: standard settings
