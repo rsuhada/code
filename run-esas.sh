@@ -111,8 +111,10 @@ then
     export DS9_BINARY="/Users/rs/bin/ds9/ds9"
     export CALC_SCRIPT_DIR="/Users/rs/data1/sw/calc/"
 
-else
+    export PYTHONEXEC=/opt/local/bin/python
 
+else
+    # settings are d1 specific at the moment
     echo "ON_LAPTOP = " $ON_LAPTOP
     echo "machine = " $machine
 
@@ -128,8 +130,10 @@ else
     export SAS_ODF=${startdir}/${ANALYSIS_DIR}/odf
     export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
 
-    export DS9_BINARY=" /home/moon/rsuhada/big/sw/ds9/7.0.1/ds9"
+    export DS9_BINARY="/home/moon/rsuhada/big/sw/ds9/7.0.1/ds9"
     export CALC_SCRIPT_DIR="/home/moon/rsuhada/big/sw/calc/"
+
+    export PYTHONEXEC=/home/moon/rsuhada/big/sw/Python-2.7.3/python
 
 fi
 

@@ -22,19 +22,18 @@ outreg=${region_file%.*.*}
 
 mv $region_file conversion_tmp.reg
 
-DS9BINARY=`which ds9 | sed 's/ds9: aliased to //g'`
-$DS9BINARY $im \
+$DS9_BINARY $im \
 	-regions format ds9 \
 	-regions load conversion_tmp.reg \
 	-regions system image \
-    -region save ${outreg}.im.reg \
+    -regions save ${outreg}.im.reg \
     -regions system physical \
-    -region save ${outreg}.phy.reg \
+    -regions save ${outreg}.phy.reg \
     -regions system wcs \
-    -region save ${outreg}.wcs.reg \
+    -regions save ${outreg}.wcs.reg \
     -regions system wcs \
     -regions skyformat sexagesimal \
-    -region save ${outreg}.wcs60.reg \
+    -regions save ${outreg}.wcs60.reg \
     -exit
 
 # rather to keep in case you accidentaly overwritten the good region

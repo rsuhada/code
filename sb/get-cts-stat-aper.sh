@@ -26,7 +26,7 @@ yim=`echo $out | awk '{print $2}'`
 ######################################################################
 # run
 
-${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture $bgmap
+$PYTHONEXEC ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture $bgmap
 
 ######################################################################
 #  output report
