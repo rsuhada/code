@@ -18,8 +18,8 @@ function do_sb_extraction {
     ######################################################################
     # run
 
-    echo ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
-    ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+    echo $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+    $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
 }
 
 ######################################################################
@@ -29,7 +29,7 @@ dir=$1
 here=`pwd`
 cd $dir
 
-reduction_id="007"              # FIXME: add autonaming - see below
+reduction_id="001"              # FIXME: add autonaming - see below
 elo="500"
 ehi="2000"
 aperture=200.0                  # [pix]
