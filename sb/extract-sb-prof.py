@@ -152,7 +152,8 @@ if __name__ == '__main__':
         ######################################################################
         # do the profile extraction
 
-        for r in range(1.0, aper+1.0, 1):
+        radii = arange(1.0, aper+1.0, 1.0)
+        for r in radii:
 
             ids = where((distmatrix <= r**2.0) & (distmatrix >= (r - 1.0)**2.0))
             geometric_area = len(ids[0])      # [pix]
@@ -187,6 +188,7 @@ if __name__ == '__main__':
             # calculate the counts/countrates/surface brightness (area corrected)
 
             if (exp_time_wps > 0.0):
+            # if (mask_area_wps > 0.0):
                 # with ps
                 ctr_tot_wps     = cts_tot_wps/exp_time_wps
                 ctr_bg_wps      = cts_bg_wps/exp_time_wps
@@ -227,6 +229,7 @@ if __name__ == '__main__':
                 sb_src_wps_err  = -1.0
 
             if (exp_time > 0.0):
+            # if (mask_area > 0.0):
                 # without point surces
                 ctr_tot         = cts_tot/exp_time
                 ctr_bg          = cts_bg/exp_time
@@ -315,7 +318,7 @@ if __name__ == '__main__':
 
 
             ######################################################################
-            # write output profile file
+            # write output cumulative profile file
 
             g.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, cumul_sb_src, cumul_sb_bg, cumul_sb_tot, cumul_sb_src_err, cumul_sb_bg_err, cumul_sb_tot_err, cumul_ctr_src, cumul_ctr_bg, cumul_ctr_tot, cumul_ctr_src_err, cumul_ctr_bg_err, cumul_ctr_tot_err, cumul_cts_src, cumul_cts_bg, cumul_cts_tot, cumul_cts_src_err, cumul_cts_bg_err, cumul_cts_tot_err, exp_time, area_correction, mask_area, geometric_area, cumul_sb_src_wps, cumul_sb_bg_wps, cumul_sb_tot_wps, cumul_sb_src_wps_err, cumul_sb_bg_wps_err, cumul_sb_tot_wps_err, cumul_ctr_src_wps, cumul_ctr_bg_wps, cumul_ctr_tot_wps, cumul_ctr_src_wps_err, cumul_ctr_bg_wps_err, cumul_ctr_tot_wps_err, cumul_cts_src_wps, cumul_cts_bg_wps, cumul_cts_tot_wps, cumul_cts_src_wps_err, cumul_cts_bg_wps_err, cumul_cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
 

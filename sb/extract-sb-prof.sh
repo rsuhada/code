@@ -20,6 +20,11 @@ function do_sb_extraction {
 
     echo $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
     $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+
+    if [[ $PLOT_CUMUL_PROF -eq 1 ]]
+    then
+        $PYTHONEXEC ${codedir}/sb/plt_cumul_sb.py ${output}.cumul
+    fi
 }
 
 ######################################################################
@@ -36,6 +41,7 @@ aperture=200.0                  # [pix]
 # bg_type_id=".spl"               # "" - 2comp, ".spl" - spline
 bg_type_id=""               # "" - 2comp, ".spl" - spline
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
+PLOT_CUMUL_PROF=1               # make a quick view plot?
 
 ######################################################################
 # assign profile ID - keep in sync with the naming convention in
