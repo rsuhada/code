@@ -149,6 +149,44 @@ if __name__ == '__main__':
         cumul_sb_bg_err       = 0.0
         cumul_sb_src_err      = 0.0
 
+        cts_tot_wps     = 0.0
+        cts_bg_wps      = 0.0
+        cts_src_wps     = 0.0
+        cts_tot         = 0.0
+        cts_bg          = 0.0
+        cts_src         = 0.0
+        ctr_tot_wps     = 0.0
+        ctr_bg_wps      = 0.0
+        ctr_src_wps     = 0.0
+        ctr_tot         = 0.0
+        ctr_bg          = 0.0
+        ctr_src         = 0.0
+        sb_tot_wps      = 0.0
+        sb_bg_wps       = 0.0
+        sb_src_wps      = 0.0
+        sb_tot          = 0.0
+        sb_bg           = 0.0
+        sb_src          = 0.0
+
+        cts_tot_wps_err = 0.0
+        cts_bg_wps_err  = 0.0
+        cts_src_wps_err = 0.0
+        cts_tot_err     = 0.0
+        cts_bg_err      = 0.0
+        cts_src_err     = 0.0
+        ctr_tot_wps_err = 0.0
+        ctr_bg_wps_err  = 0.0
+        ctr_src_wps_err = 0.0
+        ctr_tot_err     = 0.0
+        ctr_bg_err      = 0.0
+        ctr_src_err     = 0.0
+        sb_tot_wps_err  = 0.0
+        sb_bg_wps_err   = 0.0
+        sb_src_wps_err  = 0.0
+        sb_tot_err      = 0.0
+        sb_bg_err       = 0.0
+        sb_src_err      = 0.0
+
         ######################################################################
         # do the profile extraction
 
@@ -184,11 +222,13 @@ if __name__ == '__main__':
 
             cts_src = cts_tot - cts_bg
 
+
+            print  "area:", r, mask_area, mask_area_wps
             ######################################################################
             # calculate the counts/countrates/surface brightness (area corrected)
 
-            if (exp_time_wps > 0.0):
-            # if (mask_area_wps > 0.0):
+            # if (exp_time_wps > 0.0):
+            if (mask_area_wps > 0.0):
                 # with ps
                 ctr_tot_wps     = cts_tot_wps/exp_time_wps
                 ctr_bg_wps      = cts_bg_wps/exp_time_wps
@@ -228,8 +268,8 @@ if __name__ == '__main__':
                 sb_bg_wps_err   = -1.0
                 sb_src_wps_err  = -1.0
 
-            if (exp_time > 0.0):
-            # if (mask_area > 0.0):
+            # if (exp_time > 0.0):
+            if (mask_area > 0.0):
                 # without point surces
                 ctr_tot         = cts_tot/exp_time
                 ctr_bg          = cts_bg/exp_time
