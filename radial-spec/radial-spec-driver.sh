@@ -39,8 +39,8 @@ then
         tmp_redshift=`echo $out | awk '{print $1}'`
         tmp_nh=`echo $out | awk '{print $2}'`
 
-        sed -i .sed.bk "s/PLACEHOLDER_REDSHIFT/${tmp_redshift}/g" $config_file
-        sed -i .sed.bk "s/PLACEHOLDER_NH/${tmp_nh}/g" $config_file
+        sed -i.sed.bk "s/PLACEHOLDER_REDSHIFT/${tmp_redshift}/g" $config_file
+        sed -i.sed.bk "s/PLACEHOLDER_NH/${tmp_nh}/g" $config_file
         rm ${config_file}.sed.bk
     fi
 fi

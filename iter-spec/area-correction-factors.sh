@@ -75,7 +75,7 @@ do
     ######################################################################
     # create a fits reg file for ps-masking
     # need to remove the negative sign in front of the shape
-    sed -i .sed.bk 's/-circle/circle/g' $MAN_PS_REG
+    sed -i.sed.bk 's/-circle/circle/g' $MAN_PS_REG
     rm ${MAN_PS_REG}.sed.bk
     ds9tocxc outset=${MAN_PS_REG}.fits < ${MAN_PS_REG}
 
