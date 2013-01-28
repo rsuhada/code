@@ -239,7 +239,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     # do the rmf extraction
 
     # detmaptype="dataset"        # flat/psf/dataset
-    detmaptype="psf"        # flat/psf/dataset
+    detmaptype="psf"        # psf is SAS and ESAS default
 
     if [[ $MAKE_RMF -eq 1 ]]
     then
@@ -390,7 +390,7 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
     r_old=$r
 
     # r=$(echo "scale=6;$r*1.2" | bc) # dummy for debug
-    ${codedir}/py/t_to_r.py ${spectrumid}/${CLNAME}-${spectrumid}.result | tee ${spectrumid}/${CLNAME}-${spectrumid}.aper
+    $PYTHONEXEC ${codedir}/py/t_to_r.py ${spectrumid}/${CLNAME}-${spectrumid}.result | tee ${spectrumid}/${CLNAME}-${spectrumid}.aper
 
     r=`egrep "\brfit_ang\b" ${spectrumid}/${CLNAME}-${spectrumid}.aper | awk '{print $2}'`
     r_phy=$(echo "scale=6;$r*20.0" | bc)
