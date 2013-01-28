@@ -46,17 +46,20 @@ fi
 case $instrument in
     "pn")
         instpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
+        instpattern2="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [400:10000])"
         prefix=$PN_EV_PREFIX_LIST
         evlist=pn${prefix}-clean.fits
         ootevlist=pn${prefix}-clean-oot.fits
         ;;
     "m1")
         instpattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
+        instpattern2="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [400:10000])"
         prefix=$M1_EV_PREFIX_LIST
         evlist=mos${prefix}-clean.fits
         ;;
     "m2")
         instpattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
+        instpattern2="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [400:10000])"
         prefix=$M2_EV_PREFIX_LIST
         evlist=mos${prefix}-clean.fits
         ;;
@@ -104,6 +107,18 @@ evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${sp
     specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
     writedss=Y expression="$expr"
 
+# extract also check image in the roughly fitted bands (0.4-10 typically)
+expr2="$instpattern2 && $srcreg $psreg"
+evselect table=${evlist} withimageset=yes imageset=${specdir}/${instrument}-${spectrumid}-specband.im \
+    xcolumn=X ycolumn=Y withzcolumn=N withzerrorcolumn=N \
+    ximagebinsize=1 yimagebinsize=1 squarepixels=yes \
+    ximagesize=900 yimagesize=900 imagebinning=imageSize \
+    withxranges=yes ximagemin=3401 ximagemax=48400 withxranges=yes \
+    withyranges=yes yimagemin=3401 yimagemax=48400 withyranges=yes \
+    withspectrumset=true spectrumset=${specdir}/${instrument}-${spectrumid}.pha \
+    withspecranges=true energycolumn=PI specchannelmin=0 \
+    specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+    writedss=Y expression="$expr2"
 
 ######################################################################
 # if pn create also the oot stuff
