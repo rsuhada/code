@@ -10,11 +10,33 @@ specdir=$3
 ra=$4
 de=$5
 
+
+######################################################################
+# select the eventlist and the selection pattern
+case $instrument in
+    "pn")
+        prefix=$PN_EV_PREFIX_LIST
+        evlist=pn${prefix}-clean.fits
+        ootevlist=pn${prefix}-clean-oot.fits
+        ;;
+    "m1")
+        prefix=$M1_EV_PREFIX_LIST
+        evlist=mos${prefix}-clean.fits
+        ;;
+    "m2")
+        prefix=$M2_EV_PREFIX_LIST
+        evlist=mos${prefix}-clean.fits
+        ;;
+    *)
+        echo "unknown instrument!"
+        exit 1
+esac
+
+
 ######################################################################
 # extraction
 
+# the quickspec version
+export set="badpixelresolution=2 crossregionarf=no detmaptype=dataset extendedsource=yes filterdss=yes filteredset=filteredpixellist.ds ignoreoutoffov=yes keeparfset=yes modelee=no modeleffarea=yes modelfiltertrans=yes modelootcorr=no modelquantumeff=yes psfenergy=2 setbackscale=no sourcecoords="eqpos" sourcex=${ra} sourcey=${de} useodfatt=no withbadpixcorr=yes withdetbounds=no withfilteredset=no withrmfset=yes withsourcepos=yes"
 
-# WITH VIG CORR!!!!!!!!!!!! -> special purpose  - if you use: 1. local bg & 2. zcolumn of spectra is "NO"
-export set="withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de} withrmfset=true withdetbounds=yes extendedsource=yes detmaptype=flat filterdss=no detxbins=10 detybins=10 modelee=N withbadpixcorr=N modeleffarea=Y modelquantumeff=Y modelfiltertrans=Y"
-
-arfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha $set rmfset=${specdir}/${instrument}-${spectrumid}.rmf arfset=${specdir}/${instrument}-${spectrumid}.arf
+arfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha $set rmfset=${specdir}/${instrument}-${spectrumid}.rmf badpixlocation=${evlist} detmaparray=${specdir}/${instrument}-${spectrumid}-detmap.ds arfset=${specdir}/${instrument}-${spectrumid}.arf
