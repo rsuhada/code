@@ -258,17 +258,15 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
             if [[ ! -e ${specdir}/${instrument}-${spectrumid}.rmf ]]
             then
                 echo -e "${specdir}/${instrument}-${spectrumid}.rmf does not exists - linking it to preexisting"
-
-                if [[ ! -e ${specdir}/${instrument}.rmf ]]
+                rmfile=${bgspecdir}/${instrument}-cluster-man-01.rmf # use a backup rmf
+                if [[ ! -e $rmfile ]]
                 then
-                    echo -e "\n** error: ${specdir}/${instrument}.rmf does not exists here!"
+                    echo -e "\n** error: $rmfile does not exists here!"
                     echo -e "*** error in $0\n"
                     cd $startdir
                     exit 1
                 fi
-                ln -s ${specdir}/${instrument}.rmf ${specdir}/${instrument}-${spectrumid}.rmf
-
-                # ln -s ${bgspecdir}/${instrument}.rmf ${specdir}/${instrument}-${spectrumid}.rmf
+                ln -s $rmfile ${specdir}/${instrument}-${spectrumid}.rmf
             fi
         done
     fi
@@ -288,19 +286,20 @@ while [[ $iter -le $max_iter && $reached_r_tolerance -ne 1 ]]; do
         for instrument in ${instruments[@]}
         do
             echo 'Not creating new ARF...'
+
             if [[ ! -e ${specdir}/${instrument}-${spectrumid}.arf ]]
             then
                 echo -e "${specdir}/${instrument}-${spectrumid}.arf does not exists - linking it to preexisting"
 
-                if [[ ! -e ${specdir}/${instrument}.arf ]]
+                arfile=${bgspecdir}/${instrument}-cluster-man-01.arf # use a backup arf
+                if [[ ! -e $arfile ]]
                 then
-                    echo -e "\n** error: ${specdir}/${instrument}.arf does not exists here!"
+                    echo -e "\n** error: $arfile does not exists here!"
                     echo -e "*** error in $0\n"
                     cd $startdir
                     exit 1
                 fi
-                ln -s ${specdir}/${instrument}.arf ${specdir}/${instrument}-${spectrumid}.arf
-                # ln -s ${bgspecdir}/${instrument}.arf ${specdir}/${instrument}-${spectrumid}.arf
+                ln -s $arfile ${specdir}/${instrument}-${spectrumid}.arf
             fi
         done
     fi

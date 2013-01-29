@@ -175,6 +175,8 @@ while [[ $reached_r_max -ne 1 ]]; do
     export rpad=`printf "%03d" $rpad`              # zero pad, need export
     spectrumid="run-$fitid-iter-r-$rpad"           # identifier for spectral products
 
+    export r_phy=$(echo "scale=6;$r*20.0" | bc)    # current rad in phy units
+
     coordsystem="wcs"
     regname=${specdir}/${SRC_REGION_ID}-${rpad}.wcs.reg
     make_src_reg_file $shape $regname $coordsystem $ra $de $r
