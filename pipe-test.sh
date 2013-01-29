@@ -122,7 +122,7 @@ echo
 # # out=`get_cluster_pars $pars`
 # # xim=`echo $out | awk '{print $1}'`
 # # yim=`echo $out | awk '{print $2}'`
-# ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > test.txt
+# ${PYTHONEXEC} ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > test.txt
 # cat test.txt
 
 

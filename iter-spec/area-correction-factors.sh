@@ -117,7 +117,7 @@ do
         aperture1_im=`arcsec_2_impix_xmm $image $aperture1`
 
         echo "Getting area correction for non-core excised image"
-        ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture1_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+        ${PYTHONEXEC} ${codedir}/sb/get_cts_stat_aper.py $image $xim $yim $aperture1_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
 
     else
 
@@ -125,7 +125,7 @@ do
         aperture2_im=`arcsec_2_impix_xmm $image $aperture2`
 
         echo "Getting area correction for core excised image"
-        ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
+        ${PYTHONEXEC} ${codedir}/sb/get_cts_stat_aper_annul.py $image $xim $yim $aperture1_im $aperture2_im $bgmap > ${image%.*} > ${image%.*}-areacorr.txt
 
     fi
 
