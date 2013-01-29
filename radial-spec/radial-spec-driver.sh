@@ -232,7 +232,7 @@ while [[ $reached_r_max -ne 1 ]]; do
     # do the rmf extraction
 
     # detmaptype="dataset"        # flat/psf/dataset
-    detmaptype="psf"        # flat/psf/dataset
+    detmaptype="psf"        # flat/psf/dataset - psf default for SAS and ESAS
 
     if [[ $MAKE_RMF -eq 1 ]]
     then

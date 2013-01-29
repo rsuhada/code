@@ -42,7 +42,7 @@ do
     echo "working on instrument : " $instrument
 
     # FIXME: assumes that the keyword is on a single line (should be OK)
-    image=`ls ${instrument}-*.im`
+    image=`ls ${instrument}-*.im | grep -c specband`
     evli=`fkeyprint ${image}+0 XPROC0 | grep -o "table=[^ ]*" | sed 's/table=//g'`
     evli=${startdir}/${ANALYSIS_DIR}/analysis/${evli##*/}   # strips possible path and adds the correct one
 
