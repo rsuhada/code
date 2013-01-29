@@ -171,11 +171,13 @@ while [[ $reached_r_max -ne 1 ]]; do
 
     shape="circle"
 
+    export rcore=$(echo "scale=6;$core_frac*$r" | bc)
     rpad=$(echo $r | bc -l | xargs printf "%1.0f") # round
     export rpad=`printf "%03d" $rpad`              # zero pad, need export
     spectrumid="run-$fitid-iter-r-$rpad"           # identifier for spectral products
 
     export r_phy=$(echo "scale=6;$r*20.0" | bc)    # current rad in phy units
+    export rcore_phy=$(echo "scale=6;$rcore*20.0" | bc)    # current rad in phy units
 
     coordsystem="wcs"
     regname=${specdir}/${SRC_REGION_ID}-${rpad}.wcs.reg
@@ -386,6 +388,8 @@ while [[ $reached_r_max -ne 1 ]]; do
 
     if [[ $DO_SPECTROSCOPY -eq 1 ]]
     then
+        # sort of dummy here - if current r were r500 what would be the pars be (required for further output)
+        $PYTHONEXEC ${codedir}/py/t_to_r.py ${spectrumid}/${CLNAME}-${spectrumid}.result | tee ${spectrumid}/${CLNAME}-${spectrumid}.aper
         aper_results=`read_aper_result_file ${spectrumid}/${CLNAME}-${spectrumid}.aper`
 
         echo $fitid $iter $r $aper_results >> $LOG_MASTER_FILE
