@@ -682,29 +682,29 @@ case $instrument in
     'm1')
         for num in 1 2 3 4 5 6 7
         do
+            chip="M1_CCD"$num
+            chip="${!chip}"
 
-            a=`grep M1_CCD${num} $config_file |  awk '{print $2}'`
-            a=${a#${a%?}}
-            if [[ $a -eq '0' ]]
+            if [[ $chip -eq '0' ]]
             then
-                expresion=${expression}"&!(CCDNR==$num)"
+                expression=${expression}"&!(CCDNR==$num)"
             fi
         done
         echo $expression
      ;;
-    'm1')
+    'm2')
         for num in 1 2 3 4 5 6 7
         do
+            chip="M2_CCD"$num
+            chip="${!chip}"
 
-            a=`grep M2_CCD${num} $config_file |  awk '{print $2}'`
-            a=${a#${a%?}}
-            if [[ $a -eq '0' ]]
+            if [[ $chip -eq '0' ]]
             then
-                expresion=${expression}"&!(CCDNR==$num)"
+                expression=${expression}"&!(CCDNR==$num)"
             fi
         done
         echo $expression
-     ;;
+    ;;
     *)
         echo
 ;;

@@ -9,34 +9,36 @@ cd $dir
 
 specdir=../spec
 
-# FIXME: available in a standalone script - this function is redundant
-function get_cluster_pars {
+source ${codedir}/utils/util-funcs-lib.sh
 
-    ######################################################################
-    # looks through an analysis notebook file returning the requested
-    # parameters. Input is an array, e.g.  pars=(RA DE RA60
-    # DE60 X_IM Y_IM X_PHY Y_PHY NH REDSHIFT), output is a string
+# # FIXME: available in a standalone script - this function is redundant
+# function get_cluster_pars {
 
-    if [[ -e $NOTESFILE ]]
-    then
+#     ######################################################################
+#     # looks through an analysis notebook file returning the requested
+#     # parameters. Input is an array, e.g.  pars=(RA DE RA60
+#     # DE60 X_IM Y_IM X_PHY Y_PHY NH REDSHIFT), output is a string
 
-        pars=$1
-        declare -a values
+#     if [[ -e $NOTESFILE ]]
+#     then
 
-        for i in ${!pars[@]}
-        do
-            val=`grep ${pars[i]} $NOTESFILE | head -1 | awk '{print $2}'`
-            values=( "${values[@]}" "$val" )
-            # echo ${pars[i]} ${values[i]}
-        done
+#         pars=$1
+#         declare -a values
 
-        # this is the output
-        echo ${values[@]}
+#         for i in ${!pars[@]}
+#         do
+#             val=`grep ${pars[i]} $NOTESFILE | head -1 | awk '{print $2}'`
+#             values=( "${values[@]}" "$val" )
+#             # echo ${pars[i]} ${values[i]}
+#         done
 
-    else
-        echo "$NOTESFILE does not exist, not returning parameters!"
-    fi
-}
+#         # this is the output
+#         echo ${values[@]}
+
+#     else
+#         echo "$NOTESFILE does not exist, not returning parameters!"
+#     fi
+# }
 
 ######################################################################
 # settings
@@ -132,17 +134,8 @@ srcreg="$inpattern"
 inpattern=`cat ${BG_REGION}.desc`
 bgreg="$inpattern"
 
-# original
-
-# mospattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
-# pnpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
-
-# esas
-
-mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
-pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
-
 # CCD patterns
+
 mos1ccdpattern=`get_sas_taboo_ccd $config_file m1`
 mos2ccdpattern=`get_sas_taboo_ccd $config_file m2`
   pnccdpattern=`get_sas_taboo_ccd $config_file pn` # FIXME: not supported atm
@@ -152,7 +145,17 @@ echo $mos1ccdpattern
 echo $mos2ccdpattern
 echo $pnccdpattern
 echo "##############################"
-sleep 1000
+
+# original
+
+# mospattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
+# pnpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
+
+# esas
+mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
+pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
+
+
 
 if [[ $EXTRACT_SRC -ne 0 ]]
 then
@@ -172,7 +175,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos1ccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m1-${SRC_REGION_ID}-detmap.ds \
@@ -181,7 +184,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos1ccdpattern"
 
 ######################################################################
 #  get m2 spectra
@@ -198,7 +201,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos2ccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m2-${SRC_REGION_ID}-detmap.ds \
@@ -207,7 +210,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos2ccdpattern"
 
 ######################################################################
 #  get pn spectra
@@ -224,7 +227,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-detmap.ds \
@@ -233,7 +236,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
 ######################################################################
 #  get pn oot spectra
@@ -250,7 +253,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
     # # detector map file for arfgen
     # evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-oot-detmap.ds \
@@ -281,7 +284,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos1ccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m1-${bgid}-detmap.ds \
@@ -290,7 +293,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos1ccdpattern"
 
 ######################################################################
 #  get m2 background spectra
@@ -307,7 +310,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos2ccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m2-${bgid}-detmap.ds \
@@ -316,7 +319,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr"
+        writedss=Y expression="$mosexpr $mos2ccdpattern"
 
 
 ######################################################################
@@ -334,7 +337,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-detmap.ds \
@@ -343,7 +346,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
 ######################################################################
 #  get pn oot background spectra
@@ -360,7 +363,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr"
+        writedss=Y expression="$pnexpr $pnccdpattern"
 
     # # detector map file for arfgen
     # evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-oot-detmap.ds \
