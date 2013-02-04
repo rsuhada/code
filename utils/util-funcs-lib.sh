@@ -667,3 +667,47 @@ function arcsec_2_impix_xmm {
     # this the output
     echo $x_im
 }
+
+function get_sas_taboo_ccd {
+    # returns a SAS compatible string expresion for given instrument
+    # and config file to which ccds/quadrants should be removed
+
+    # FIXME: add pn quadrant support
+
+    config_file=$1
+    instrument=$2
+    expression=''
+
+case $instrument in
+    'm1')
+        for num in 1 2 3 4 5 6 7
+        do
+
+            a=`grep M1_CCD${num} $config_file |  awk '{print $2}'`
+            a=${a#${a%?}}
+            if [[ $a -eq '0' ]]
+            then
+                expresion=${expression}"&!(CCDNR==$num)"
+            fi
+        done
+        echo $expression
+     ;;
+    'm1')
+        for num in 1 2 3 4 5 6 7
+        do
+
+            a=`grep M2_CCD${num} $config_file |  awk '{print $2}'`
+            a=${a#${a%?}}
+            if [[ $a -eq '0' ]]
+            then
+                expresion=${expression}"&!(CCDNR==$num)"
+            fi
+        done
+        echo $expression
+     ;;
+    *)
+        echo
+;;
+esac
+
+}

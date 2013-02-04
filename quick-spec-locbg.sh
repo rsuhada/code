@@ -142,6 +142,18 @@ bgreg="$inpattern"
 mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
 pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
 
+# CCD patterns
+mos1ccdpattern=`get_sas_taboo_ccd $config_file m1`
+mos2ccdpattern=`get_sas_taboo_ccd $config_file m2`
+  pnccdpattern=`get_sas_taboo_ccd $config_file pn` # FIXME: not supported atm
+
+echo "##############################"
+echo $mos1ccdpattern
+echo $mos2ccdpattern
+echo $pnccdpattern
+echo "##############################"
+sleep 1000
+
 if [[ $EXTRACT_SRC -ne 0 ]]
 then
 
