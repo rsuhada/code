@@ -687,10 +687,10 @@ case $instrument in
 
             if [[ $chip -eq '0' ]]
             then
-                expression=${expression}"&!(CCDNR==$num)"
+                expression=${expression}" &&! (CCDNR==$num)"
             fi
         done
-        echo $expression
+        echo -n $expression
      ;;
     'm2')
         for num in 1 2 3 4 5 6 7
@@ -700,10 +700,10 @@ case $instrument in
 
             if [[ $chip -eq '0' ]]
             then
-                expression=${expression}"&!(CCDNR==$num)"
+                expression=${expression}" &&! (CCDNR==$num)"
             fi
         done
-        echo $expression
+        echo -n $expression
     ;;
     *)
         echo

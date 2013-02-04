@@ -134,27 +134,25 @@ srcreg="$inpattern"
 inpattern=`cat ${BG_REGION}.desc`
 bgreg="$inpattern"
 
-# CCD patterns
 
+# CCD patterns
 mos1ccdpattern=`get_sas_taboo_ccd $config_file m1`
 mos2ccdpattern=`get_sas_taboo_ccd $config_file m2`
   pnccdpattern=`get_sas_taboo_ccd $config_file pn` # FIXME: not supported atm
 
-echo "##############################"
-echo $mos1ccdpattern
-echo $mos2ccdpattern
-echo $pnccdpattern
-echo "##############################"
+echo "M1 CCD pattern: " $mos1ccdpattern
+echo "M2 CCD pattern: " $mos2ccdpattern
+echo "PN CCD pattern: " $pnccdpattern
+
 
 # original
-
 # mospattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
 # pnpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
+
 
 # esas
 mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
 pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
-
 
 
 if [[ $EXTRACT_SRC -ne 0 ]]
@@ -165,7 +163,7 @@ then
 
     echo -e '\nGetting m1 spectra...'
 
-    mosexpr="$mospattern && $srcreg $psreg"
+    mosexpr="$mospattern && $srcreg $psreg $mos1ccdpattern"
     prefix=$M1_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -175,7 +173,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos1ccdpattern"
+        writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m1-${SRC_REGION_ID}-detmap.ds \
@@ -184,14 +182,14 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos1ccdpattern"
+        writedss=Y expression="$mosexpr"
 
 ######################################################################
 #  get m2 spectra
 
     echo -e '\nGetting m2 spectra...'
 
-    mosexpr="$mospattern && $srcreg $psreg"
+    mosexpr="$mospattern && $srcreg $psreg mos2ccdpattern"
     prefix=$M2_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -201,7 +199,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos2ccdpattern"
+        writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m2-${SRC_REGION_ID}-detmap.ds \
@@ -210,14 +208,14 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos2ccdpattern"
+        writedss=Y expression="$mosexpr"
 
 ######################################################################
 #  get pn spectra
 
     echo -e '\nGetting pn spectra...'
 
-    pnexpr="$pnpattern && $srcreg $psreg"
+    pnexpr="$pnpattern && $srcreg $psreg $pnccdpattern"
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean.fits
 
@@ -227,7 +225,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-detmap.ds \
@@ -236,14 +234,14 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
 ######################################################################
 #  get pn oot spectra
 
     echo -e '\nGetting pn spectra...'
 
-    pnexpr="$pnpattern && $srcreg $psreg"
+    pnexpr="$pnpattern && $srcreg $psreg $pnccdpattern"
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean-oot.fits
 
@@ -253,7 +251,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${SRC_REGION_ID}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
     # # detector map file for arfgen
     # evselect table=${evlist} withimageset=yes imageset=pn-${SRC_REGION_ID}-oot-detmap.ds \
@@ -274,7 +272,7 @@ then
 
     echo -e '\nGetting m1 background spectra...'
 
-    mosexpr="$mospattern && $bgreg $psreg"
+    mosexpr="$mospattern && $bgreg $psreg $mos1ccdpattern"
     prefix=$M1_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -284,7 +282,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos1ccdpattern"
+        writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m1-${bgid}-detmap.ds \
@@ -293,14 +291,14 @@ then
         withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos1ccdpattern"
+        writedss=Y expression="$mosexpr"
 
 ######################################################################
 #  get m2 background spectra
 
     echo -e '\nGetting m2 background spectra...'
 
-    mosexpr="$mospattern && $bgreg $psreg"
+    mosexpr="$mospattern && $bgreg $psreg $mos2ccdpattern"
     prefix=$M2_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -310,7 +308,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos2ccdpattern"
+        writedss=Y expression="$mosexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=m2-${bgid}-detmap.ds \
@@ -319,7 +317,7 @@ then
         withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$mosexpr $mos2ccdpattern"
+        writedss=Y expression="$mosexpr"
 
 
 ######################################################################
@@ -327,7 +325,7 @@ then
 
     echo -e '\nGetting pn background spectra...'
 
-    pnexpr="$pnpattern && $bgreg $psreg"
+    pnexpr="$pnpattern && $bgreg $psreg $pnccdpattern"
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean.fits
 
@@ -337,7 +335,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
     # detector map file for arfgen
     evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-detmap.ds \
@@ -346,14 +344,14 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
 ######################################################################
 #  get pn oot background spectra
 
     echo -e '\nGetting pn background spectra...'
 
-    pnexpr="$pnpattern && $bgreg $psreg"
+    pnexpr="$pnpattern && $bgreg $psreg $pnccdpattern"
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean-oot.fits
 
@@ -363,7 +361,7 @@ then
         withspectrumset=true spectrumset=${specdir}/pn-${bgid}-oot.pha \
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
-        writedss=Y expression="$pnexpr $pnccdpattern"
+        writedss=Y expression="$pnexpr"
 
     # # detector map file for arfgen
     # evselect table=${evlist} withimageset=yes imageset=pn-${bgid}-oot-detmap.ds \
