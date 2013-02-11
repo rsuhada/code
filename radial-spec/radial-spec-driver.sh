@@ -423,21 +423,11 @@ while [[ $reached_r_max -ne 1 ]]; do
 done                            # iteration end
 ######################################################################
 
-######################################################################
-# do area correction calculation - NOT needed for radial temperature
-# profiles
 
-# if [[ $CALCULATE_AREACORR -eq 1 ]]
-# then
-#     cd ${specdir}/${spectrumid}-final
-#     if [[ $EXCLUDE_CORE -eq 0 ]]
-#     then
-#         area-correction-factors.sh "$r_old"
-#     else
-#         rcore_old=$(echo "scale=6;$core_frac*$r_old" | bc)
-#         area-correction-factors.sh "$rcore_old" "$r_old"
-#     fi
-# fi
+######################################################################
+# plot
+
+plt_radial_t.py $LOG_MASTER_FILE
 
 
 
