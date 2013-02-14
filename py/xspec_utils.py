@@ -27,11 +27,9 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
     mu_h = mu_h_feldman92
 
     # convert everything to cgs
-    r_proj_mpc = r_proj_ang * arcsec_to_radian * da       # [cm]
-    print r_proj_mpc
     da = da * mpc_to_cm
     r_proj = r_proj_ang * arcsec_to_radian * da       # [cm]
-    r_proj_inner = r_proj_inner_ang * da
+    r_proj_inner = r_proj_inner_ang  * arcsec_to_radian * da
 
     b = r_proj**3 - r_proj_inner**3
 
