@@ -27,8 +27,10 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
     mu_h = mu_h_feldman92
 
     # convert everything to cgs
+    r_proj_mpc = r_proj_ang * arcsec_to_radian * da       # [cm]
+    print r_proj_mpc
     da = da * mpc_to_cm
-    r_proj = r_proj_ang * da
+    r_proj = r_proj_ang * arcsec_to_radian * da       # [cm]
     r_proj_inner = r_proj_inner_ang * da
 
     b = r_proj**3 - r_proj_inner**3
@@ -43,6 +45,7 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
 
 
 if __name__ == '__main__':
+    print
     ######################################################################
     # test normalization calculation
 
@@ -62,14 +65,16 @@ if __name__ == '__main__':
 
     # angular distance
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
+    angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
 
     density = spec_norm_to_density(norm, z, da, r_proj_ang)
-
     ne = density / (mu_e_feldman92 * mp_cgs)
+
 
     print
     print " z          :: ", z
     print " da         :: ", da
+    print " ang scale  :: ", angscale
     print " r_proj_ang :: ", r_proj_ang
     print " r_proj     :: ", r_proj
     print " norm       :: ", norm
