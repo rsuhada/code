@@ -8,6 +8,7 @@ m1          m1.pha
 m2          m2.pha
 pn          pn.pha
 bg          local
+bgid        bg-ann-01
 stat        c
 excise_core 0
 

@@ -7,6 +7,7 @@ dir         ~/w/xspt/data/
 source
 inst        xmm
 bg          local
+bgid        bg-ann-01
 stat        c
 
 notes:
