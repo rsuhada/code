@@ -125,6 +125,10 @@ echo "PN CCD pattern: " $pnccdpattern
 mospattern="(FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])"
 pnpattern="(FLAG == 0) && (PATTERN<=4) && (PI in [100:10000])"
 
+mospattern2="(FLAG == 0) && (PATTERN<=12) && (PI in [400:10000])"
+pnpattern2="(FLAG == 0) && (PATTERN<=4) && (PI in [400:10000])"
+
+
 if [[ $EXTRACT_SRC -ne 0 ]]
 then
 
@@ -159,7 +163,7 @@ then
 
     echo -e '\nGetting m2 spectra...'
 
-    mosexpr="$mospattern && $srcreg $psreg mos2ccdpattern"
+    mosexpr="$mospattern && $srcreg $psreg $mos2ccdpattern"
     prefix=$M2_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -243,6 +247,8 @@ then
     echo -e '\nGetting m1 background spectra...'
 
     mosexpr="$mospattern && $bgreg $psreg $mos1ccdpattern"
+    mosexpr2="$mospattern2 && $bgreg $psreg $mos1ccdpattern"
+
     prefix=$M1_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -263,12 +269,24 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
+    # image to check if in the spectroscopic band 400: everything was
+    # removed
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/m1-${bgid}-specband.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m1-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr2"
+
+
 ######################################################################
 #  get m2 background spectra
 
     echo -e '\nGetting m2 background spectra...'
 
     mosexpr="$mospattern && $bgreg $psreg $mos2ccdpattern"
+    mosexpr2="$mospattern2 && $bgreg $psreg $mos2ccdpattern"
     prefix=$M2_EV_PREFIX_LIST
     evlist=mos${prefix}-clean.fits
 
@@ -289,6 +307,15 @@ then
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$mosexpr"
 
+    # image to check if in the spectroscopic band 400: everything was
+    # removed
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/m2-${bgid}-specband.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/m2-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$mosexpr2"
 
 ######################################################################
 #  get pn background spectra
@@ -296,6 +323,8 @@ then
     echo -e '\nGetting pn background spectra...'
 
     pnexpr="$pnpattern && $bgreg $psreg $pnccdpattern"
+    pnexpr2="$pnpattern2 && $bgreg $psreg $pnccdpattern"
+
     prefix=$PN_EV_PREFIX_LIST
     evlist=pn${prefix}-clean.fits
 
@@ -315,6 +344,16 @@ then
         withspecranges=true energycolumn=PI specchannelmin=0 \
         specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
         writedss=Y expression="$pnexpr"
+
+    # image to check if in the spectroscopic band 400: everything was
+    # removed
+    evselect table=${evlist} withimageset=yes imageset=${specdir}/pn-${bgid}-specband.im \
+        xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=80 \
+        yimagebinsize=80 withzcolumn=N withzerrorcolumn=N \
+        withspectrumset=true spectrumset=${specdir}/pn-${bgid}.pha \
+        withspecranges=true energycolumn=PI specchannelmin=0 \
+        specchannelmax=11999 spectralbinsize=5 updateexposure=yes \
+        writedss=Y expression="$pnexpr2"
 
 ######################################################################
 #  get pn oot background spectra

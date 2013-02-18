@@ -34,7 +34,7 @@ dir=$1
 here=`pwd`
 cd $dir
 
-reduction_id="001"              # FIXME: add autonaming - see below
+reduction_id="003"              # FIXME: add autonaming - see below
 elo="500"
 ehi="2000"
 aperture=200.0                  # [pix]
