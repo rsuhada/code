@@ -1063,7 +1063,7 @@ pars_true.add('rcore', value=rcore, vary=False)
 pars_true.add('beta', value=beta, vary=False)
 pars_true.add('xcen', value=450, vary=False)
 pars_true.add('ycen', value=450, vary=False)
-# test_lmfit_beta_psf_1d(im_file)
+test_lmfit_beta_psf_1d(im_file)
 
 # test v06 fit of the v06 model
 
@@ -1077,7 +1077,7 @@ pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
 # test_create_v06_psf_im(im_file)
-test_lmfit_v06_psf_1d(im_file)
+# test_lmfit_v06_psf_1d(im_file)
 
 
 print "done!"

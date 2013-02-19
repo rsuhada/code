@@ -133,7 +133,7 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
         color='black',
         linestyle='',              # -/--/-./:
         linewidth=1,                # linewidth=1
-        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        marker='.',                  # ./o/*/+/x/^/</>/v/s/p/h/H
         markerfacecolor='black',
         markersize=6,               # markersize=6
         label=r"source"               # '__nolegend__'
@@ -152,8 +152,8 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
 
     ######################################################################
     # subplot data sets
-    ax1.set_xscale('log')                     # ['linear' | 'log' | 'symlog']
-    ax1.set_yscale('log')                     # ['linear' | 'log' | 'symlog']
+    ax1.set_xscale('log', nonposx='clip')                     # ['linear' | 'log' | 'symlog']
+    ax1.set_yscale('log', nonposy='clip')                     # ['linear' | 'log' | 'symlog']
     # ax1.set_xlim(xmin=20.0,xmax=50.0)
     ax1.set_ylim(ymin=ymin)
 
