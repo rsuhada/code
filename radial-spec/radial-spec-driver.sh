@@ -388,6 +388,7 @@ while [[ $reached_r_max -ne 1 ]]; do
 
     if [[ $DO_SPECTROSCOPY -eq 1 ]]
     then
+        echo "writing into the master log"
         # sort of dummy here - if current r were r500 what would be the pars be (required for further output)
         $PYTHONEXEC ${codedir}/py/t_to_r.py ${spectrumid}/${CLNAME}-${spectrumid}.result | tee ${spectrumid}/${CLNAME}-${spectrumid}.aper
         aper_results=`read_aper_result_file ${spectrumid}/${CLNAME}-${spectrumid}.aper`
@@ -427,7 +428,8 @@ done                            # iteration end
 ######################################################################
 # plot
 
-plt_radial_t.py $LOG_MASTER_FILE
+echo "Creating radial temperature plot!"
+$PYTHONEXEC ${codedir}/radial-spec/plt_radial_t.py $LOG_MASTER_FILE
 
 
 
