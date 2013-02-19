@@ -43,3 +43,45 @@ def py2ds9imcoord(pyindex):
     """
     return pyindex + 1
 
+def iplot(x, y):
+    """
+    A simple no-fuss or features interctive plot for debugging.
+
+    Arguments:
+    - `x`: x value
+    - `y`: y value
+    """
+    # interactive quick plot
+    plt.figure()
+    plt.ion()
+    plt.clf()
+
+    plt.plot(x, y,
+        color='black',
+        linestyle='-',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=0,               # markersize=6
+        label=r"data"               # '__nolegend__'
+        )
+
+    plt.xscale("linear")
+    plt.yscale("linear")
+
+    plt.show()
+    plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+    plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
+def print_lmfit_result_tab(pars_true, pars_fit):
+    """
+    Print a nice result table for lmfit structures
+    """
+    print
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
+    print "| %10s | %10s | %10s | %10s |" % ("name", "true", "fit", "error")
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
+    for key in pars_true:
+        print "| %10s | %10.5f | %10.5f | %10.5f |" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
+    print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
+    print
