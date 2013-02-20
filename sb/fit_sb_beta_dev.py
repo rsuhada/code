@@ -8,7 +8,8 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile
 from esaspi_utils import *
-
+from sb_models import beta_psf_2d_lmfit_profile
+import lmfit as lm
 
 def load_sb_curve(fname):
     """
@@ -70,21 +71,45 @@ def fit_beta_model(r, sb_src, sb_src_err):
     - `sb_src_err`:
     """
 
+    # settings
+    APPLY_PSF = True
+    DO_ZERO_PAD = True
+
+    ######################################################################
+    # modelling is done in 2D and then projected - setup here the 2D
+    # parameters
+
+    size = r.max()
+    xsize = size
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+    # imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+    imsize = (size, size)         # FIXME: is this necessary? I could just use it inside the model
+
+    xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    r_aper = xsize_obj  / 2        # aperture for the fitting
+
+
     ######################################################################
     # init model
 
     pars = lm.Parameters()
-    pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(input_im))
+    pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(sb_src))
     pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
     pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
-                   energy, APPLY_PSF, DO_ZERO_PAD, profile_norm,
-                   profile_norm_err)
+                   energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+                   sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
+    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
     # do the fit
@@ -118,9 +143,9 @@ def fit_beta_model(r, sb_src, sb_src_err):
         ######################################################################
         # output
 
-        print_result_tab(pars_true, pars)
+        # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
-
+        print "fitting subroutine done!"
 
         return 0
 
@@ -148,7 +173,7 @@ if __name__ == '__main__':
 
     # program settings
     MAKE_CONTROL_PLOT = True
-    FIT_BETA_MODEL = False
+    FIT_BETA_MODEL = True
 
     ######################################################################
     # loading the data

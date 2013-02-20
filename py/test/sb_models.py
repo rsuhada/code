@@ -179,7 +179,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     """
     # FIXME: the _object coordinates are not needed anymore
 
-    hdr = pyfits.getheader('pn-test.fits')
+    # hdr = pyfits.getheader('pn-test.fits') # FIXME: would be better to create a fits header from scratch
 
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
