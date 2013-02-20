@@ -925,8 +925,8 @@ def plot_data_model_simple(r_data, profile_data,
     plt.xscale("linear")
     plt.yscale("linear")
 
-    # plt.xscale("log")
-    # plt.yscale("log")
+    # plt.xscale("log", nonposx='clip')
+    # plt.yscale("log", nonposy='clip')
 
     # plt.ylim(ymin=1e-2,ymax=1e4)
 

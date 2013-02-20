@@ -533,6 +533,93 @@ def plot_king_model_psf(energy, theta, instrument):
     # save figure
     plt.savefig(fig_name)
 
+
+def plot_data_model_simple(r_data, profile_data,
+                           r_model=None, profile_model=None,
+                           output_figure=None, profile_data_err=None,
+                           r_true=None, profile_true=None):
+    """
+    Simple plot of a profile: data vs model (optionally also error bars)
+
+    Arguments:
+    - `r_data`: radial grid for data
+    - `profile_data`: profile data
+    - `r_model`: radial grid for model
+    - `profile_norm_model`: profile model
+    - `ouputname`:
+    """
+    ax1 = plt.figure()
+    plt.ion()
+    plt.clf()
+
+    if any(profile_data_err):
+        plt.errorbar(r_data-0.5, profile_data, profile_data_err,
+        color='black',
+        linestyle='',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=6,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+    else:
+        plt.plot(r_data-0.5, profile_data,
+        color='black',
+        linestyle='-',              # -/--/:/-.
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=4,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+
+    if any(profile_model):
+        plt.plot(r_model-0.5, profile_model,
+            color='red',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"model fit"          # '__nolegend__'
+            )
+
+    if any(profile_true):
+        plt.plot(r_true-0.5, profile_true,
+            color='green',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"true model"          # '__nolegend__'
+            )
+
+    from pylab import xlabel, ylabel
+    xlabel('radius', fontsize=14, fontweight="normal")          # fontsize=12
+    ylabel('profile', fontsize=14, fontweight="normal")          # fontsize=12
+
+    # plt.xscale("linear")
+    # plt.yscale("linear")
+
+    plt.xscale("log", nonposx='clip')
+    plt.yscale("log", nonposy='clip')
+
+
+    # plt.ylim(ymin=1e-2,ymax=1e4)
+
+    prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+    plt.legend(loc=0, prop=prop, numpoints=1)
+
+    plt.draw()
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    plt.show()
+
+    if output_figure:
+        plt.savefig(output_figure)
+
+
+
 if __name__ == '__main__':
     print "This is a library! Use import sb_plotting_utils in your script to call the subrutines"
 

@@ -6,10 +6,12 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-from sb_plotting_utils import plot_sb_profile, plot_cts_profile
+from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple
 from esaspi_utils import *
 from sb_models import beta_psf_2d_lmfit_profile
 import lmfit as lm
+import time
+
 
 def load_sb_curve(fname):
     """
@@ -50,7 +52,8 @@ def sanitize_sb_curve(sb_curve_tuple):
     ids1 = where(sb_src>0.0)
     ids2 = where(negative(isnan(sb_src)))
 
-    ids = unique(hstack((ids1, ids2)))
+    # ids = unique(hstack((ids1, ids2)))
+    ids = ids2
 
     r = r[ids]
     sb_src = sb_src[ids]
@@ -74,12 +77,14 @@ def fit_beta_model(r, sb_src, sb_src_err):
     # settings
     APPLY_PSF = True
     DO_ZERO_PAD = True
+    DO_FIT = True
+    PLOT_PROFILE = True
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
     # parameters
 
-    size = r.max()
+    size = 2.0 * r.max()
     xsize = size
     ysize = xsize
     xcen = xsize/2
@@ -93,14 +98,13 @@ def fit_beta_model(r, sb_src, sb_src_err):
     ycen_obj = ysize_obj / 2
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
-
     ######################################################################
     # init model
 
     pars = lm.Parameters()
-    pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(sb_src))
+    pars.add('norm', value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
     pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
-    pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
+    pars.add('beta', value=0.66, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
@@ -108,12 +112,11 @@ def fit_beta_model(r, sb_src, sb_src_err):
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
     # do the fit
-    DO_FIT = True
 
     if DO_FIT:
         print "starting fit"
@@ -147,6 +150,18 @@ def fit_beta_model(r, sb_src, sb_src_err):
         lm.printfuncs.report_errors(result.params)
         print "fitting subroutine done!"
 
+    ######################################################################
+    # plot profiles
+
+    if DO_FIT and PLOT_PROFILE:
+
+        output_figure = 'lmfit_beta_psf_1d.png'
+
+        plot_data_model_simple(r, sb_src,
+                               r_model, profile_norm_model,
+                               output_figure, sb_src_err)
+
+
         return 0
 
 
@@ -163,7 +178,8 @@ if __name__ == '__main__':
     fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     outfig = fname+'.dev.png'
 
-    r_500_proj_ang = 153.0   # projected radius [arcsec]
+    # r_500_proj_ang = 153.0   # projected radius [arcsec]
+    r_500_proj_ang = 100.0   # projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0
@@ -171,14 +187,14 @@ if __name__ == '__main__':
     instrument = "pn"
     psf_pars = (instrument, theta, energy)
 
-    # program settings
-    MAKE_CONTROL_PLOT = True
+    # module settings
+    MAKE_CONTROL_PLOT = False
     FIT_BETA_MODEL = True
 
     ######################################################################
     # loading the data
-    # (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
-    (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = load_sb_curve(fname)
+    (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
+    # (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = load_sb_curve(fname)
 
     ids = where(r<=r_500_proj_ang)
 
@@ -187,7 +203,10 @@ if __name__ == '__main__':
     sb_bg = sb_bg[ids]
     sb_src_err = sb_src_err[ids]
     sb_bg_err = sb_bg_err[ids]
+    n = len(r)
 
+    for i in xrange(n):
+        print r[i], sb_src[i], sb_bg[i], sb_src_err[i], sb_bg_err[i]
 
     ######################################################################
     # control plot
