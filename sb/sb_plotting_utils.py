@@ -6,7 +6,7 @@ from numpy import *
 from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator, MaxNLocator
 from sb_utils import *
 
 def plot_cts_profile(r, c1, c2, fname):
@@ -612,6 +612,120 @@ def plot_data_model_simple(r_data, profile_data,
     plt.legend(loc=0, prop=prop, numpoints=1)
 
     plt.draw()
+    plt.get_current_fig_manager().window.wm_geometry("+1100+0")
+    plt.show()
+
+    if output_figure:
+        plt.savefig(output_figure)
+
+
+def plot_data_model_resid(r_data, profile_data,
+                           r_model=None, profile_model=None,
+                           output_figure=None, profile_data_err=None,
+                           r_true=None, profile_true=None):
+    """
+    Simple plot of a profile: data vs model (optionally also error bars)
+    just as def plot_data_model_simple but also include residual sublot
+
+    Arguments:
+    - `r_data`: radial grid for data
+    - `profile_data`: profile data
+    - `r_model`: radial grid for model
+    - `profile_norm_model`: profile model
+    - `ouputname`:
+    """
+    f = plt.figure()
+    plt.subplots_adjust(hspace=0.001)
+    plt.ion()
+    plt.clf()
+
+    ax1 = plt.subplot(211)
+    if any(profile_data_err):
+        ax1.errorbar(r_data-0.5, profile_data, profile_data_err,
+        color='black',
+        linestyle='',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=6,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+    else:
+        ax1.plot(r_data-0.5, profile_data,
+        color='black',
+        linestyle='-',              # -/--/:/-.
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=4,               # markersize=6
+        label=r"source"               # '__nolegend__'
+        )
+
+    if any(profile_model):
+        ax1.plot(r_model-0.5, profile_model,
+            color='red',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"model fit"          # '__nolegend__'
+            )
+
+    if any(profile_true):
+        ax1.plot(r_true-0.5, profile_true,
+            color='green',
+            linestyle='-',              # -/--/:/-.
+            linewidth=1,                # linewidth=1
+            marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=0,               # markersize=6
+            label=r"true model"          # '__nolegend__'
+            )
+
+    ######################################################################
+    # residuals
+
+    # FIXME: now OK but indices should be generalized
+    res = (profile_data[:-1] - profile_model[1:]) / profile_model[1:]
+    res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
+
+    ax2 = plt.subplot(212)
+
+    ax2.errorbar(r_data[:-1]-1.5, res, res_err,
+        color='black',
+        linestyle='',              # -/--/-./:
+        linewidth=1,                # linewidth=1
+        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        markerfacecolor='black',
+        markersize=6,               # markersize=6
+        label=r"__nolegend__"               # '__nolegend__'
+        )
+
+    ax2.axhline(0.0, color='red')
+
+    # take care of labels and ticks
+
+    ax1.set_xscale("log", nonposx='clip')
+    ax1.set_yscale("log", nonposy='clip')
+    ax1.set_ylabel('Profile', fontsize=14, fontweight="normal")          # fontsize=12
+    xticklabels = ax1.get_xticklabels()
+    plt.setp(xticklabels, visible=False)
+
+    # ax1.yaxis.set_major_locator(MaxNLocator(prune='lower'))  # doesn'the work
+
+    ax2.set_xscale("log", nonposx='clip')
+    # ax2.set_yscale("log", nonposy='clip')
+    ax2.set_xlabel('Radius', fontsize=14, fontweight="normal")          # fontsize=12
+    ax2.set_ylabel('(data-model)/model', fontsize=12, fontweight="normal")          # fontsize=12
+
+    width=std(res)
+    ax2.set_ylim(-3*width, 3*width)
+
+    # prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+    # set_legend(loc=0, prop=prop, numpoints=1)
+
+    # plt.draw()
     plt.get_current_fig_manager().window.wm_geometry("+1100+0")
     plt.show()
 

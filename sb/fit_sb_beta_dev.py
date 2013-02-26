@@ -6,7 +6,7 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple
+from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
 from esaspi_utils import *
 from sb_models import beta_psf_2d_lmfit_profile
 import lmfit as lm
@@ -112,7 +112,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'ptol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
@@ -157,15 +157,11 @@ def fit_beta_model(r, sb_src, sb_src_err):
 
         output_figure = 'lmfit_beta_psf_1d.png'
 
-        plot_data_model_simple(r, sb_src,
+        plot_data_model_resid(r, sb_src,
                                r_model, profile_norm_model,
                                output_figure, sb_src_err)
 
-
-        return 0
-
-
-
+    return 0
 
 
 if __name__ == '__main__':
@@ -205,8 +201,8 @@ if __name__ == '__main__':
     sb_bg_err = sb_bg_err[ids]
     n = len(r)
 
-    for i in xrange(n):
-        print r[i], sb_src[i], sb_bg[i], sb_src_err[i], sb_bg_err[i]
+    # for i in xrange(n):
+    #     print r[i], sb_src[i], sb_bg[i], sb_src_err[i], sb_bg_err[i]
 
     ######################################################################
     # control plot
