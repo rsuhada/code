@@ -372,8 +372,8 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
         # is this biasing?
         if USE_ERROR: residuals = residuals / data_profile_err
 
-
         return residuals
+
 
 def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
                              xcen_obj,ycen_obj,data_profile=None,
@@ -390,6 +390,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                   psf_pars)
 
+    # FIXME: is this necessary for each step?
     # trim distmatrix size to image post convolution
     distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
     distmatrix = trim_fftconvolve(distmatrix)

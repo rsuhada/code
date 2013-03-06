@@ -170,8 +170,8 @@ def fit_v06_model(fname='cluster-im-v06-psf.fits'):
     """
     APPLY_PSF = True
     DO_ZERO_PAD = True
-    DO_FIT = True
-    PLOT_PROFILE = True
+    DO_FIT = False
+    PLOT_PROFILE = False
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -221,19 +221,6 @@ def fit_v06_model(fname='cluster-im-v06-psf.fits'):
     (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
                                                            *nonfit_args)
 
-    ######################################################################
-    # fits
-
-    fname = 'smooth_model.fits'
-    (model_image, hdr2) = load_fits_im(fname)
-
-    distmatrix = distance_matrix(model_image, xcen_obj, ycen_obj).astype('int') + 1 # +1 bc of the divergence
-    bgrid = unique(distmatrix.flat)
-
-    (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
-    profile_norm_true2 = profile / geometric_area
-    r_true2 = arange(0, len(profile), 1.0)
-
     # start here
     # plot_data_model_simple(r_data, profile_norm_data,
     #                        r_true2, profile_norm_true2,
@@ -247,7 +234,8 @@ def fit_v06_model(fname='cluster-im-v06-psf.fits'):
                    xcen_obj, ycen_obj, profile_norm_data,
                    profile_norm_data_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'ptol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting fit"
