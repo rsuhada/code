@@ -164,71 +164,35 @@ def fit_beta_model(r, sb_src, sb_src_err):
     return 0
 
 
-def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
+def fit_v06_model(fname='cluster-im-v06-psf.fits'):
     """
     Testing simple 1D fit of v06 model with psf convolution
     """
     APPLY_PSF = True
     DO_ZERO_PAD = True
+    DO_FIT = True
+    PLOT_PROFILE = True
 
     ######################################################################
-    # image setup
+    # modelling is done in 2D and then projected - setup here the 2D
+    # parameters
 
-    xsize = input_im.shape[0]
+    size = 2.0 * r.max()
+    xsize = size
     ysize = xsize
-    xcen = xsize/2 #+ 1
-    ycen = ysize/2 #+ 1
+    xcen = xsize/2
+    ycen = ysize/2
+    # imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+    imsize = (size, size)         # FIXME: is this necessary? I could just use it inside the model
 
-    imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
-
-    rmax = 1.5 * r500_pix
-    xsize_obj = 2 * rmax   # has to be at least 1 pix less than the
-                           # "data" image
-
+    xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
+    r_aper = xsize_obj  / 2        # aperture for the fitting
 
     ######################################################################
-    # getting the "data"
-
-    # cut out the relevant part of the image
-    subidx1 = xcen-xsize_obj/2
-    subidx2 = xcen+xsize_obj/2
-    subidy1 = ycen-ysize_obj/2
-    subidy2 = ycen+ysize_obj/2
-
-    data = input_im[subidx1:subidx2, subidy1:subidy2]
-    imsize = data.shape
-
-    # setup data for the profile extraction - for speedup
-    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1 # +1 bc of the divergence
-
-    # FIXME: bgrid should be removed and replaced by r_data in the
-    # extract_profile_fast2 call
-    bgrid = unique(distmatrix.flat)
-
-    # defining the binning scheme
-    r_length = data.shape[0]/2
-    r_data = arange(0, r_length, 1.0)
-
-    # extract profile for *data*
-    (profile_data, geometric_area_data) = extract_profile_fast2(data, distmatrix, bgrid)
-    profile_norm_data = profile_data[0:r_length] / geometric_area_data[0:r_length]    # trim the corners
-
-    # print 'v06', profile_data[0:10]
-    # print 'v06', geometric_area_data[0:10]
-    # print 'v06', profile_norm_data[0:10]
-
-    # normalize and get errors
-    profile_norm_data_err = sqrt(profile_norm_data)
-    profile_norm_data_err[profile_norm_data_err==0.0] = sqrt(profile_norm_data.max())
-
-    # plot_data_model_simple(r_data, profile_norm_data, None, None, None, profile_norm_data_err,
-    #                        None, None)
-
-    ######################################################################
-    # init fit parameters
+    # init model
 
     n0 = 7e+0
     rc = 20.0
@@ -278,8 +242,6 @@ def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
 
     ######################################################################
     # do the fit
-
-    DO_FIT = True
 
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj, profile_norm_data,
@@ -415,8 +377,8 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = True
-    FIT_V06_MODEL = False
+    FIT_BETA_MODEL = False
+    FIT_V06_MODEL = True
 
     ######################################################################
     # loading the data
@@ -432,9 +394,6 @@ if __name__ == '__main__':
     sb_bg_err = sb_bg_err[ids]
     n = len(r)
 
-    # for i in xrange(n):
-    #     print r[i], sb_src[i], sb_bg[i], sb_src_err[i], sb_bg_err[i]
-
     ######################################################################
     # control plot
 
@@ -446,7 +405,7 @@ if __name__ == '__main__':
         fit_beta_model(r, sb_src, sb_src_err)
 
     if FIT_V06_MODEL:
-        fit_beta_model(r, sb_src, sb_src_err)
+        fit_v06_model(r, sb_src, sb_src_err)
 
 
     print "done!"
