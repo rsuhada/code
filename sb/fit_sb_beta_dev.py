@@ -9,7 +9,7 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
 from esaspi_utils import *
 from sb_utils import distance_matrix
-from sb_models import beta_psf_2d_lmfit_profile
+from sb_models import beta_psf_2d_lmfit_profile, v06_psf_2d_lmfit_profile
 import lmfit as lm
 import time
 
@@ -100,7 +100,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
     ######################################################################
-    # init model
+    # init beta model
 
     pars = lm.Parameters()
     pars.add('norm', value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
@@ -113,7 +113,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'ptol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
@@ -171,8 +171,10 @@ def fit_v06_model(r, sb_src, sb_src_err):
     """
     APPLY_PSF = True
     DO_ZERO_PAD = True
-    DO_FIT = False
-    PLOT_PROFILE = False
+    DO_FIT = True
+    PLOT_PROFILE = True
+    CALC_1D_CI = False
+    CALC_2D_CI = False
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -203,7 +205,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
     gamma = 3.0
     epsilon = 1.5
 
-    rmax = 200.0
+    rmax = 100.0
     r500_pix = rmax
 
     # v06 pars lmfit structure
@@ -232,8 +234,8 @@ def fit_v06_model(r, sb_src, sb_src_err):
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    leastsq_kws={'ptol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting fit"
@@ -245,62 +247,28 @@ def fit_v06_model(r, sb_src, sb_src_err):
                              **leastsq_kws)
         result.leastsq()
 
-        # get the final fitted model
-        nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
-                   xcen_obj, ycen_obj)
-        (r_fit_model, profile_norm_fit_model) = v06_psf_2d_lmfit_profile(pars, *nonfit_args)
-
-        ######################################################################
-        ######################################################################
-        ######################################################################
-
-        # nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
-        #            energy, APPLY_PSF, DO_ZERO_PAD, profile_norm_data,
-        #            profile_norm_data_err)
-
-        # pars = lm.Parameters()
-        # pars.add('norm', value=1.0, vary=True, min=0.0, max=sum(input_im))
-        # pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
-        # pars.add('beta', value=0.7, vary=True, min=0.1, max=10.0)
-        # pars.add('xcen', value=xcen_obj, vary=False)
-        # pars.add('ycen', value=ycen_obj, vary=False)
-
-        # result = lm.minimize(beta_psf_2d_lmfit_profile,
-        #                      pars,
-        #                      args=nonfit_args,
-        #                      **leastsq_kws)
-        # result.leastsq()
-
-        # # get the output model
-        # (r_fit_model, profile_norm_fit_model) = beta_psf_2d_lmfit_profile(pars,
-        #                                                           imsize,
-        #                                                           xsize_obj,
-        #                                                           ysize_obj,
-        #                                                           instrument,
-        #                                                           theta,
-        #                                                           energy,
-        #                                                           APPLY_PSF,
-        #                                                           DO_ZERO_PAD)
-
-        ######################################################################
-        ######################################################################
-        ######################################################################
-
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
+
+        # get the output model
+        (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
+                                                                         distmatrix_input,
+                                                                         bgrid,
+                                                                         r500_pix,
+                                                                         psf_pars,
+                                                                         xcen_obj,
+                                                                         ycen_obj)
+
 
     ######################################################################
     # output
 
     if DO_FIT:
         lm.printfuncs.report_errors(result.params)
-        print_result_tab(pars_true, pars)
+        # print_result_tab(pars_true, pars)
 
     ######################################################################
-    # confidence intervals
-
-    CALC_1D_CI = False
-    CALC_2D_CI = False
+    # FIXME: not yet ported, confidence intervals
 
     if CALC_1D_CI:
         print "Calculating 1D confidence intervals"
@@ -326,19 +294,15 @@ def fit_v06_model(r, sb_src, sb_src_err):
     ######################################################################
     # plot profiles
 
-    PLOT_PROFILE = False
-
     if DO_FIT and PLOT_PROFILE:
 
         print 30*'#'
         print
 
         output_figure = 'lmfit_v06_psf_1d.png'
-        plot_data_model_simple(r_data, profile_norm_data,
-                               r_fit_model, profile_norm_fit_model,
-                               output_figure, profile_norm_data_err,
-                               r_true, profile_norm_true)
-
+        plot_data_model_resid(r, sb_src,
+                              r_model, profile_norm_model,
+                              output_figure, sb_src_err)
 
 
 

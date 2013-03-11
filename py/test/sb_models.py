@@ -402,6 +402,15 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
+    # print '*'*30
+    # print len(r), len(model_profile)
+    # print len(profile[0:r_length]), r_length
+    # # print len(data_profile[0:r_length]), len(model_profile), r500, r_length
+    # print '*'*30
+    # # from time import sleep
+    # # sleep(100)
+
+
     if data_profile == None:
         # return (r, model_profile, geometric_area)
         return (r, model_profile)
@@ -412,6 +421,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
 
         # return residuals
         return residuals
+
 
 def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile):
     """
