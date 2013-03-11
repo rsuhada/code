@@ -164,7 +164,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
     return 0
 
 
-def fit_v06_model(fname='cluster-im-v06-psf.fits'):
+def fit_v06_model(r, sb_src, sb_src_err):
     """
     Testing simple 1D fit of v06 model with psf convolution
     """
@@ -202,12 +202,14 @@ def fit_v06_model(fname='cluster-im-v06-psf.fits'):
     gamma = 3.0
     epsilon = 1.5
 
+    rmax = 200.0
+
     # convert pars to lmfit structure
     pars = lm.Parameters()
     pars.add('n0'      , value=n0, vary=True, min=1.0e-9, max=1.0e3)
-    pars.add('rc'      , value=rc, vary=True, min=0.05, max=r500_pix)
+    pars.add('rc'      , value=rc, vary=True, min=0.05, max=rmax)
     pars.add('beta'    , value=beta, vary=True, min=0.05, max=2.0)
-    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*r500_pix)
+    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*rmax)
     pars.add('alpha'   , value=alpha, vary=True, min=0.01, max=3.0)
     pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
     pars.add('gamma'   , value=gamma, vary=False)
