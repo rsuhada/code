@@ -8,6 +8,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
 from esaspi_utils import *
+from sb_utils import distance_matrix
 from sb_models import beta_psf_2d_lmfit_profile
 import lmfit as lm
 import time
@@ -203,8 +204,9 @@ def fit_v06_model(r, sb_src, sb_src_err):
     epsilon = 1.5
 
     rmax = 200.0
+    r500_pix = rmax
 
-    # convert pars to lmfit structure
+    # v06 pars lmfit structure
     pars = lm.Parameters()
     pars.add('n0'      , value=n0, vary=True, min=1.0e-9, max=1.0e3)
     pars.add('rc'      , value=rc, vary=True, min=0.05, max=rmax)
@@ -215,26 +217,20 @@ def fit_v06_model(r, sb_src, sb_src_err):
     pars.add('gamma'   , value=gamma, vary=False)
 
     # set the ancilarry parameters
-    distmatrix_input = distmatrix.copy()
+    # +1 bc of the central divergence
+    data = empty(imsize)
+    distmatrix_input = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1
+    bgrid = unique(distmatrix_input.flat)
 
+    # gather all non-fit arguments
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj)
-
-    (r_true, profile_norm_true) = v06_psf_2d_lmfit_profile(pars_true,
-                                                           *nonfit_args)
-
-    # start here
-    # plot_data_model_simple(r_data, profile_norm_data,
-    #                        r_true2, profile_norm_true2,
-    #                        None, profile_norm_data_err,
-    #                        r_true, profile_norm_true)
 
     ######################################################################
     # do the fit
 
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
-                   xcen_obj, ycen_obj, profile_norm_data,
-                   profile_norm_data_err)
+                   xcen_obj, ycen_obj, sb_src, sb_src_err)
 
     leastsq_kws={'ptol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
@@ -330,7 +326,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
     ######################################################################
     # plot profiles
 
-    PLOT_PROFILE = True
+    PLOT_PROFILE = False
 
     if DO_FIT and PLOT_PROFILE:
 
@@ -348,8 +344,6 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
 if __name__ == '__main__':
     print
-
-    reload(sb_plotting_utils)
 
     ######################################################################
     # settings
