@@ -434,6 +434,7 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     'bgmap' - background map (smooth, units cts)
     'maskmap' - mask
     """
+    POISSONIZE_IMAGE = False
 
     # load images
     srcmodel, hdr = load_fits_im(srcmodel_file)
@@ -451,7 +452,9 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     bgmap_poi = bgmap * maskmap     # get rid of artifacts
 
     ids = where(bgmap_poi != 0.0)
-    bgmap_poi[ids] = poisson.rvs(bgmap[ids])
+
+    if POISSONIZE_IMAGE:
+        bgmap_poi[ids] = poisson.rvs(bgmap[ids])
 
     output_im = srcmodel + bgmap_poi
 

@@ -364,7 +364,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     print "Creating V06 x PSF image!"
 
     # settings
-    POISSONIZE_IMAGE   = True            # poissonize image?
+    POISSONIZE_IMAGE   = False            # poissonize image?
 
     # get a header
     fname='pn-test.fits'
@@ -372,7 +372,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdr = hdu[0].header
 
     # image setup
-    xsize = 900
+    xsize = 902
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
@@ -381,7 +381,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # - works fine
     rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
 
-    xsize_obj = 100           # 900 if you want a big image, *has* to be > 3xr500
+    xsize_obj = 902           # 900 if you want a big image, *has* to be > 3xr500
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -1051,10 +1051,10 @@ im_file = 'v06_image_cts.fits'
 expmap_file = "pn-test-exp.fits"
 bgmap_file  = "pn-test-bg-2cp.fits"
 maskmap_file= "pn-test-mask.fits"
-outfile_file= "cluster-im-v06-psf_2e5.fits"
+out_file= "cluster-im-v06-psf_2e5.fits"
 
 # make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, outfile_file)
+                           # bgmap_file, maskmap_file, out_file)
 
 # test beta fit of the v06 model
 pars_true = lm.Parameters()
@@ -1063,8 +1063,21 @@ pars_true.add('rcore', value=rcore, vary=False)
 pars_true.add('beta', value=beta, vary=False)
 pars_true.add('xcen', value=450, vary=False)
 pars_true.add('ycen', value=450, vary=False)
-test_lmfit_beta_psf_1d(im_file)
 
+# create image for externla test
+# im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src.fits'
+# out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs.fits'
+
+# test_create_beta_psf_im(im_file)
+# make_synthetic_observation(im_file, expmap_file,
+#                            bgmap_file, maskmap_file, out_file)
+
+
+# testing fitting
+# test_create_beta_psf_im(im_file)
+# test_lmfit_beta_psf_1d(im_file)
+
+######################################################################
 # test v06 fit of the v06 model
 
 pars_true = lm.Parameters()
@@ -1076,8 +1089,18 @@ pars_true.add('alpha', value=alpha, vary=False)
 pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
-# test_create_v06_psf_im(im_file)
+# create image for externla test
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-01.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-01.fits'
+test_create_v06_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file)
+
+
+
 # test_lmfit_v06_psf_1d(im_file)
+
+
 
 
 print "done!"

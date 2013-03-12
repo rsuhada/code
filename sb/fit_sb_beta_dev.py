@@ -109,6 +109,8 @@ def fit_beta_model(r, sb_src, sb_src_err):
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
+    # sb_src = sb_src * r
+
     nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
@@ -117,10 +119,10 @@ def fit_beta_model(r, sb_src, sb_src_err):
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
-    # do the fit
+    # do the fit: beta
 
     if DO_FIT:
-        print "starting fit"
+        print "starting beta fit"
         t1 = time.clock()
 
         result = lm.minimize(beta_psf_2d_lmfit_profile,
@@ -156,7 +158,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
 
     if DO_FIT and PLOT_PROFILE:
 
-        output_figure = 'lmfit_beta_psf_1d.png'
+        output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_beta_psf.png'
 
         plot_data_model_resid(r, sb_src,
                                r_model, profile_norm_model,
@@ -229,7 +231,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
                    xcen_obj, ycen_obj)
 
     ######################################################################
-    # do the fit
+    # do the fit: v06
 
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
@@ -238,7 +240,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
-        print "starting fit"
+        print "starting v06 fit"
         t1 = time.clock()
 
         result = lm.minimize(v06_psf_2d_lmfit_profile,
@@ -252,12 +254,12 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
         # get the output model
         (r_model, profile_norm_model) = v06_psf_2d_lmfit_profile(pars,
-                                                                         distmatrix_input,
-                                                                         bgrid,
-                                                                         r500_pix,
-                                                                         psf_pars,
-                                                                         xcen_obj,
-                                                                         ycen_obj)
+                                                                 distmatrix_input,
+                                                                 bgrid,
+                                                                 r500_pix,
+                                                                 psf_pars,
+                                                                 xcen_obj,
+                                                                 ycen_obj)
 
 
     ######################################################################
@@ -299,7 +301,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
         print 30*'#'
         print
 
-        output_figure = 'lmfit_v06_psf_1d.png'
+        output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
@@ -325,8 +327,8 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = False
-    FIT_V06_MODEL = True
+    FIT_BETA_MODEL = True
+    FIT_V06_MODEL = False
 
     ######################################################################
     # loading the data
