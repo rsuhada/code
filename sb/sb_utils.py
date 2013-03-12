@@ -487,3 +487,20 @@ def extract_binned_sb_profiles(distmatrix, rgrid, im, expmap, bgmap, maskmap):
     # extended return
     # return cts_tot, cts_tot_err, ctr_tot, ctr_tot_err, sb_tot, sb_tot_err, \
            # cts_bg, cts_bg_err, ctr_bg, ctr_bg_err, sb_bg, sb_bg_err
+
+def trim_fftconvolve(image):
+    """
+    Removes invalid rows and columns from a convolved image after
+    fftconvolve with the "same" option.
+
+    Arguments:
+    - `image`: input image for trimming
+    """
+
+    # remove invalid edge
+    image = delete(image, 0, 0)
+    image = delete(image, 0, 1)
+    image = delete(image, image.shape[1]-1, 0)
+    image = delete(image, image.shape[0]-1, 1)
+
+    return image

@@ -313,11 +313,12 @@ if __name__ == '__main__':
 
     ######################################################################
     # settings
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-01-beta.dat'
     outfig = fname+'.dev.png'
 
     # r_500_proj_ang = 153.0   # projected radius [arcsec]
-    r_500_proj_ang = 100.0   # projected radius [arcsec]
+    r_500_proj_ang = 50.0   # projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0

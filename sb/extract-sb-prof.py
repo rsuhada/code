@@ -85,6 +85,10 @@ if __name__ == '__main__':
         ######################################################################
         # create images with ps masking
 
+        exp_raw = trim_fftconvolve(exp_raw)
+        bg_raw = trim_fftconvolve(bg_raw)
+        mask = trim_fftconvolve(mask)
+
         im  = im_raw  * mask
         bg  = bg_raw  * mask
         exp = exp_raw * mask

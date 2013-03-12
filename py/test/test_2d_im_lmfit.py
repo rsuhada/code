@@ -372,7 +372,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     hdr = hdu[0].header
 
     # image setup
-    xsize = 902
+    xsize = 900
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
@@ -381,7 +381,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
     # - works fine
     rmax = 1.5 * r500_pix                 # [pix], should be 1.5 r500
 
-    xsize_obj = 902           # 900 if you want a big image, *has* to be > 3xr500
+    xsize_obj = 900           # 900 if you want a big image, *has* to be > 3xr500
     ysize_obj = xsize_obj
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
@@ -1065,17 +1065,16 @@ pars_true.add('xcen', value=450, vary=False)
 pars_true.add('ycen', value=450, vary=False)
 
 # create image for externla test
-# im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src.fits'
-# out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs.fits'
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-02.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-02.fits'
 
-# test_create_beta_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-#                            bgmap_file, maskmap_file, out_file)
-
+test_create_beta_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file)
 
 # testing fitting
 # test_create_beta_psf_im(im_file)
-# test_lmfit_beta_psf_1d(im_file)
+test_lmfit_beta_psf_1d(im_file)
 
 ######################################################################
 # test v06 fit of the v06 model
@@ -1090,11 +1089,11 @@ pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
 # create image for externla test
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-01.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-01.fits'
-test_create_v06_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file)
+# im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-01.fits'
+# out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-01.fits'
+# test_create_v06_psf_im(im_file)
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, out_file)
 
 
 

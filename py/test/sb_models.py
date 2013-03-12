@@ -459,7 +459,7 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     output_im = srcmodel + bgmap_poi
 
     # ids = where(maskmap != 0.0)
-    output_im[ids] = output_im[ids] / expmap[ids]
+    # output_im[ids] = output_im[ids] / expmap[ids] # if output is in cts/s
     output_im = output_im * maskmap
 
     # save output
