@@ -85,9 +85,15 @@ if __name__ == '__main__':
         ######################################################################
         # create images with ps masking
 
-        exp_raw = trim_fftconvolve(exp_raw)
-        bg_raw = trim_fftconvolve(bg_raw)
-        mask = trim_fftconvolve(mask)
+        # trim sizes if necessary (should be needed only in case of
+        # manual testing)
+
+        if im_raw.shape[0] == exp_raw.shape[0]-2:
+            exp_raw = trim_fftconvolve(exp_raw)
+        if im_raw.shape[0] == bg_raw.shape[0]-2:
+            bg_raw = trim_fftconvolve(bg_raw)
+        if im_raw.shape[0] == mask.shape[0]-2:
+            mask = trim_fftconvolve(mask)
 
         im  = im_raw  * mask
         bg  = bg_raw  * mask

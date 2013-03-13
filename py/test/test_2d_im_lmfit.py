@@ -334,7 +334,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     im_conv = num_cts * im_conv/im_conv.sum()
 
-    # slow extractor
+    # slow extractor FIXME
     (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
 
     # setup data for the profile extraction - for speedup
@@ -343,6 +343,12 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     rgrid = arange(0, rgrid_length, 1.0)
 
     (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
+
+    f = open('/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp', 'w')
+    for i in range(len(r)):
+        f.write('%f %f %f %f %f %f %f\n' % (r[i], profile[i]/geometric_area[i], 0.0, 0.0, sqrt(profile[i]/geometric_area[i]), 0.01*sqrt(profile[i]/geometric_area[i]), 0.01*sqrt(profile[i]/geometric_area[i]) ))
+    f.close()
+
 
     if POISSONIZE_IMAGE:
         # fix current poissonize bug -poissonize only nonz-zero
@@ -1068,13 +1074,34 @@ pars_true.add('ycen', value=450, vary=False)
 im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-02.fits'
 out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-02.fits'
 
+# synthetic image: beta
 test_create_beta_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file)
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, out_file)
 
-# testing fitting
+# testing fitting: beta
 # test_create_beta_psf_im(im_file)
-test_lmfit_beta_psf_1d(im_file)
+# test_lmfit_beta_psf_1d(im_file)
+
+
+######################################################################
+# empty files for testing
+
+# tmp, hdr = load_fits_im(im_file)
+# emptybg=zeros(tmp.shape)
+# unitexp=ones(tmp.shape)
+
+# hdu = pyfits.PrimaryHDU(emptybg, hdr)    # extension - array, header
+# hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+# hdulist.writeto('/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits', clobber=True)
+# hdu = pyfits.PrimaryHDU(unitexp, hdr)    # extension - array, header
+# hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+# hdulist.writeto('/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits', clobber=True)
+# hdu = pyfits.PrimaryHDU(unitexp, hdr)    # extension - array, header
+# hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+# hdulist.append(pyfits.ImageHDU(unitexp))
+# hdulist.writeto('/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits', clobber=True)
+
 
 ######################################################################
 # test v06 fit of the v06 model
@@ -1098,6 +1125,7 @@ pars_true.add('epsilon', value=epsilon, vary=False)
 
 
 # test_lmfit_v06_psf_1d(im_file)
+
 
 
 

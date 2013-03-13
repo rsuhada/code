@@ -116,7 +116,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
                    sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     ######################################################################
     # do the fit: beta
@@ -163,6 +163,13 @@ def fit_beta_model(r, sb_src, sb_src_err):
         plot_data_model_resid(r, sb_src,
                                r_model, profile_norm_model,
                                output_figure, sb_src_err)
+        print
+        print r_model[0]
+        print r[0]
+        print r_model[0:3]
+        print r_model[1:3]
+        print profile_norm_model[-3:]
+        print profile_norm_model[-3:-1]
 
     return 0
 
@@ -314,7 +321,9 @@ if __name__ == '__main__':
     ######################################################################
     # settings
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-01-beta.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-01-beta.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp'
+
     outfig = fname+'.dev.png'
 
     # r_500_proj_ang = 153.0   # projected radius [arcsec]
@@ -334,7 +343,6 @@ if __name__ == '__main__':
     ######################################################################
     # loading the data
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
-    # (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = load_sb_curve(fname)
 
     ids = where(r<=r_500_proj_ang)
 
@@ -360,5 +368,13 @@ if __name__ == '__main__':
 
 
     print "done!"
+
+
+
+
+
+
+
+
 
 
