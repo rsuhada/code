@@ -344,6 +344,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
 
     (profile, geometric_area) = extract_profile_fast(im_conv, distmatrix, xcen_obj, ycen_obj)
 
+    # save profile for checking
     f = open('/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp', 'w')
     for i in range(len(r)):
         f.write('%f %f %f %f %f %f %f\n' % (r[i], profile[i]/geometric_area[i], 0.0, 0.0, sqrt(profile[i]/geometric_area[i]), 0.01*sqrt(profile[i]/geometric_area[i]), 0.01*sqrt(profile[i]/geometric_area[i]) ))
@@ -466,7 +467,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype('int')   # int - this is proper binning
     r_length = data.shape[0]/2.0
-    r = arange(0, r_length, 1.0)
+    r = arange(1, r_length+1, 1.0)
 
     # FIXME: bgrid not necessary - use r instead (careful with the size)
     bgrid = unique(distmatrix.flat)
@@ -479,7 +480,10 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     # FIXME: if somewhere ill defined replace with the maximal error (is this still needed?)
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
-    print r.min(), profile_norm[0]
+    print xcen_obj, ycen_obj
+    print r.min(), profile_norm[0], distmatrix.min()
+    from time import sleep
+    sleep(100)
 
     plot_data_model_simple(r, profile_norm, None, None, None, profile_norm_err,
                            None, None)
@@ -501,7 +505,7 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     ######################################################################
-    # do the fit
+    # do the beta fit
     DO_FIT = True
 
     if DO_FIT:
@@ -534,13 +538,6 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
         print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
-
-        # print
-        # print "parameter: true | fit"
-        # print "rcore", rcore, pars['rcore'].value, "+/-", pars['rcore'].stderr
-        # print "beta", beta, pars['beta'].value, "+/-", pars['beta'].stderr
-        # print
-        # print
 
     ######################################################################
     # confidence intervals
@@ -595,10 +592,69 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
         output_figure = 'lmfit_beta_psf_1d.png'
 
-        plot_data_model_simple(r, profile_norm,
-                               r_model, profile_norm_model,
-                               output_figure, profile_norm_err,
-                               r_true, profile_norm_true)
+        # plot_data_model_simple(r, profile_norm,
+        #                        r_model, profile_norm_model,
+        #                        output_figure, profile_norm_err,
+        #                        r_true, profile_norm_true)
+
+
+
+        # # interactive quick plot
+        # plt.figure()
+        # plt.ion()
+        # plt.clf()
+
+        # plt.plot(r, profile_norm,
+        #     color='black',
+        #     linestyle='-',              # -/--/-./:
+        #     linewidth=1,                # linewidth=1
+        #     marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        #     markerfacecolor='black',
+        #     markersize=6,               # markersize=6
+        #     label=r"data"               # '__nolegend__'
+        #     )
+
+        # plt.plot(r_model, profile_norm_model,
+        #     color='red',
+        #     linestyle='-',              # -/--/-./:
+        #     linewidth=1,                # linewidth=1
+        #     marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        #     markerfacecolor='red',
+        #     markersize=0,               # markersize=6
+        #     label=r"data"               # '__nolegend__'
+        #     )
+
+        # plt.xscale("log")
+        # plt.yscale("log")
+
+        # plt.show()
+        # plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+        # plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
+        #         # interactive quick plot
+        # plt.figure()
+        # plt.ion()
+        # plt.clf()
+
+        # plt.plot(r, profile_norm-r_model,
+        #     color='black',
+        #     linestyle='-',              # -/--/-./:
+        #     linewidth=1,                # linewidth=1
+        #     marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+        #     markerfacecolor='black',
+        #     markersize=6,               # markersize=6
+        #     label=r"data"               # '__nolegend__'
+        #     )
+
+        # plt.axhline(0.0, color='red')
+
+        # plt.xscale("log")
+        # plt.yscale("linear")
+
+        # plt.show()
+        # plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+        # plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+
 
 
 def test_lmfit_v06_psf_1d(fname='cluster-im-v06-psf.fits'):
@@ -1081,7 +1137,7 @@ test_create_beta_psf_im(im_file)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
-# test_lmfit_beta_psf_1d(im_file)
+test_lmfit_beta_psf_1d(im_file)
 
 
 ######################################################################

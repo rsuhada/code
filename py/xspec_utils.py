@@ -31,6 +31,7 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
     r_proj = r_proj_ang * arcsec_to_radian * da       # [cm]
     r_proj_inner = r_proj_inner_ang  * arcsec_to_radian * da
 
+    # FIXME: check the volume
     b = r_proj**3 - r_proj_inner**3
 
     if b>0.0:

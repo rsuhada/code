@@ -161,15 +161,15 @@ def fit_beta_model(r, sb_src, sb_src_err):
         output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_beta_psf.png'
 
         plot_data_model_resid(r, sb_src,
+                               # r_model[1:], profile_norm_model[:-1],
                                r_model, profile_norm_model,
                                output_figure, sb_src_err)
-        print
-        print r_model[0]
-        print r[0]
-        print r_model[0:3]
-        print r_model[1:3]
-        print profile_norm_model[-3:]
-        print profile_norm_model[-3:-1]
+
+        print len(r_model), len(r)
+
+        # for i in xrange(len(r)):
+        #     print r[i], r_model[i]
+
 
     return 0
 

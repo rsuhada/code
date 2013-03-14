@@ -204,7 +204,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     im_output = im_beta
 
     if APPLY_PSF:
-    # create PSF
+        # create PSF
         im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
 
         # convolve
@@ -361,7 +361,10 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
     # setup data for the profile extraction - for speedup
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2 + 1
-    r = arange(0, r_length, 1.0)
+
+    r = arange(0, r_length, 1.0)   # original line: before 2013-03-13
+    # r = arange(1.0, r_length+1, 1.0)
+
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 

@@ -686,44 +686,47 @@ def plot_data_model_resid(r_data, profile_data,
     ######################################################################
     # residuals
 
-    # FIXME: now OK but indices should be generalized
-    res = (profile_data[:-1] - profile_model[1:]) / profile_model[1:]
-    res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
+    PLOT_RESIDUAL = True
 
-    ax2 = plt.subplot(212)
+    if PLOT_RESIDUAL:
+        # FIXME: now OK but indices should be generalized
+        res = (profile_data[:-1] - profile_model[1:]) / profile_model[1:]
+        res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
 
-    ax2.errorbar(r_data[:-1]-1.5, res, res_err,
-        color='black',
-        linestyle='',              # -/--/-./:
-        linewidth=1,                # linewidth=1
-        marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        markerfacecolor='black',
-        markersize=6,               # markersize=6
-        label=r"__nolegend__"               # '__nolegend__'
-        )
+        ax2 = plt.subplot(212)
 
-    ax2.axhline(0.0, color='red')
+        ax2.errorbar(r_data[:-1]-1.5, res, res_err,
+            color='black',
+            linestyle='',              # -/--/-./:
+            linewidth=1,                # linewidth=1
+            marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+            markerfacecolor='black',
+            markersize=6,               # markersize=6
+            label=r"__nolegend__"               # '__nolegend__'
+            )
 
-    # take care of labels and ticks
+        ax2.axhline(0.0, color='red')
 
-    ax1.set_xscale("log", nonposx='clip')
-    ax1.set_yscale("log", nonposy='clip')
-    ax1.set_ylabel('Profile', fontsize=14, fontweight="normal")          # fontsize=12
-    xticklabels = ax1.get_xticklabels()
-    plt.setp(xticklabels, visible=False)
+        # take care of labels and ticks
 
-    # ax1.yaxis.set_major_locator(MaxNLocator(prune='lower'))  # doesn'the work
+        ax1.set_xscale("log", nonposx='clip')
+        ax1.set_yscale("log", nonposy='clip')
+        ax1.set_ylabel('Profile', fontsize=14, fontweight="normal")          # fontsize=12
+        xticklabels = ax1.get_xticklabels()
+        plt.setp(xticklabels, visible=False)
 
-    ax2.set_xscale("log", nonposx='clip')
-    # ax2.set_yscale("log", nonposy='clip')
-    ax2.set_xlabel('Radius', fontsize=14, fontweight="normal")          # fontsize=12
-    ax2.set_ylabel('(data-model)/model', fontsize=12, fontweight="normal")          # fontsize=12
+        # ax1.yaxis.set_major_locator(MaxNLocator(prune='lower'))  # doesn'the work
 
-    width=std(res)
-    ax2.set_ylim(-3*width, 3*width)
+        ax2.set_xscale("log", nonposx='clip')
+        # ax2.set_yscale("log", nonposy='clip')
+        ax2.set_xlabel('Radius', fontsize=14, fontweight="normal")          # fontsize=12
+        ax2.set_ylabel('(data-model)/model', fontsize=12, fontweight="normal")          # fontsize=12
 
-    # prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
-    # set_legend(loc=0, prop=prop, numpoints=1)
+        width=std(res)
+        ax2.set_ylim(-3*width, 3*width)
+
+        # prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
+        # set_legend(loc=0, prop=prop, numpoints=1)
 
     # plt.draw()
     plt.get_current_fig_manager().window.wm_geometry("+1100+0")
