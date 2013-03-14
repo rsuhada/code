@@ -453,8 +453,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
 
     xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize
     ysize_obj = xsize_obj
-    xcen_obj = xsize_obj / 2
-    ycen_obj = ysize_obj / 2
+    xcen_obj = xsize_obj / 2  + 1
+    ycen_obj = ysize_obj / 2  + 1
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
     ######################################################################
@@ -481,9 +481,8 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
     profile_norm_err[profile_norm_err==0.0] = sqrt(profile_norm.max())
 
     print xcen_obj, ycen_obj
-    print r.min(), profile_norm[0], distmatrix.min()
-    from time import sleep
-    sleep(100)
+    print r[0], profile_norm[0]
+    print r[1], profile_norm[1]
 
     plot_data_model_simple(r, profile_norm, None, None, None, profile_norm_err,
                            None, None)
@@ -597,63 +596,19 @@ def test_lmfit_beta_psf_1d(fname='cluster_image_cts.fits'):
         #                        output_figure, profile_norm_err,
         #                        r_true, profile_norm_true)
 
+        plot_data_model_resid(r, profile_norm,
+                               r_model, profile_norm_model,
+                               output_figure, profile_norm_err,
+                               r_true, profile_norm_true)
 
+        # interactive quick plot
+        plt.figure()
+        plt.ion()
+        plt.clf()
 
-        # # interactive quick plot
-        # plt.figure()
-        # plt.ion()
-        # plt.clf()
-
-        # plt.plot(r, profile_norm,
-        #     color='black',
-        #     linestyle='-',              # -/--/-./:
-        #     linewidth=1,                # linewidth=1
-        #     marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        #     markerfacecolor='black',
-        #     markersize=6,               # markersize=6
-        #     label=r"data"               # '__nolegend__'
-        #     )
-
-        # plt.plot(r_model, profile_norm_model,
-        #     color='red',
-        #     linestyle='-',              # -/--/-./:
-        #     linewidth=1,                # linewidth=1
-        #     marker='',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        #     markerfacecolor='red',
-        #     markersize=0,               # markersize=6
-        #     label=r"data"               # '__nolegend__'
-        #     )
-
-        # plt.xscale("log")
-        # plt.yscale("log")
-
-        # plt.show()
-        # plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
-        # plt.get_current_fig_manager().window.wm_geometry(plotPosition)
-
-        #         # interactive quick plot
-        # plt.figure()
-        # plt.ion()
-        # plt.clf()
-
-        # plt.plot(r, profile_norm-r_model,
-        #     color='black',
-        #     linestyle='-',              # -/--/-./:
-        #     linewidth=1,                # linewidth=1
-        #     marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
-        #     markerfacecolor='black',
-        #     markersize=6,               # markersize=6
-        #     label=r"data"               # '__nolegend__'
-        #     )
-
-        # plt.axhline(0.0, color='red')
-
-        # plt.xscale("log")
-        # plt.yscale("linear")
-
-        # plt.show()
-        # plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
-        # plt.get_current_fig_manager().window.wm_geometry(plotPosition)
+        plt.show()
+        plotPosition="+1100+0"          # large_screen="+1100+0"; lap="+640+0"
+        plt.get_current_fig_manager().window.wm_geometry(plotPosition)
 
 
 
@@ -1127,17 +1082,22 @@ pars_true.add('xcen', value=450, vary=False)
 pars_true.add('ycen', value=450, vary=False)
 
 # create image for externla test
+
+expmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits"
+bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
+maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
+
 im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-02.fits'
 out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-02.fits'
 
 # synthetic image: beta
-test_create_beta_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, out_file)
+# test_create_beta_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
-test_lmfit_beta_psf_1d(im_file)
+# test_lmfit_beta_psf_1d(im_file)
 
 
 ######################################################################
@@ -1181,10 +1141,6 @@ pars_true.add('epsilon', value=epsilon, vary=False)
 
 
 # test_lmfit_v06_psf_1d(im_file)
-
-
-
-
 
 print "done!"
 

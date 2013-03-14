@@ -203,8 +203,8 @@ if __name__ == '__main__':
         radii = arange(1.0, aper+1.0, 1.0)
         for r in radii:
 
-            ids = where((distmatrix <= r**2.0) & (distmatrix >= (r - 1.0)**2.0))
-            geometric_area = len(ids[0])      # [pix]
+            ids = where((distmatrix < r**2.0) & (distmatrix >= (r - 1.0)**2.0))
+            geometric_area = len(ids[0])      # [pix], total number of pix
 
             ######################################################################
             # with ps (wps), area corrected

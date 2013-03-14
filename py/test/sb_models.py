@@ -445,24 +445,30 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     bgmap, hdr = load_fits_im(bgmap_file)
     maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
 
-    # do the rescaling to the fft image
-    # FIXME: some problem
-    expmap = trim_fftconvolve(expmap)
-    bgmap = trim_fftconvolve(bgmap)
-    maskmap = trim_fftconvolve(maskmap)
+
+    # trim sizes if necessary (should be needed only in case of
+        # manual testing)
+
+    if srcmodel.shape[0] == expmap.shape[0]-2:
+        expmap = trim_fftconvolve(expmap)
+    if srcmodel.shape[0] == bgmap.shape[0]-2:
+        bgmap = trim_fftconvolve(bgmap)
+    if srcmodel.shape[0] == maskmap.shape[0]-2:
+        maskmap = trim_fftconvolve(maskmap)
+
+    # # do the rescaling to the fft image
+    # expmap = trim_fftconvolve(expmap)
+    # bgmap = trim_fftconvolve(bgmap)
+    # maskmap = trim_fftconvolve(maskmap)
 
     # do the transforms
     bgmap_poi = bgmap * maskmap     # get rid of artifacts
-
     ids = where(bgmap_poi != 0.0)
 
     if POISSONIZE_IMAGE:
         bgmap_poi[ids] = poisson.rvs(bgmap[ids])
 
-    output_im = srcmodel + bgmap_poi
-
-    # ids = where(maskmap != 0.0)
-    # output_im[ids] = output_im[ids] / expmap[ids] # if output is in cts/s
+    output_im = srcmodel * expmap + bgmap_poi # output is in cts (cts/pix in each pixel)
     output_im = output_im * maskmap
 
     # save output

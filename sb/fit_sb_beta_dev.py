@@ -12,6 +12,7 @@ from sb_utils import distance_matrix
 from sb_models import beta_psf_2d_lmfit_profile, v06_psf_2d_lmfit_profile
 import lmfit as lm
 import time
+import asciitable as atab
 
 
 def load_sb_curve(fname):
@@ -22,16 +23,27 @@ def load_sb_curve(fname):
     - `fname`: file name
     """
 
-    dat=loadtxt(fname, dtype='string', comments='#', delimiter=None, converters=None,
-            skiprows=0, unpack=False,
-            usecols=(0,1,2,4,5)
-            )
+    data = atab.read(table=fname,
+                     data_start=0, data_end=None, header_start=9,
+                     delimiter=' ', comment='#', quotechar='"')
 
-    r = double(dat[:,0])
-    sb_src = double(dat[:,1])
-    sb_bg = double(dat[:,2])
-    sb_src_err = double(dat[:,3])
-    sb_bg_err = double(dat[:,4])
+    r = data['r']
+    sb_src = data['ctr_src']
+    sb_bg = data['ctr_bg']
+    sb_src_err = data['ctr_src_err']
+    sb_bg_err = data['ctr_bg_err']
+
+    # dat=loadtxt(fname, dtype='string', comments='#', delimiter=None, converters=None,
+    #         skiprows=0, unpack=False,
+    #         # usecols=(0,1,2,4,5)
+    #         usecols=(0,1,2,4,5,6,7,10,11)
+    #         )
+
+    # r = double(dat[:,0])
+    # sb_src = double(dat[:,1])
+    # sb_bg = double(dat[:,2])
+    # sb_src_err = double(dat[:,3])
+    # sb_bg_err = double(dat[:,4])
 
     return r, sb_src, sb_bg, sb_src_err, sb_bg_err
 
@@ -321,13 +333,13 @@ if __name__ == '__main__':
     ######################################################################
     # settings
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-01-beta.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp'
 
     outfig = fname+'.dev.png'
 
     # r_500_proj_ang = 153.0   # projected radius [arcsec]
-    r_500_proj_ang = 50.0   # projected radius [arcsec]
+    r_500_proj_ang = 100.0   # projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0
@@ -337,12 +349,14 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = True
+    FIT_BETA_MODEL = False
     FIT_V06_MODEL = False
 
     ######################################################################
     # loading the data
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
+
+    print r[0], sb_src[0], '*'*30
 
     ids = where(r<=r_500_proj_ang)
 

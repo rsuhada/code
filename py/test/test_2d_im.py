@@ -194,7 +194,7 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
         for j in range(imsize[1]):
             r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
 
-    im = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5)
+    im = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5) # this is the projected Ix [erg s^-1 pix^-1]
 
     return im
 
