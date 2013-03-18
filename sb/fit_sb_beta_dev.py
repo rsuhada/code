@@ -249,7 +249,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
 
     if DO_FIT:
         print "starting v06 fit"
@@ -305,12 +305,9 @@ def fit_v06_model(r, sb_src, sb_src_err):
         print "elasped time:", t.secs, " s"
 
     ######################################################################
-    # plot profiles
+    # plot v06 profiles
 
     if DO_FIT and PLOT_PROFILE:
-
-        print 30*'#'
-        print
 
         output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
 
@@ -342,8 +339,8 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = True
-    FIT_V06_MODEL = False
+    FIT_BETA_MODEL = False
+    FIT_V06_MODEL = True
 
     ######################################################################
     # loading the data
