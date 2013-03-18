@@ -641,7 +641,7 @@ def plot_data_model_resid(r_data, profile_data,
 
     ax1 = plt.subplot(211)
     if any(profile_data_err):
-        ax1.errorbar(r_data-0.5, profile_data, profile_data_err,
+        ax1.errorbar(r_data, profile_data, profile_data_err,
         color='black',
         linestyle='',              # -/--/-./:
         linewidth=1,                # linewidth=1
@@ -651,7 +651,7 @@ def plot_data_model_resid(r_data, profile_data,
         label=r"source"               # '__nolegend__'
         )
     else:
-        ax1.plot(r_data-0.5, profile_data,
+        ax1.plot(r_data, profile_data,
         color='black',
         linestyle='-',              # -/--/:/-.
         linewidth=1,                # linewidth=1
@@ -662,7 +662,7 @@ def plot_data_model_resid(r_data, profile_data,
         )
 
     if any(profile_model):
-        ax1.plot(r_model-0.5, profile_model,
+        ax1.plot(r_model, profile_model,
             color='red',
             linestyle='-',              # -/--/:/-.
             linewidth=1,                # linewidth=1
@@ -673,7 +673,7 @@ def plot_data_model_resid(r_data, profile_data,
             )
 
     if any(profile_true):
-        ax1.plot(r_true-0.5, profile_true,
+        ax1.plot(r_true, profile_true,
             color='green',
             linestyle='-',              # -/--/:/-.
             linewidth=1,                # linewidth=1
@@ -689,13 +689,19 @@ def plot_data_model_resid(r_data, profile_data,
     PLOT_RESIDUAL = True
 
     if PLOT_RESIDUAL:
-        # FIXME: now OK but indices should be generalized
-        res = (profile_data[:-1] - profile_model[1:]) / profile_model[1:]
-        res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
 
         ax2 = plt.subplot(212)
 
-        ax2.errorbar(r_data[:-1]-1.5, res, res_err,
+        # FIXME:
+        # res = (profile_data[:-1] - profile_model[1:]) / profile_model[1:]
+        # res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
+        # ax2.errorbar(r_data[:-1]-1.5, res, res_err,
+
+        res = (profile_data - profile_model) / profile_model
+        # res_err = (profile_data_err - profile_model) / profile_model
+        res_err = profile_data_err / profile_model
+
+        ax2.errorbar(r_data, res, res_err,
             color='black',
             linestyle='',              # -/--/-./:
             linewidth=1,                # linewidth=1
@@ -708,10 +714,9 @@ def plot_data_model_resid(r_data, profile_data,
         ax2.axhline(0.0, color='red')
 
         # take care of labels and ticks
-
         ax1.set_xscale("log", nonposx='clip')
         ax1.set_yscale("log", nonposy='clip')
-        ax1.set_ylabel('Profile', fontsize=14, fontweight="normal")          # fontsize=12
+        ax1.set_ylabel('Profile [cts s$^{-1}$ pix$^{-1}$]', fontsize=14, fontweight="normal")          # fontsize=12
         xticklabels = ax1.get_xticklabels()
         plt.setp(xticklabels, visible=False)
 

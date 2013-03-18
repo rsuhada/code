@@ -1092,12 +1092,12 @@ out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-02.fits'
 
 # synthetic image: beta
 # test_create_beta_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file)
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, out_file)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
-# test_lmfit_beta_psf_1d(im_file)
+test_lmfit_beta_psf_1d(im_file)
 
 
 ######################################################################

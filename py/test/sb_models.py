@@ -362,8 +362,8 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2 + 1
 
-    r = arange(0, r_length, 1.0)   # original line: before 2013-03-13
-    # r = arange(1.0, r_length+1, 1.0)
+    # r = arange(0, r_length, 1.0)   # original line: before 2013-03-13
+    r = arange(1.0, r_length+1, 1.0)
 
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners

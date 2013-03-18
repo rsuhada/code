@@ -158,6 +158,9 @@ def fit_beta_model(r, sb_src, sb_src_err):
                                                                   APPLY_PSF,
                                                                   DO_ZERO_PAD)
 
+        print r[0], sb_src[0], len(r),'*'*30
+        print r_model[0], profile_norm_model[0], len(r_model)
+
         ######################################################################
         # output
 
@@ -166,21 +169,16 @@ def fit_beta_model(r, sb_src, sb_src_err):
         print "fitting subroutine done!"
 
     ######################################################################
-    # plot profiles
+    # plot beta fit and data profiles
 
     if DO_FIT and PLOT_PROFILE:
 
         output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_beta_psf.png'
 
         plot_data_model_resid(r, sb_src,
-                               # r_model[1:], profile_norm_model[:-1],
-                               r_model, profile_norm_model,
-                               output_figure, sb_src_err)
+                              r_model, profile_norm_model,
+                              output_figure, sb_src_err)
 
-        print len(r_model), len(r)
-
-        # for i in xrange(len(r)):
-        #     print r[i], r_model[i]
 
 
     return 0
@@ -280,7 +278,6 @@ def fit_v06_model(r, sb_src, sb_src_err):
                                                                  xcen_obj,
                                                                  ycen_obj)
 
-
     ######################################################################
     # output
 
@@ -321,6 +318,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
         print
 
         output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
+
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
@@ -329,6 +327,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
 if __name__ == '__main__':
     print
+    plt.close('all')
 
     ######################################################################
     # settings
@@ -349,14 +348,12 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = False
+    FIT_BETA_MODEL = True
     FIT_V06_MODEL = False
 
     ######################################################################
     # loading the data
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
-
-    print r[0], sb_src[0], '*'*30
 
     ids = where(r<=r_500_proj_ang)
 
@@ -382,13 +379,3 @@ if __name__ == '__main__':
 
 
     print "done!"
-
-
-
-
-
-
-
-
-
-
