@@ -697,9 +697,12 @@ def plot_data_model_resid(r_data, profile_data,
         # res_err = (profile_data_err[:-1] - profile_model[1:]) / profile_model[1:]
         # ax2.errorbar(r_data[:-1]-1.5, res, res_err,
 
-        res = (profile_data - profile_model) / profile_model
         # res_err = (profile_data_err - profile_model) / profile_model
+
+        res = (profile_data - profile_model) / profile_model
         res_err = profile_data_err / profile_model
+        print 'Mean residual :: ', mean(res)
+        print 'mean error :: ', mean(profile_data_err)
 
         ax2.errorbar(r_data, res, res_err,
             color='black',
@@ -728,7 +731,7 @@ def plot_data_model_resid(r_data, profile_data,
         ax2.set_ylabel('(data-model)/model', fontsize=12, fontweight="normal")          # fontsize=12
 
         width=std(res)
-        ax2.set_ylim(-3*width, 3*width)
+        ax2.set_ylim(-1.5*width, 1.5*width)
 
         # prop = matplotlib.font_manager.FontProperties(size=16)  # size=16
         # set_legend(loc=0, prop=prop, numpoints=1)

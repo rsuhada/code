@@ -158,9 +158,6 @@ def fit_beta_model(r, sb_src, sb_src_err):
                                                                   APPLY_PSF,
                                                                   DO_ZERO_PAD)
 
-        print r[0], sb_src[0], len(r),'*'*30
-        print r_model[0], profile_norm_model[0], len(r_model)
-
         ######################################################################
         # output
 
@@ -178,8 +175,6 @@ def fit_beta_model(r, sb_src, sb_src_err):
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
-
-
 
     return 0
 
@@ -333,7 +328,6 @@ if __name__ == '__main__':
     # settings
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/profile-lmfit-ideal-beta.tmp'
 
     outfig = fname+'.dev.png'
 
