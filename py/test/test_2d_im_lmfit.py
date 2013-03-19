@@ -175,7 +175,7 @@ def test_create_beta_im(imname='beta_image_cts.fits'):
     # create beta
     print (xsize, ysize), xcen, ycen, normalization, rcore, beta
     im_beta = make_2d_beta((xsize, ysize), xcen, ycen, normalization, rcore, beta)
-    im_beta = num_cts * im_beta/im_beta.sum()
+    im_beta = targ_num_cts * im_beta/im_beta.sum()
 
     if POISSONIZE_IMAGE:
         im_beta = poisson.rvs(im_beta)
@@ -332,7 +332,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
                                instrument, theta, energy,
                                APPLY_PSF, DO_ZERO_PAD)
 
-    im_conv = num_cts * im_conv/im_conv.sum()
+    im_conv = targ_num_cts * im_conv/im_conv.sum()
 
     # slow extractor FIXME
     (r, profile_ref, geometric_area_ref) = extract_profile_generic(im_conv, xcen, ycen)
@@ -424,7 +424,7 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     # FIXME: better to set n0 to the integral in r500 and then
     # poissonize
-    # im_conv = num_cts * im_conv/im_conv.sum()
+    # im_conv = targ_num_cts * im_conv/im_conv.sum()
     print "poisson sum:", im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
@@ -942,7 +942,7 @@ instrument = "pn"
 psf_pars = (instrument, theta, energy)
 
 # setup for the beta model
-num_cts       = 2.0e5             # Will be the normalization
+targ_num_cts       = 2.0e3             # Will be the normalization
 rcore         = 10.0              # [pix]
 beta          = 2.0 / 3.0
 normalization = 1.0
@@ -1083,21 +1083,21 @@ pars_true.add('ycen', value=450, vary=False)
 
 # create image for externla test
 
-expmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits"
-bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
-maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
+# expmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits"
+# bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
+# maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-02.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-02.fits'
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-03.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits'
 
 # synthetic image: beta
-# test_create_beta_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, out_file)
+test_create_beta_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
-test_lmfit_beta_psf_1d(im_file)
+# test_lmfit_beta_psf_1d(im_file)
 
 
 ######################################################################

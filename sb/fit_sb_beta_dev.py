@@ -249,7 +249,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+3}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+1}
 
     if DO_FIT:
         print "starting v06 fit"
@@ -311,11 +311,13 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
         output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
 
+        print len(r), len( sb_src), len( r_model), len( profile_norm_model)
+
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
 
-
+        print r[0], r_model[0]
 
 if __name__ == '__main__':
     print

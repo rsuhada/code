@@ -400,7 +400,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
 
     # profile extraction
     r_length = r500             # factor out r500
-    r = arange(0, r_length, 1.0)
+    r = arange(1.0, r_length, 1.0)
 
     (profile, geometric_area) = extract_profile_fast2(model_image, distmatrix, bgrid)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
@@ -418,15 +418,15 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
         # return (r, model_profile, geometric_area)
         return (r, model_profile)
     else:
-        residuals = data_profile[0:r_length] - model_profile
+        residuals = data_profile - model_profile
         # is this biasing?
-        if USE_ERROR: residuals = residuals / data_profile_err[0:r_length]
+        if USE_ERROR: residuals = residuals / data_profile_err
 
         # return residuals
         return residuals
 
 
-def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile):
+def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile, targ_cts=2000):
     """
     Take a synthetic sb model and turn it into a "observation" by
     applying an exposure map, bg image and mask.
@@ -437,7 +437,7 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     'bgmap' - background map (smooth, units cts)
     'maskmap' - mask
     """
-    POISSONIZE_IMAGE = False
+    POISSONIZE_IMAGE = True
 
     # load images
     srcmodel, hdr = load_fits_im(srcmodel_file)
@@ -445,9 +445,9 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     bgmap, hdr = load_fits_im(bgmap_file)
     maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
 
-
-    # trim sizes if necessary (should be needed only in case of
-        # manual testing)
+    # trim sizes if necessary (should be needed only in case of manual
+    # testing) and works only in the (most typical) case of
+    # 1row/column difference
 
     if srcmodel.shape[0] == expmap.shape[0]-2:
         expmap = trim_fftconvolve(expmap)
@@ -456,20 +456,35 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     if srcmodel.shape[0] == maskmap.shape[0]-2:
         maskmap = trim_fftconvolve(maskmap)
 
-    # # do the rescaling to the fft image
-    # expmap = trim_fftconvolve(expmap)
-    # bgmap = trim_fftconvolve(bgmap)
-    # maskmap = trim_fftconvolve(maskmap)
-
-    # do the transforms
+    # prepare the transforms
+    output_im = srcmodel
     bgmap_poi = bgmap * maskmap     # get rid of artifacts
-    ids = where(bgmap_poi != 0.0)
+    output_im_poi = srcmodel * expmap # model should be in cts/s/pix, this
+                                      # way you get cts/pix as in
+                                      # obsercvations
+
+    print 'Number of total cts :: ', sum(output_im_poi)
+
+    try:
+        output_im_poi = targ_cts * output_im_poi / sum(output_im_poi)
+    except Exception, e:
+        print 'source image is empty!'
+	raise e
+
+    print 'Number of expected total cts :: ', sum(output_im_poi)
 
     if POISSONIZE_IMAGE:
+        print 'poissonizing!'
+        ids = where(bgmap != 0.0) # to avoid poisson.rvs bug
         bgmap_poi[ids] = poisson.rvs(bgmap[ids])
+        ids = where(output_im != 0.0) # to avoid poisson.rvs bug
+        output_im_poi[ids] = poisson.rvs(output_im[ids])
 
-    output_im = srcmodel * expmap + bgmap_poi # output is in cts (cts/pix in each pixel)
-    output_im = output_im * maskmap
+    # would be better to limit to r500
+    print 'Number of total cts :: ', sum(output_im_poi)
+
+    output_im = output_im_poi + bgmap_poi      # bg is already in cts
+    output_im = output_im * maskmap    # final masking to be sure
 
     # save output
     hdu = pyfits.PrimaryHDU(output_im, hdr)    # extension - array, header
