@@ -466,12 +466,13 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     print 'Number of total cts :: ', sum(output_im_poi)
 
     try:
+        # would be better to limit to r500
+        print 'Norming to expected total cts :: ', targ_cts
         output_im_poi = targ_cts * output_im_poi / sum(output_im_poi)
     except Exception, e:
         print 'source image is empty!'
 	raise e
 
-    print 'Number of expected total cts :: ', sum(output_im_poi)
 
     if POISSONIZE_IMAGE:
         print 'poissonizing!'
@@ -480,7 +481,6 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
         ids = where(output_im != 0.0) # to avoid poisson.rvs bug
         output_im_poi[ids] = poisson.rvs(output_im[ids])
 
-    # would be better to limit to r500
     print 'Number of total cts :: ', sum(output_im_poi)
 
     output_im = output_im_poi + bgmap_poi      # bg is already in cts

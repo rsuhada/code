@@ -424,7 +424,8 @@ def test_create_v06_psf_im(imname='v06_image_cts.fits'):
 
     # FIXME: better to set n0 to the integral in r500 and then
     # poissonize
-    # im_conv = targ_num_cts * im_conv/im_conv.sum()
+    im_conv = targ_num_cts * im_conv/im_conv.sum()
+
     print "poisson sum:", im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
@@ -1064,11 +1065,10 @@ model_im_name = 'v06_image_cts.fits'
 # create the full synthetic observation
 # im_file = 'v06_image_cts_2e5.fits'
 # im_file = 'v06_image_cts_nonoise.fits'
-im_file = 'v06_image_cts.fits'
+
 expmap_file = "pn-test-exp.fits"
 bgmap_file  = "pn-test-bg-2cp.fits"
 maskmap_file= "pn-test-mask.fits"
-out_file= "cluster-im-v06-psf_2e5.fits"
 
 # make_synthetic_observation(im_file, expmap_file,
                            # bgmap_file, maskmap_file, out_file)
@@ -1087,13 +1087,13 @@ pars_true.add('ycen', value=450, vary=False)
 # bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
 # maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-03.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits'
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-04.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-04.fits'
 
 # synthetic image: beta
-test_create_beta_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file)
+# test_create_beta_psf_im(im_file)
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
@@ -1132,13 +1132,17 @@ pars_true.add('gamma', value=gamma, vary=False)
 pars_true.add('epsilon', value=epsilon, vary=False)
 
 # create image for externla test
-# im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-01.fits'
-# out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-01.fits'
+
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-02.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits'
+
+# expmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits"
+# bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
+# maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
+
 # test_create_v06_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, out_file)
-
-
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # test_lmfit_v06_psf_1d(im_file)
 
