@@ -116,7 +116,7 @@ def fit_beta_model(r, sb_src, sb_src_err):
 
     pars = lm.Parameters()
     pars.add('norm', value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
-    pars.add('rcore', value=15.0, vary=True, min=1.0, max=80.0)
+    pars.add('rcore', value=15.0, vary=True, min=0.05, max=80.0)
     pars.add('beta', value=0.66, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
@@ -249,7 +249,7 @@ def fit_v06_model(r, sb_src, sb_src_err):
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+1}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting v06 fit"
@@ -313,14 +313,13 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
         print len(r), len( sb_src), len( r_model), len( profile_norm_model)
 
-        plot_data_model_resid(r, sb_src,
-                              r_model, profile_norm_model,
-                              output_figure, sb_src_err)
+        # plot_data_model_resid(r, sb_src,
+        #                       r_model, profile_norm_model,
+        #                       output_figure, sb_src_err)
 
         print r[0], r_model[0]
 
 if __name__ == '__main__':
-    print
     plt.close('all')
 
     ######################################################################
@@ -328,7 +327,8 @@ if __name__ == '__main__':
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     outfig = fname+'.dev.png'
 
@@ -348,6 +348,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # loading the data
+
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
 
     ids = where(r<=r_500_proj_ang)

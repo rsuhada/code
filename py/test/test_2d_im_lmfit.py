@@ -944,20 +944,20 @@ psf_pars = (instrument, theta, energy)
 
 # setup for the beta model
 targ_num_cts       = 2.0e3             # Will be the normalization
-rcore         = 10.0              # [pix]
+rcore         = 0.2              # [pix]
 beta          = 2.0 / 3.0
 normalization = 1.0
 imname='t1.fits'
 
 ######################################################################
 # pars
-pars_true = lm.Parameters()
 
-pars_true.add('norm', value=normalization, vary=True)
-pars_true.add('rcore', value=rcore, vary=False)
-pars_true.add('beta', value=beta, vary=False)
-pars_true.add('xcen', value=450, vary=False)
-pars_true.add('ycen', value=450, vary=False)
+# pars_true = lm.Parameters()
+# pars_true.add('norm', value=normalization, vary=True)
+# pars_true.add('rcore', value=rcore, vary=False)
+# pars_true.add('beta', value=beta, vary=False)
+# pars_true.add('xcen', value=450, vary=False)
+# pars_true.add('ycen', value=450, vary=False)
 
 ######################################################################
 # images for fitting tests
@@ -1073,7 +1073,10 @@ maskmap_file= "pn-test-mask.fits"
 # make_synthetic_observation(im_file, expmap_file,
                            # bgmap_file, maskmap_file, out_file)
 
+
+######################################################################
 # test beta fit of the v06 model
+
 pars_true = lm.Parameters()
 pars_true.add('norm', value=normalization, vary=True)
 pars_true.add('rcore', value=rcore, vary=False)
@@ -1087,13 +1090,14 @@ pars_true.add('ycen', value=450, vary=False)
 # bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
 # maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-04.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-04.fits'
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-05.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits'
 
 # synthetic image: beta
-# test_create_beta_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, out_file, targ_num_cts)
+
+test_create_beta_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
@@ -1141,8 +1145,8 @@ out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits'
 # maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
 # test_create_v06_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file, targ_num_cts)
+# make_synthetic_observation(im_file, expmap_file,
+                           # bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # test_lmfit_v06_psf_1d(im_file)
 
