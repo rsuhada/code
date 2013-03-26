@@ -116,8 +116,8 @@ def fit_beta_model(r, sb_src, sb_src_err):
 
     pars = lm.Parameters()
     pars.add('norm', value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
-    pars.add('rcore', value=15.0, vary=True, min=0.05, max=80.0)
-    pars.add('beta', value=0.66, vary=True, min=0.1, max=10.0)
+    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
+    pars.add('beta', value=0.8, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
@@ -326,9 +326,9 @@ if __name__ == '__main__':
     # settings
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     outfig = fname+'.dev.png'
 

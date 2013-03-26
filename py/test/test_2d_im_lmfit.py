@@ -944,8 +944,8 @@ psf_pars = (instrument, theta, energy)
 
 # setup for the beta model
 targ_num_cts       = 2.0e3             # Will be the normalization
-rcore         = 0.2              # [pix]
-beta          = 2.0 / 3.0
+rcore         = 1.0              # [pix]
+beta          = 4.0 / 3.0
 normalization = 1.0
 imname='t1.fits'
 

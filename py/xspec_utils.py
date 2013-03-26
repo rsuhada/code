@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 from numpy import *
 from cosmo_dist import dist_ang
-from constants import *
+from physconstants import *
 
 
-def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
+def spec_norm_to_density(norm, z, da, rproj1_ang=0.0, rproj2_ang, model_name, model_pars):
     """
     Convert XSPEC normalization to density for a spherical region,
     optionally with excised inner sphere.
@@ -13,16 +13,18 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
     - `norm`: XSPEC normalization in XSPEC units
     - `z`: redsihift
     - `da`: angular diameter distance [Mpc]
-    - `r_proj_ang`: projected radius of the fitted spherical region
-      [arcsec]
-    - `r_proj_inner_ang`: [Optional] projected radius of the inner
-      excised spherical region [arcsec]
+    - `r_proj_inner_ang`: [default=0] projected radius of the inner
+                          excised spherical region [arcsec]
+    - `rproj2_ang`: projected outer radius of the fitted spherical
+      region [arcsec]
+    - `model_name`: model identifier: beta, v06
+    - 'model_pars': parameter structure - content depends on : on the model
 
     Output:
     - `density`: density in cgs [g cm**-3]
     """
 
-    # relative molecular weights: Feldman 1992, A=0.3
+    # get relative molecular weights: Feldman 1992, A=0.3
     mu_e = mu_e_feldman92
     mu_h = mu_h_feldman92
 
@@ -31,14 +33,8 @@ def spec_norm_to_density(norm, z, da, r_proj_ang, r_proj_inner_ang=0.0):
     r_proj = r_proj_ang * arcsec_to_radian * da       # [cm]
     r_proj_inner = r_proj_inner_ang  * arcsec_to_radian * da
 
-    # FIXME: check the volume
-    b = r_proj**3 - r_proj_inner**3
-
-    if b>0.0:
-        density = (da*(1+z)) * mp_cgs * sqrt(3.0e14 * mu_e * mu_h * norm / b)
-    else:
-        density = 0.0
-        print "*** Error: Source region has zero volume!"
+    # the constant factor
+    const = norm * 2 * mu_e * mu_h * mp_cgs**2 * (da*(1+z))**2 * 1.0e14
 
     return density
 
