@@ -13,10 +13,7 @@ def beta_shape_integral(rho, zeta, beta):
     - `zeta`: dimensionless LOS
     - `beta`: beta power
     """
-
     return (1 + rho + zeta**2)**(-3*beta)
-
-
 
 def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars):
     """
@@ -45,6 +42,7 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     # convert everything to cgs
     da = da * mpc_to_cm
 
+    # go on with pomodoros as you like
     # rproj1 = rproj1_ang * arcsec_to_radian * da       # [cm]
     # rproj2 = rproj2_ang * arcsec_to_radian * da       # [cm]
 
@@ -54,10 +52,13 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
 
     if model_name == 'beta':
         print 'Using beta model'
-        print
 
         rcore = model_pars[0]
         beta  = model_pars[1]
+
+        print 'rcore: ', rcore
+        print 'beta: ', beta
+        print
 
         # integration bounds
         rho1 = (rproj1_ang / rcore)**2
