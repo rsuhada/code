@@ -15,7 +15,7 @@ def beta_shape_integral(rho, zeta, beta):
     """
     return (1 + rho + zeta**2)**(-3*beta)
 
-def v06mod_shape integral(rho, zeta, a, beta, gamma, epsilon, rbar);
+def v06mod_shape_integral(rho, zeta, a, beta, gamma, epsilon, rbar):
     """
     - `rho`: dimensionless projected radius (squared)
     - `zeta`: dimensionless LOS
@@ -79,13 +79,41 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
 
         # do the integration
         for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
-            integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax, lambda rho:rho1, lambda rho:rho2, args=(beta,))[0]
+            integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
+                                              lambda rho:rho1, lambda rho:rho2,
+                                              args=(beta,))[0]
             print rmax, integ_profile
 
         integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
-    elif model_name == 'v06':
-        print 'Using v06 model'
+    elif model_name == 'mod_v06':
+        print 'Using modified v06 model'
+
+        print model_pars
+
+        alpha   = model_pars[0]
+        beta    = model_pars[1]
+        gamma   = model_pars[2]
+        epsilon = model_pars[3]
+        rc      = model_pars[4]
+        rs      = model_pars[5]
+
+        a = alpha / 2.0
+        rbar = (rc/rs)**gamma
+
+        # integration bounds
+        rho1 = (rproj1_ang / rcore)**2
+        rho2 = (rproj2_ang / rcore)**2
+
+        # do the integration
+        for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+            integ_profile = integrate.dblquad(v06mod_shape_integral, 0.0, rmax,
+                                              lambda rho:rho1, lambda rho:rho2,
+                                              args=(a, beta, gamma, epsilon, rbar))[0]
+            print rmax, integ_profile
+
+        integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
+
     try:
 	density = sqrt(const / integ_profile)
     except Exception, e:
@@ -100,6 +128,9 @@ if __name__ == '__main__':
     ######################################################################
     # test normalization calculation
 
+    # TEST_MODEL_NAME = 'beta'    # beta, v06mod
+    TEST_MODEL_NAME = 'v06mod'    # beta, v06mod
+
     # cosmology
     h_0=70.2
     omega_m_0=0.272
@@ -110,20 +141,40 @@ if __name__ == '__main__':
     z = 0.468
     rproj1_ang = 0.0   # projected radius [arcsec]
     rproj2_ang = 60.0    # projected radius [arcsec]
-    model_name = 'beta'
-    rcore = 10.0 * 2.5                # [arcsec]
-    beta  = 2.0/3.0
-    model_pars = (rcore, beta)
 
     norm = 1.45738E-03          # xspec norm
     norm_err_n = -4.5767e-05
     norm_err_p = +4.53208e-05
+
+    # setup the parameters for the integration
+    if TEST_MODEL_NAME == 'beta':
+        model_name = TEST_MODEL_NAME
+
+        # best fit parameters should go here
+        rcore = 10.0 * 2.5                # [arcsec]
+        beta  = 2.0/3.0
+        model_pars = (rcore, beta)
+
+    elif TEST_MODEL_NAME == 'v06mod':
+        model_name = TEST_MODEL_NAME
+
+        rc = 20.0                   # ballpark 0.1 r500
+        beta = 2.0/3.0
+        rs = 20.0                   # ballpark 0.5-1 r500 - same rs aa rc???
+        alpha = 1.5                 # <3
+        gamma = 3.0                 # fix = 3
+        epsilon = 2.0               # <5
+
+        print rc, rs
+        model_pars = (alpha, beta, gamma, epsilon, rc, rs)
+        print " blaa", model_pars
 
 
     # angular distance
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
     angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
 
+    # do the integration
     density = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
     ne = density / (mu_e_feldman92 * mp_cgs)
 
