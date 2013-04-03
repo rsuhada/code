@@ -10,10 +10,23 @@ def beta_shape_integral(rho, zeta, beta):
 
     Arguments:
     - `rho`: dimensionless projected radius (squared)
-    - `zeta`: dimensionless LOS
+    - `zeta`: dimensionless LOS distance
     - `beta`: beta power
     """
     return (1 + rho + zeta**2)**(-3*beta)
+
+def v06mod_shape integral(rho, zeta, a, beta, gamma, epsilon, rbar);
+    """
+    - `rho`: dimensionless projected radius (squared)
+    - `zeta`: dimensionless LOS
+    - 'a': alpha/2 - power from the profile
+    - 'beta', 'gamma', 'epsilon': powers from the profile
+    """
+    x = rho + zeta**2
+
+    i = x**(-a) * (1 + x)**(a - 3.0*beta) * (1 + x**(gamma/2.0) * rbar)**(-1.0*epsilon/gamma)
+
+    return i
 
 def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars):
     """
