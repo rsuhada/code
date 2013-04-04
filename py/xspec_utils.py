@@ -82,15 +82,14 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
             integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
-            print rmax, integ_profile
+            print "Integration :: ", rmax, integ_profile
+            integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
-        integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
-    elif model_name == 'mod_v06':
+    elif model_name == 'v06mod':
         print 'Using modified v06 model'
 
-        print model_pars
-
+        # unpack parameters
         alpha   = model_pars[0]
         beta    = model_pars[1]
         gamma   = model_pars[2]
@@ -102,17 +101,19 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
         rbar = (rc/rs)**gamma
 
         # integration bounds
-        rho1 = (rproj1_ang / rcore)**2
-        rho2 = (rproj2_ang / rcore)**2
+        rho1 = (rproj1_ang / rc)**2
+        rho2 = (rproj2_ang / rc)**2
+
+        print rho1, rho2
 
         # do the integration
-        for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        for rmax in (1, Inf):
             integ_profile = integrate.dblquad(v06mod_shape_integral, 0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(a, beta, gamma, epsilon, rbar))[0]
-            print rmax, integ_profile
-
-        integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
+            print "Integration :: ", rmax, integ_profile
+            integ_profile = integ_profile * (rc * arcsec_to_radian * da)**3
 
     try:
 	density = sqrt(const / integ_profile)
@@ -160,14 +161,12 @@ if __name__ == '__main__':
 
         rc = 20.0                   # ballpark 0.1 r500
         beta = 2.0/3.0
-        rs = 20.0                   # ballpark 0.5-1 r500 - same rs aa rc???
+        rs = 20.0                   # ballpark 0.5-1 r500
         alpha = 1.5                 # <3
         gamma = 3.0                 # fix = 3
         epsilon = 2.0               # <5
 
-        print rc, rs
         model_pars = (alpha, beta, gamma, epsilon, rc, rs)
-        print " blaa", model_pars
 
 
     # angular distance
