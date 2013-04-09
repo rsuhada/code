@@ -6,7 +6,8 @@ from scipy import integrate
 
 def beta_shape_integral(rho, zeta, beta):
     """
-    Beta model shape integral
+    Beta model shape integral. Integral was validated with
+    Mathematica.
 
     Arguments:
     - `rho`: dimensionless projected radius (squared)
@@ -17,13 +18,15 @@ def beta_shape_integral(rho, zeta, beta):
 
 def v06mod_shape_integral(rho, zeta, a, beta, gamma, epsilon, rbar):
     """
+    Modified Vikhlinin06 model shape integral. Integral was validated
+    with Mathematica.
+
     - `rho`: dimensionless projected radius (squared)
     - `zeta`: dimensionless LOS
     - 'a': alpha/2 - power from the profile
     - 'beta', 'gamma', 'epsilon': powers from the profile
     """
     x = rho + zeta**2
-
     i = x**(-a) * (1 + x)**(a - 3.0*beta) * (1 + x**(gamma/2.0) * rbar)**(-1.0*epsilon/gamma)
 
     return i
@@ -55,10 +58,6 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     # convert everything to cgs
     da = da * mpc_to_cm
 
-    # go on with pomodoros as you like
-    # rproj1 = rproj1_ang * arcsec_to_radian * da       # [cm]
-    # rproj2 = rproj2_ang * arcsec_to_radian * da       # [cm]
-
     # the constant factor
     const = norm * 2 * mu_e * mu_h * mp_cgs**2 * (da*(1+z))**2 * 1.0e14
     integ_profile = 1.0
@@ -78,11 +77,12 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
         rho2 = (rproj2_ang / rcore)**2
 
         # do the integration
-        for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        for rmax in (Inf,):
             integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
-            print "Integration :: ", rmax, integ_profile
+            print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
             integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
 
@@ -104,22 +104,19 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
         rho1 = (rproj1_ang / rc)**2
         rho2 = (rproj2_ang / rc)**2
 
-        print rho1, rho2
-
         # do the integration
         # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
-        for rmax in (1, Inf):
+        for rmax in (Inf,):
             integ_profile = integrate.dblquad(v06mod_shape_integral, 0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(a, beta, gamma, epsilon, rbar))[0]
-            print "Integration :: ", rmax, integ_profile
+            print "Integration bound :: ", rmax, '   shape integral :: ', integ_profile
             integ_profile = integ_profile * (rc * arcsec_to_radian * da)**3
 
     try:
 	density = sqrt(const / integ_profile)
     except Exception, e:
 	raise e
-
 
     return density
 
@@ -129,8 +126,8 @@ if __name__ == '__main__':
     ######################################################################
     # test normalization calculation
 
-    # TEST_MODEL_NAME = 'beta'    # beta, v06mod
-    TEST_MODEL_NAME = 'v06mod'    # beta, v06mod
+    TEST_MODEL_NAME = 'beta'    # beta, v06mod
+    # TEST_MODEL_NAME = 'v06mod'    # beta, v06mod
 
     # cosmology
     h_0=70.2
@@ -181,10 +178,6 @@ if __name__ == '__main__':
     print " z          :: ", z
     print " da         :: ", da
     print " ang scale  :: ", angscale
-    # print " rproj1_ang :: ", rproj1_ang
-    # print " rproj1     :: ", rproj1
-    # print " rproj2_ang :: ", rproj2_ang
-    # print " rproj2     :: ", rproj2
     print " norm       :: ", norm
     print " density    :: ", density
     print " ne density :: ", ne

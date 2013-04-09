@@ -472,7 +472,6 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
         print 'source image is empty!'
 	raise e
 
-
     if POISSONIZE_IMAGE:
         print 'poissonizing!'
         ids = where(bgmap != 0.0) # to avoid poisson.rvs bug

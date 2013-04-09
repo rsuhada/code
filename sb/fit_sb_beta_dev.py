@@ -327,7 +327,8 @@ if __name__ == '__main__':
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     outfig = fname+'.dev.png'
@@ -343,8 +344,8 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = True
-    FIT_V06_MODEL = False
+    FIT_BETA_MODEL = False
+    FIT_V06_MODEL = True
 
     ######################################################################
     # loading the data
@@ -372,6 +373,5 @@ if __name__ == '__main__':
 
     if FIT_V06_MODEL:
         fit_v06_model(r, sb_src, sb_src_err)
-
 
     print "done!"

@@ -1040,12 +1040,12 @@ r500 = 1.0e3                # r500 [kpc]
 r500_pix = 30              # r500 in im pixels
 
 n0 = 7e+0
-rc = 20.0                   # ballpark 0.1 r500
+rc = 10.0                   # ballpark 0.1 r500
 beta = 2.0/3.0
-rs = 20.0                   # ballpark 0.5-1 r500
+rs = 27.0                   # ballpark 0.5-1 r500
 alpha = 1.5                 # <3
 gamma = 3.0                 # fix = 3
-epsilon = 2.0               # <5
+epsilon = 2.5               # <5
 
 # convert pars to lmfit structure
 pars_true = lm.Parameters()
@@ -1095,9 +1095,9 @@ out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits'
 
 # synthetic image: beta
 
-test_create_beta_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file, targ_num_cts)
+# test_create_beta_psf_im(im_file)
+# make_synthetic_observation(im_file, expmap_file,
+#                            bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
@@ -1137,16 +1137,18 @@ pars_true.add('epsilon', value=epsilon, vary=False)
 
 # create image for externla test
 
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-02.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits'
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_src-03.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits'
 
 # expmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-exp.fits"
 # bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
 # maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
-# test_create_v06_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-                           # bgmap_file, maskmap_file, out_file, targ_num_cts)
+# create the synthetic images
+
+test_create_v06_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # test_lmfit_v06_psf_1d(im_file)
 
