@@ -324,17 +324,17 @@ if __name__ == '__main__':
 
     ######################################################################
     # settings
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     outfig = fname+'.dev.png'
 
-    # r_500_proj_ang = 153.0   # projected radius [arcsec]
-    r_500_proj_ang = 100.0   # projected radius [arcsec]
+    r_500_proj_ang = 153.0   # projected radius [arcsec]
+    # r_500_proj_ang = 100.0   # projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0
@@ -344,11 +344,11 @@ if __name__ == '__main__':
 
     # module settings
     MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = False
-    FIT_V06_MODEL = True
+    FIT_BETA_MODEL = True
+    FIT_V06_MODEL = False
 
     ######################################################################
-    # loading the data
+    # loading the XSPEC data
 
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
 

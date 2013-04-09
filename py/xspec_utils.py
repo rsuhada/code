@@ -37,7 +37,7 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     optionally with excised inner sphere.
 
     Arguments:
-    - `norm`: XSPEC normalization in XSPEC units
+    - `norm`: XSPEC normalization in XSPEC units (10**(-14)/((1+z)Da)**2)
     - `z`: redsihift
     - `da`: angular diameter distance [Mpc]
     - `rproj1_ang`: projected radius of the inner
@@ -121,6 +121,23 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     return density
 
 
+def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
+    """
+    Integrate the 3D density profile
+
+    Arguments:
+    - `model_name`: model identifier: beta, v06
+    - 'model_pars': parameter structure - content depends on : on the model
+    - `rho0`: central density from the XSPEC norm [g cm**-3]
+    - `r1`: inner 3D radius [kpc],
+    - `r2`: outer 3D radius [kpc], e.g. r500
+
+    Output:
+    - `Mgas`: gas mass [Msol]
+    """
+    return 0.0
+
+
 if __name__ == '__main__':
     print
     ######################################################################
@@ -135,30 +152,38 @@ if __name__ == '__main__':
     omega_de_0=0.728
     omega_k_0=0.0
 
-    # cluster
+    # cluster parameters - 0559
     z = 0.468
-    rproj1_ang = 0.0   # projected radius [arcsec]
-    rproj2_ang = 60.0    # projected radius [arcsec]
+    r500 = 1043.0      # kpc
 
-    norm = 1.45738E-03          # xspec norm
+    rproj1_ang = 0.0     # inner projected radius [arcsec]
+    rproj2_ang = 60.0    # outer projected radius [arcsec]
+    pixscale = 2.5       # [arcsec]
+
+    # xspec norm
+    norm = 1.45738E-03
     norm_err_n = -4.5767e-05
     norm_err_p = +4.53208e-05
 
-    # setup the parameters for the integration
+    # setup the parameters for the integration, somewhat redundant
+    # (having 2 rcore units) but for convenience
     if TEST_MODEL_NAME == 'beta':
         model_name = TEST_MODEL_NAME
 
         # best fit parameters should go here
-        rcore = 10.0 * 2.5                # [arcsec]
+        rcore = 10.0 * 2.5                # [pix]
         beta  = 2.0/3.0
         model_pars = (rcore, beta)
+
+        # parameters for the Mgas calculation
+        rcore =
 
     elif TEST_MODEL_NAME == 'v06mod':
         model_name = TEST_MODEL_NAME
 
-        rc = 20.0                   # ballpark 0.1 r500
+        rc = 20.0                   # ballpark 0.1 r500, [pix]
         beta = 2.0/3.0
-        rs = 20.0                   # ballpark 0.5-1 r500
+        rs = 20.0                   # ballpark 0.5-1 r500, [pix]
         alpha = 1.5                 # <3
         gamma = 3.0                 # fix = 3
         epsilon = 2.0               # <5
@@ -170,19 +195,33 @@ if __name__ == '__main__':
     da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
     angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
 
-    # do the integration
-    density = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
-    ne = density / (mu_e_feldman92 * mp_cgs)
+    # do the integrations for the density
+    rho0 = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
+    ne0 = rho0 / (mu_e_feldman92 * mp_cgs)
+
+    # gas mass calculation
+    r1 = 0.0                    # [kpc]
+    r2 = r500                   # [kpc]
+
+    mgas = calc_gas_mass(model_name, model_pars, rho0, r1, r2)
+
+    # output
 
     print
-    print " z          :: ", z
-    print " da         :: ", da
-    print " ang scale  :: ", angscale
-    print " norm       :: ", norm
-    print " density    :: ", density
-    print " ne density :: ", ne
-
-
-
+    print "-"*60
+    print " z            :: ", z
+    print " da           :: ", da , "Mpc"
+    print " ang scale    :: ", angscale, "kpc/arcsec"
+    print "-"*60
+    print " rcore        :: ", rcore
+    print " beta         :: ", beta
+    print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
+    print "-"*60
+    print " norm         :: ", norm, " 10**(-14)/((1+z)Da)**2"
+    print " rho0 density :: ", rho0, "g cm**-3"
+    print " ne0 density  :: ", ne0, "cm**-3"
+    print "-"*60
+    print " Mgas         :: ", mgas, "Msol"
+    print "-"*60
 
 
