@@ -135,6 +135,56 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
     Output:
     - `Mgas`: gas mass [Msol]
     """
+
+    if model_name == 'beta':
+        print 'Using beta model'
+
+        rcore = model_pars[0]
+        beta  = model_pars[1]
+
+        print 'rcore: ', rcore
+        print 'beta: ', beta
+        print
+
+        # integration bounds
+        rho1 = (r1 / rcore)**2
+        rho2 = (r2 / rcore)**2
+
+        # do the integration
+        # FIXME: implement the integral
+        integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
+                                          lambda rho:rho1, lambda rho:rho2,
+                                          args=(beta,))[0]
+
+    elif model_name == 'v06mod':
+        # FIXME: not done yet
+        print 'Using modified v06 model'
+
+        # unpack parameters
+        alpha   = model_pars[0]
+        beta    = model_pars[1]
+        gamma   = model_pars[2]
+        epsilon = model_pars[3]
+        rc      = model_pars[4]
+        rs      = model_pars[5]
+
+        a = alpha / 2.0
+        rbar = (rc/rs)**gamma
+
+        # integration bounds
+        rho1 = (rproj1_ang / rc)**2
+        rho2 = (rproj2_ang / rc)**2
+
+        # do the integration
+        # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        for rmax in (Inf,):
+            integ_profile = integrate.dblquad(v06mod_shape_integral, 0.0, rmax,
+                                              lambda rho:rho1, lambda rho:rho2,
+                                              args=(a, beta, gamma, epsilon, rbar))[0]
+            print "Integration bound :: ", rmax, '   shape integral :: ', integ_profile
+            integ_profile = integ_profile * (rc * arcsec_to_radian * da)**3
+
+
     return 0.0
 
 
@@ -176,7 +226,8 @@ if __name__ == '__main__':
         model_pars = (rcore, beta)
 
         # parameters for the Mgas calculation
-        rcore =
+        rcore_phy = rcore * pixscale * arcsec_to_radian * da * 1000.0 # [kpc]
+        model_pars_phy = (rcore_phy, beta)
 
     elif TEST_MODEL_NAME == 'v06mod':
         model_name = TEST_MODEL_NAME
@@ -189,6 +240,11 @@ if __name__ == '__main__':
         epsilon = 2.0               # <5
 
         model_pars = (alpha, beta, gamma, epsilon, rc, rs)
+
+        # parameters for the Mgas calculation
+        rc_phy = rc * pixscale * arcsec_to_radian * da * 1000.0 # [kpc]
+        rs_phy = rc * pixscale * arcsec_to_radian * da * 1000.0 # [kpc]
+        model_pars_phy = (alpha, beta, gamma, epsilon, rc_phy, rs_phy)
 
 
     # angular distance
@@ -203,7 +259,7 @@ if __name__ == '__main__':
     r1 = 0.0                    # [kpc]
     r2 = r500                   # [kpc]
 
-    mgas = calc_gas_mass(model_name, model_pars, rho0, r1, r2)
+    mgas = calc_gas_mass(model_name, model_pars_phy, rho0, r1, r2)
 
     # output
 
@@ -213,7 +269,8 @@ if __name__ == '__main__':
     print " da           :: ", da , "Mpc"
     print " ang scale    :: ", angscale, "kpc/arcsec"
     print "-"*60
-    print " rcore        :: ", rcore
+    print " rcore        :: ", rcore, "pix"
+    print " rcore phy    :: ", rcore_phy, "kpc"
     print " beta         :: ", beta
     print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
     print "-"*60
@@ -221,6 +278,7 @@ if __name__ == '__main__':
     print " rho0 density :: ", rho0, "g cm**-3"
     print " ne0 density  :: ", ne0, "cm**-3"
     print "-"*60
+    print " r500         :: ", r500, "kpc"
     print " Mgas         :: ", mgas, "Msol"
     print "-"*60
 
