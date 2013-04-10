@@ -6,8 +6,9 @@ from scipy import integrate
 
 def beta_shape_integral(rho, zeta, beta):
     """
-    Beta model shape integral. Integral was validated with
-    Mathematica.
+    Beta model shape integral for integrating density profile
+    (squared) needed for the XSPEC normalization conversion to
+    physical units. Integral was validated with Mathematica.
 
     Arguments:
     - `rho`: dimensionless projected radius (squared)
@@ -15,6 +16,20 @@ def beta_shape_integral(rho, zeta, beta):
     - `beta`: beta power
     """
     return (1 + rho + zeta**2)**(-3*beta)
+
+def beta_shape_integral_3D(x, zeta, beta):
+    """
+    Beta model shape integral for integration of the density profile
+    (as function of 3D radius).  To be used for eg Mgas(r<r500)
+    integration.
+
+    Integral was validated with Mathematica.
+
+    Arguments:
+    - `x`: 3D radius in rcore units
+    - `beta`: beta power
+    """
+    return (1 + x**2)**(-3*beta)
 
 def v06mod_shape_integral(rho, zeta, a, beta, gamma, epsilon, rbar):
     """
@@ -142,19 +157,24 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         rcore = model_pars[0]
         beta  = model_pars[1]
 
+        # integration bounds
+        x1 = r1 / rcore
+        x2 = r2 / rcore
+
         print 'rcore: ', rcore
         print 'beta: ', beta
         print
+        print r1, r2
 
-        # integration bounds
-        rho1 = (r1 / rcore)**2
-        rho2 = (r2 / rcore)**2
+
+        integ_profile = 0.0
 
         # do the integration
-        # FIXME: implement the integral
-        integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
-                                          lambda rho:rho1, lambda rho:rho2,
-                                          args=(beta,))[0]
+        integ_profile = integrate.quad(beta_shape_integral, x1, x2,
+                                       args=(beta, ))
+
+        mgas = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs) * integ_profile
+
 
     elif model_name == 'v06mod':
         # FIXME: not done yet
@@ -168,24 +188,7 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         rc      = model_pars[4]
         rs      = model_pars[5]
 
-        a = alpha / 2.0
-        rbar = (rc/rs)**gamma
-
-        # integration bounds
-        rho1 = (rproj1_ang / rc)**2
-        rho2 = (rproj2_ang / rc)**2
-
-        # do the integration
-        # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
-        for rmax in (Inf,):
-            integ_profile = integrate.dblquad(v06mod_shape_integral, 0.0, rmax,
-                                              lambda rho:rho1, lambda rho:rho2,
-                                              args=(a, beta, gamma, epsilon, rbar))[0]
-            print "Integration bound :: ", rmax, '   shape integral :: ', integ_profile
-            integ_profile = integ_profile * (rc * arcsec_to_radian * da)**3
-
-
-    return 0.0
+    return mgas
 
 
 if __name__ == '__main__':

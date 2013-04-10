@@ -21,7 +21,7 @@ me_cgs = 9.10938188e-28                       # Electron rest mass [cgs]
 # astrophysical
 
 # mass
-msun_cgs = 1.989e33                           # Solar Mass [cgs]
+msun_cgs = 1.989e33                           # grams, Solar Mass [cgs]
 
 # distance
 mpc_to_cm = 3.085677582e24                # megaparsec [cgs]
