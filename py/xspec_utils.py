@@ -17,19 +17,17 @@ def beta_shape_integral(rho, zeta, beta):
     """
     return (1 + rho + zeta**2)**(-3*beta)
 
-def beta_shape_integral_3D(x, zeta, beta):
+def beta_shape_integral_3D(x, beta):
     """
     Beta model shape integral for integration of the density profile
     (as function of 3D radius).  To be used for eg Mgas(r<r500)
-    integration.
-
-    Integral was validated with Mathematica.
+    integration. Integral was validated with Mathematica.
 
     Arguments:
     - `x`: 3D radius in rcore units
     - `beta`: beta power
     """
-    return (1 + x**2)**(-3*beta)
+    return x**2 * (1 + x**2)**(-3*beta/2.0)
 
 def v06mod_shape_integral(rho, zeta, a, beta, gamma, epsilon, rbar):
     """
@@ -138,7 +136,7 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
 
 def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
     """
-    Integrate the 3D density profile
+    Integrate the 3D density profile.
 
     Arguments:
     - `model_name`: model identifier: beta, v06
@@ -164,17 +162,17 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         print 'rcore: ', rcore
         print 'beta: ', beta
         print
-        print r1, r2
-
 
         integ_profile = 0.0
 
         # do the integration
-        integ_profile = integrate.quad(beta_shape_integral, x1, x2,
+        integ_profile = integrate.quad(beta_shape_integral_3D, x1, x2,
                                        args=(beta, ))
 
-        mgas = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs) * integ_profile
+        print 'Integration limits :: ', x1, x2, beta
+        print "integral :: ", integ_profile
 
+        mgas = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs) * integ_profile
 
     elif model_name == 'v06mod':
         # FIXME: not done yet
@@ -218,6 +216,11 @@ if __name__ == '__main__':
     norm_err_n = -4.5767e-05
     norm_err_p = +4.53208e-05
 
+
+    # angular distance
+    da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
+    angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
+
     # setup the parameters for the integration, somewhat redundant
     # (having 2 rcore units) but for convenience
     if TEST_MODEL_NAME == 'beta':
@@ -250,10 +253,6 @@ if __name__ == '__main__':
         model_pars_phy = (alpha, beta, gamma, epsilon, rc_phy, rs_phy)
 
 
-    # angular distance
-    da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
-    angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
-
     # do the integrations for the density
     rho0 = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
     ne0 = rho0 / (mu_e_feldman92 * mp_cgs)
@@ -264,25 +263,26 @@ if __name__ == '__main__':
 
     mgas = calc_gas_mass(model_name, model_pars_phy, rho0, r1, r2)
 
+    ######################################################################
     # output
 
-    print
-    print "-"*60
-    print " z            :: ", z
-    print " da           :: ", da , "Mpc"
-    print " ang scale    :: ", angscale, "kpc/arcsec"
-    print "-"*60
-    print " rcore        :: ", rcore, "pix"
-    print " rcore phy    :: ", rcore_phy, "kpc"
-    print " beta         :: ", beta
-    print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
-    print "-"*60
-    print " norm         :: ", norm, " 10**(-14)/((1+z)Da)**2"
-    print " rho0 density :: ", rho0, "g cm**-3"
-    print " ne0 density  :: ", ne0, "cm**-3"
-    print "-"*60
-    print " r500         :: ", r500, "kpc"
-    print " Mgas         :: ", mgas, "Msol"
-    print "-"*60
+    # print
+    # print "-"*60
+    # print " z            :: ", z
+    # print " da           :: ", da , "Mpc"
+    # print " ang scale    :: ", angscale, "kpc/arcsec"
+    # print "-"*60
+    # print " rcore        :: ", rcore, "pix"
+    # print " rcore phy    :: ", rcore_phy, "kpc"
+    # print " beta         :: ", beta
+    # print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
+    # print "-"*60
+    # print " norm         :: ", norm, " 10**(-14)/((1+z)Da)**2"
+    # print " rho0 density :: ", rho0, "g cm**-3"
+    # print " ne0 density  :: ", ne0, "cm**-3"
+    # print "-"*60
+    # print " r500         :: ", r500, "kpc"
+    # print " Mgas         :: ", mgas, "Msol"
+    # print "-"*60
 
 
