@@ -149,6 +149,9 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
     - `Mgas`: gas mass [Msol]
     """
 
+    mgas = 0.0
+    mgas_err = 0.0
+
     if model_name == 'beta':
         print 'Using beta model'
 
@@ -169,10 +172,14 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         integ_profile = integrate.quad(beta_shape_integral_3D, x1, x2,
                                        args=(beta, ))
 
-        print 'Integration limits :: ', x1, x2, beta
+        print 'Integration limits :: ', x1, x2, ' [rcore]'
         print "integral :: ", integ_profile
 
-        mgas = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs) * integ_profile
+        prefactor = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs)
+        mgas =  prefactor * integ_profile[0]
+        mgas_err = prefactor    # need to add error on rho0, beta, rcore
+
+        print "Mgas :: ", mgas
 
     elif model_name == 'v06mod':
         # FIXME: not done yet
@@ -186,7 +193,7 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         rc      = model_pars[4]
         rs      = model_pars[5]
 
-    return mgas
+    return mgas, mgas_err
 
 
 if __name__ == '__main__':
@@ -253,15 +260,17 @@ if __name__ == '__main__':
         model_pars_phy = (alpha, beta, gamma, epsilon, rc_phy, rs_phy)
 
 
+    ######################################################################
     # do the integrations for the density
     rho0 = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
     ne0 = rho0 / (mu_e_feldman92 * mp_cgs)
 
+    ######################################################################
     # gas mass calculation
     r1 = 0.0                    # [kpc]
     r2 = r500                   # [kpc]
 
-    mgas = calc_gas_mass(model_name, model_pars_phy, rho0, r1, r2)
+    mgas, mgas_err = calc_gas_mass(model_name, model_pars_phy, rho0, r1, r2)
 
     ######################################################################
     # output
