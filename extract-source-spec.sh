@@ -45,7 +45,8 @@ fi
 
 case $instrument in
     "pn")
-        pnccdpattern=`get_sas_taboo_ccd $config_file pn`
+        # pnccdpattern=`get_sas_taboo_ccd $config_file pn`
+        pnccdpattern=""
         instpattern="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [100:10000]) $pnccdpattern"
         instpattern2="((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=4) && (PI in [400:10000]) $pnccdpattern"
         prefix=$PN_EV_PREFIX_LIST
@@ -53,14 +54,16 @@ case $instrument in
         ootevlist=pn${prefix}-clean-oot.fits
         ;;
     "m1")
-        mos1ccdpattern=`get_sas_taboo_ccd $config_file m1`
+        # mos1ccdpattern=`get_sas_taboo_ccd $config_file m1`
+        mos1ccdpattern=""
         instpattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000])  $mos1ccdpattern"
         instpattern2="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [400:10000]) $mos1ccdpattern"
         prefix=$M1_EV_PREFIX_LIST
         evlist=mos${prefix}-clean.fits
         ;;
     "m2")
-        mos2ccdpattern=`get_sas_taboo_ccd $config_file m2`
+        # mos2ccdpattern=`get_sas_taboo_ccd $config_file m2`
+        mos2ccdpattern=""
         instpattern="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [100:10000]) $mos2ccdpattern"
         instpattern2="#XMMEA_EM && ((FLAG & 0x10000) == 0) && (FLAG == 0) && (PATTERN<=12) && (PI in [400:10000])$mos2ccdpattern"
         prefix=$M2_EV_PREFIX_LIST

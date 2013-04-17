@@ -39,4 +39,6 @@ esac
 # the quickspec version
 export set="badpixelresolution=2 crossregionarf=no detmaptype=dataset extendedsource=yes filterdss=yes filteredset=filteredpixellist.ds ignoreoutoffov=yes keeparfset=yes modelee=no modeleffarea=yes modelfiltertrans=yes modelootcorr=no modelquantumeff=yes psfenergy=2 setbackscale=no sourcecoords="eqpos" sourcex=${ra} sourcey=${de} useodfatt=no withbadpixcorr=yes withdetbounds=no withfilteredset=no withrmfset=yes withsourcepos=yes"
 
+export set="badpixelresolution=2 crossregionarf=no detmaptype=dataset extendedsource=yes filterdss=yes filteredset=filteredpixellist.ds ignoreoutoffov=yes keeparfset=yes modelee=no modeleffarea=yes modelfiltertrans=yes modelootcorr=no modelquantumeff=yes psfenergy=2 setbackscale=no sourcecoords="eqpos" sourcex=0 sourcey=0 useodfatt=no withbadpixcorr=yes withdetbounds=no withfilteredset=no withrmfset=yes withsourcepos=no"
+
 arfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha $set rmfset=${specdir}/${instrument}-${spectrumid}.rmf badpixlocation=${evlist} detmaparray=${specdir}/${instrument}-${spectrumid}-detmap.ds arfset=${specdir}/${instrument}-${spectrumid}.arf

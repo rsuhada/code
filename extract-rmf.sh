@@ -18,5 +18,10 @@ detmaparray=$7
 
 # rmfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha rmfset=${specdir}/${instrument}-${spectrumid}.rmf detmaptype=flat  withsourcepos=yes sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
 
+
+# # no source position is SAS and esas default
+# rmfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha rmfset=${specdir}/${instrument}-${spectrumid}.rmf detmaptype=$detmaptype detmaparray=$detmaparray withsourcepos=no sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+
+
 # no source position is SAS and esas default
-rmfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha rmfset=${specdir}/${instrument}-${spectrumid}.rmf detmaptype=$detmaptype detmaparray=$detmaparray withsourcepos=no sourcecoords="eqpos" sourcex=${ra} sourcey=${de}
+rmfgen spectrumset=${specdir}/${instrument}-${spectrumid}.pha rmfset=${specdir}/${instrument}-${spectrumid}.rmf detmaptype=$detmaptype detmaparray=$detmaparray withsourcepos=no sourcecoords="eqpos" sourcex=0 sourcey=0

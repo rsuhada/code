@@ -76,14 +76,14 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     integ_profile = 1.0
 
     if model_name == 'beta':
-        print 'Using beta model'
+        # print 'Using beta model'
 
         rcore = model_pars[0]
         beta  = model_pars[1]
 
-        print 'rcore: ', rcore
-        print 'beta: ', beta
-        print
+        # print 'rcore: ', rcore
+        # print 'beta: ', beta
+        # print
 
         # integration bounds
         rho1 = (rproj1_ang / rcore)**2
@@ -95,7 +95,7 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
             integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
-            print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
+            # print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
             integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
 
@@ -153,7 +153,7 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
     mgas_err = 0.0
 
     if model_name == 'beta':
-        print 'Using beta model'
+        # print 'Using beta model'
 
         rcore = model_pars[0]
         beta  = model_pars[1]
@@ -162,9 +162,9 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         x1 = r1 / rcore
         x2 = r2 / rcore
 
-        print 'rcore: ', rcore
-        print 'beta: ', beta
-        print
+        # print 'rcore: ', rcore
+        # print 'beta: ', beta
+        # print
 
         integ_profile = 0.0
 
@@ -172,18 +172,20 @@ def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
         integ_profile = integrate.quad(beta_shape_integral_3D, x1, x2,
                                        args=(beta, ))
 
-        print 'Integration limits :: ', x1, x2, ' [rcore]'
-        print "integral :: ", integ_profile
+        # print 'Integration limits :: ', x1, x2, ' [rcore]'
+        # print "integral :: ", integ_profile
 
         prefactor = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs)
         mgas =  prefactor * integ_profile[0]
         mgas_err = prefactor    # need to add error on rho0, beta, rcore
 
-        print "Mgas :: ", mgas
+        # print "Mgas :: ", mgas
+
+    # v06mod model
 
     elif model_name == 'v06mod':
         # FIXME: not done yet
-        print 'Using modified v06 model'
+        # print 'Using modified v06 model'
 
         # unpack parameters
         alpha   = model_pars[0]
