@@ -8,7 +8,7 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-
+import pickle
 
 def show_in_ds9(fits_image):
     """
@@ -85,3 +85,21 @@ def print_lmfit_result_tab(pars_true, pars_fit):
         print "| %10s | %10.5f | %10.5f | %10.5f |" % (key, pars_true[key].value, pars_fit[key].value, pars_fit[key].stderr)
     print "|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"+12*"-"+"|"
     print
+
+def lmfit_result_to_dict(result_obj, par_obj):
+    """
+    Flatten lmfit result aa parameter objects to a dictionary,
+    removing unpickleable objects and adding a simplre final parameter
+    subdictionary.
+    """
+
+    d={}
+    for key in par_obj:
+        d.update({key: {'correl': par_obj[key].correl, 'value': par_obj[key].value, 'stderr': par_obj[key].stderr}})
+
+    outdict = result_obj.__dict__.copy()
+    outdict['asteval'] = None
+    outdict['namefinder'] = None
+    outdict['params'] = d
+    outdict['userfcn'] = None
+

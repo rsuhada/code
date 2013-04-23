@@ -13,7 +13,7 @@ from sb_models import beta_psf_2d_lmfit_profile, v06_psf_2d_lmfit_profile
 import lmfit as lm
 import time
 import asciitable as atab
-
+import pickle
 
 def load_sb_curve(fname):
     """
@@ -77,7 +77,7 @@ def sanitize_sb_curve(sb_curve_tuple):
     return (r, sb_src, sb_bg, sb_src_err, sb_bg_err)
 
 
-def fit_beta_model(r, sb_src, sb_src_err):
+def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
     """
     Fit a beta x psf model
 
@@ -175,6 +175,18 @@ def fit_beta_model(r, sb_src, sb_src_err):
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
+
+    ######################################################################
+    # save structures
+
+    if results_pickle:
+        outstrct = lmfit_result_to_dict(result, pars)
+
+        with open(results_pickle, 'wb') as output:
+            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(p.__dict__, output, pickle.HIGHEST_PROTOCOL)
+
+
 
     return 0
 
@@ -332,6 +344,7 @@ if __name__ == '__main__':
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     outfig = fname+'.dev.png'
+    outpickle = fname+'.dev.pk'
 
     r_500_proj_ang = 153.0   # projected radius [arcsec]
     # r_500_proj_ang = 100.0   # projected radius [arcsec]
@@ -369,9 +382,14 @@ if __name__ == '__main__':
         os.system("open "+outfig)
 
     if FIT_BETA_MODEL:
-        fit_beta_model(r, sb_src, sb_src_err)
+        fit_beta_model(r, sb_src, sb_src_err, outpickle)
 
     if FIT_V06_MODEL:
         fit_v06_model(r, sb_src, sb_src_err)
 
     print "done!"
+
+    with open(outpickle, 'rb') as input:
+        results = pickle.load(input)
+
+    print results
