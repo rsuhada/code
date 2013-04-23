@@ -44,13 +44,14 @@ def v06mod_shape_integral(rho, zeta, a, beta, gamma, epsilon, rbar):
 
     return i
 
-def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars):
+def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, model_pars):
     """
     Convert XSPEC normalization to density for a spherical region,
     optionally with excised inner sphere.
 
     Arguments:
-    - `norm`: XSPEC normalization in XSPEC units (10**(-14)/((1+z)Da)**2)
+    - `norm`: array XSPEC normalization in XSPEC units
+              (10**(-14)/((1+z)Da)**2) with errors
     - `z`: redsihift
     - `da`: angular diameter distance [Mpc]
     - `rproj1_ang`: projected radius of the inner
@@ -61,8 +62,15 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     - 'model_pars': parameter structure - content depends on : on the model
 
     Output:
-    - `density`: density in cgs [g cm**-3]
+    - `density`: array density in cgs [g cm**-3] and associated errors
     """
+
+    # unpack inputs
+    norm = norm_dat[0]
+    norm_err_n = norm_dat[1]
+    norm_err_p = norm_dat[2]
+
+    density_err_n, density_err_p = 0.0, 0.0
 
     # get relative molecular weights: Feldman 1992, A=0.3
     mu_e = mu_e_feldman92
@@ -131,23 +139,27 @@ def spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_
     except Exception, e:
 	raise e
 
-    return density
+    return array((density, density_err_n, density_err_p))
 
 
-def calc_gas_mass(model_name, model_pars, rho0, r1, r2):
+def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
     """
     Integrate the 3D density profile.
 
     Arguments:
     - `model_name`: model identifier: beta, v06
     - 'model_pars': parameter structure - content depends on : on the model
-    - `rho0`: central density from the XSPEC norm [g cm**-3]
+    - `rho0`: array - central density from the XSPEC norm [g cm**-3], lower and upper error
     - `r1`: inner 3D radius [kpc],
     - `r2`: outer 3D radius [kpc], e.g. r500
 
     Output:
     - `Mgas`: gas mass [Msol]
     """
+
+    rho0 = rho0_dat[0]
+    rho0_err_n = rho0_dat[1]
+    rho0_err_p = rho0_dat[2]
 
     mgas = 0.0
     mgas_err = 0.0
