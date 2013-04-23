@@ -162,7 +162,8 @@ def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
     rho0_err_p = rho0_dat[2]
 
     mgas = 0.0
-    mgas_err = 0.0
+    mgas_err_n = 0.0
+    mgas_err_p = 0.0
 
     if model_name == 'beta':
         # print 'Using beta model'
@@ -189,7 +190,7 @@ def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
 
         prefactor = 4.0 * pi * (rcore * kpc_to_cm)**3 * (rho0 / msun_cgs)
         mgas =  prefactor * integ_profile[0]
-        mgas_err = prefactor    # need to add error on rho0, beta, rcore
+        # mgas_err = prefactor    # need to add error on rho0, beta, rcore
 
         # print "Mgas :: ", mgas
 
@@ -207,7 +208,7 @@ def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
         rc      = model_pars[4]
         rs      = model_pars[5]
 
-    return mgas, mgas_err
+    return array((mgas, mgas_err_n, mgas_err_p))
 
 
 if __name__ == '__main__':
@@ -276,7 +277,7 @@ if __name__ == '__main__':
 
     ######################################################################
     # do the integrations for the density
-    rho0 = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
+    rho0_dat = spec_norm_to_density(norm, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
     ne0 = rho0 / (mu_e_feldman92 * mp_cgs)
 
     ######################################################################
@@ -284,7 +285,7 @@ if __name__ == '__main__':
     r1 = 0.0                    # [kpc]
     r2 = r500                   # [kpc]
 
-    mgas, mgas_err = calc_gas_mass(model_name, model_pars_phy, rho0, r1, r2)
+    mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
 
     ######################################################################
     # output

@@ -116,7 +116,6 @@ for i in xrange(1,):
 
         # number density conversion for A=0.3
         ne0_dat = rho0_dat / (mu_e_feldman92 * mp_cgs)
-        # ne0_dat = [rho/(mu_e_feldman92 * mp_cgs) for rho in rho0_dat]
 
         # gas mass calculation
         r2 = r500                   # [kpc]
@@ -125,7 +124,7 @@ for i in xrange(1,):
 
         mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
 
-        mgas = mgas_dat[0]
+        # mgas = mgas_dat[0]
 
         print '#'*40
         print
@@ -147,11 +146,11 @@ for i in xrange(1,):
         print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
         print "-"*60
         print " norm         :: ", norm, " 10**(-14)/((1+z)Da)**2"
-        print " rho0 density :: ", rho0, "g cm**-3"
+        print " rho0 density :: ", rho0_dat, "g cm**-3"
         print " ne0 density  :: ", ne0, "cm**-3"
         print "-"*60
         print " r500         :: ", r500, "kpc"
-        print " Mgas         :: ", mgas, "Msol"
+        print " Mgas         :: ", mgas_dat, "Msol"
         print "-"*60
 
 
