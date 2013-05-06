@@ -318,7 +318,8 @@ def fit_v06_model(r, sb_src, sb_src_err):
 
     if DO_FIT and PLOT_PROFILE:
 
-        output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
+        # output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
+        output_figure = fname+'.beta_fit.png'
 
         print len(r), len( sb_src), len( r_model), len( profile_norm_model)
 
@@ -333,18 +334,23 @@ if __name__ == '__main__':
 
     ######################################################################
     # settings
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
+
+    # this is the 0559 fit
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
-    outfig = fname+'.dev.png'
-    outpickle = fname+'.dev.pk'
 
-    r_500_proj_ang = 153.0   # projected radius [arcsec]
+    # radius
+    # r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
     # r_500_proj_ang = 100.0   # projected radius [arcsec]
+    r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0
@@ -375,8 +381,16 @@ if __name__ == '__main__':
     # control plot
 
     if MAKE_CONTROL_PLOT:
+        outfig = fname+'.dev.png'
+
         plot_sb_profile(r, sb_src, sb_src_err, sb_bg, sb_bg_err, outfig)
         os.system("open "+outfig)
+
+
+    ######################################################################
+    # do the actua
+
+    outpickle = fname+'.dev.pk'
 
     if FIT_BETA_MODEL:
         fit_beta_model(r, sb_src, sb_src_err, outpickle)
@@ -386,7 +400,13 @@ if __name__ == '__main__':
 
     print "done!"
 
-    with open(outpickle, 'rb') as input:
-        results = pickle.load(input)
 
-    print results
+    fitted_pars_file=outpickle
+    # '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
+
+    with open(fitted_pars_file, 'rb') as input:
+        fitted_pars = pickle.load(input)
+
+    print fitted_pars
+
+

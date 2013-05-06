@@ -93,13 +93,16 @@ def lmfit_result_to_dict(result_obj, par_obj):
     subdictionary.
     """
 
+    # flatten object to a dictionary
     d={}
     for key in par_obj:
         d.update({key: {'correl': par_obj[key].correl, 'value': par_obj[key].value, 'stderr': par_obj[key].stderr}})
 
+    # take care of unserializable sub-dictionaries
     outdict = result_obj.__dict__.copy()
     outdict['asteval'] = None
     outdict['namefinder'] = None
     outdict['params'] = d
     outdict['userfcn'] = None
 
+    return outdict

@@ -45,7 +45,6 @@ norm_err_n_array = abs(data['norm_err_n'])
 norm_err_p_array = data['norm_err_p']
 
 # SB best fit parameters
-
 pixscale = 2.5       # [arcsec]
 
 beta = 0.974467
@@ -54,6 +53,26 @@ beta_norm = 0.001095
 beta_norm_err = 0.000145
 rcore = 14.230824 * pixscale         # [arcsec]
 rcore_err = 2.877397 * pixscale
+
+
+######################################################################
+fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
+with open(fitted_pars_file, 'rb') as input:
+    fitted_pars = pickle.load(input)
+
+print fitted_pars
+
+from time import sleep
+sleep(1000)
+######################################################################
+
+
+# beta = 0.974467
+# beta_err =  0.148686
+# beta_norm = 0.001095
+# beta_norm_err = 0.000145
+# rcore = 14.230824 * pixscale         # [arcsec]
+# rcore_err = 2.877397 * pixscale
 
 ######################################################################
 # do the calculation
@@ -154,4 +173,8 @@ for i in xrange(1,):
         print " Mgas         :: ", mgas_dat, "Msol"
         print "-"*60
 
+
+        ######################################################################
+        ######################################################################
+        ######################################################################
 
