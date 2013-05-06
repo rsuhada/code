@@ -170,7 +170,9 @@ def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
 
     if DO_FIT and PLOT_PROFILE:
 
-        output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_beta_psf.png'
+        output_figure = fname+'.beta_psf.png'
+
+        print "result plot :: ", output_figure
 
         plot_data_model_resid(r, sb_src,
                               r_model, profile_norm_model,
@@ -185,6 +187,7 @@ def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
         with open(results_pickle, 'wb') as output:
             pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
 
+    print "results written to:: ", results_pickle
     return 0
 
 
@@ -399,14 +402,4 @@ if __name__ == '__main__':
         fit_v06_model(r, sb_src, sb_src_err)
 
     print "done!"
-
-
-    fitted_pars_file=outpickle
-    # '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
-
-    with open(fitted_pars_file, 'rb') as input:
-        fitted_pars = pickle.load(input)
-
-    print fitted_pars
-
 
