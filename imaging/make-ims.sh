@@ -10,8 +10,8 @@ cd $dir
 ######################################################################
 # extraction for the 0.5-2 keV band
 
-elo="500"
-ehi="2000"
+elo=$2
+ehi=$3
 
 pattern="&& (PATTERN<=12)"
 m1ccdpattern=$(eval_ccd_pattern m1)

@@ -14,8 +14,8 @@ cd $dir
 ######################################################################
 # input parameters
 
-elo="500"
-ehi="2000"
+elo=$2
+ehi=$3
 
 USE_OOT=0                       # use the oot correction for pn? using
                                 # it causes some small (maybe

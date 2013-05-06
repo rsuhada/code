@@ -184,9 +184,6 @@ def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
 
         with open(results_pickle, 'wb') as output:
             pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
-            pickle.dump(p.__dict__, output, pickle.HIGHEST_PROTOCOL)
-
-
 
     return 0
 

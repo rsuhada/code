@@ -34,7 +34,8 @@ z = 0.6112
 r500 = 1043.0                    # [kpc]
 
 # load the values from XSPEC the table
-fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-001-radial-master.tab'
+# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-001-radial-master.tab'
+fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-009-radial-master.tab'
 data = asciitable.read(table=fname)
 
 rproj2_ang_array = data['r_fit']
@@ -129,7 +130,7 @@ for i in xrange(1,):
         print '#'*40
         print
 
-        print r1, r2, model_pars_phy, rho0, mgas
+        # print r1, r2, model_pars_phy, rho0, mgas
 
         ######################################################################
         # output
@@ -145,9 +146,9 @@ for i in xrange(1,):
         print " beta         :: ", beta
         print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
         print "-"*60
-        print " norm         :: ", norm, " 10**(-14)/((1+z)Da)**2"
+        print " norm         :: ", norm_dat, " 10**(-14)/((1+z)Da)**2"
         print " rho0 density :: ", rho0_dat, "g cm**-3"
-        print " ne0 density  :: ", ne0, "cm**-3"
+        print " ne0 density  :: ", ne0_dat, "cm**-3"
         print "-"*60
         print " r500         :: ", r500, "kpc"
         print " Mgas         :: ", mgas_dat, "Msol"

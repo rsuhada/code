@@ -516,9 +516,15 @@ fi
 ######################################################################
 # imaging pipeline
 
+# elo="500"
+# ehi="2000"
+
+elo="500"
+ehi="7000"
+
 if [[ $MAKE_IMS -eq 1 ]]
 then
-    ${codedir}/imaging/make-ims.sh ${workdir}
+    ${codedir}/imaging/make-ims.sh ${workdir} ${elo} ${ehi}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -528,7 +534,7 @@ fi
 
 if [[ $MAKE_EXP_MAP -eq 1 ]]
 then
-    ${codedir}/imaging/make-exp-map.sh ${workdir}
+    ${codedir}/imaging/make-exp-map.sh ${workdir} ${elo} ${ehi}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -538,7 +544,7 @@ fi
 
 if [[ $MAKE_MODEL_BG_2COMP -eq 1 ]]
 then
-    ${codedir}/imaging/make-model-bg-2comp.sh ${workdir}
+    ${codedir}/imaging/make-model-bg-2comp.sh ${workdir} ${elo} ${ehi}
     if [[ $? -ne 0 ]]
     then
         cd $startdir
@@ -548,7 +554,7 @@ fi
 
 if [[ $MAKE_MODEL_BG_SPLINE -eq 1 ]]
 then
-    ${codedir}/imaging/make-model-bg-spline.sh ${workdir}
+    ${codedir}/imaging/make-model-bg-spline.sh ${workdir} ${elo} ${ehi}
     if [[ $? -ne 0 ]]
     then
         cd $startdir

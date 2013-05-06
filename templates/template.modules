@@ -42,7 +42,7 @@ export EXTRACT_BACK_BAND_PN=0      # custom band in run-esas (500-2000)
 export EXTRACT_BACK_BAND_M1=0      # custom band in run-esas (500-2000)
 export EXTRACT_BACK_BAND_M2=0      # custom band in run-esas (500-2000)
 
-export GROUP_SPEC=0                             # FIXME - prefixes
+export GROUP_SPEC=0                # FIXME - prefixes
 
 # MANUAL STEP: create RASS bg spectrum (see notes)
 # MANUAL STEP: spectral fitting: savexspec-${analysis_id}-pow-swcx.xcm
@@ -55,6 +55,7 @@ export RENAME_SPEC_PRODUCTS=0      # should be used after
 ######################################################################
 # imaging pipeline: 0.5-2 keV (FIXME: at the moment requires
 # EXTRACT_SPEC_ to be run before for ps region file)
+# MANUAL_STEP: creating the ps region files
 
 MAKE_IMS=0
 MAKE_EXP_MAP=0

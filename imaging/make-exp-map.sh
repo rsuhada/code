@@ -9,8 +9,8 @@ cd $dir
 ######################################################################
 # do the extraction: 0.5-2 keV band
 
-elo="500"
-ehi="2000"
+elo=$2
+ehi=$3
 emask_thresh1=0.01              # [ defailt = 0.1 ]
 
 REMOVE_CLUSTER=0                # should I mask out the cluster?

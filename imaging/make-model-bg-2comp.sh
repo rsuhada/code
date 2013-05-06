@@ -9,8 +9,8 @@ cd $dir
 ######################################################################
 # input parameters
 
-elo="500"
-ehi="2000"
+elo=$2
+ehi=$3
 
 # original: excesssigma=3 mlmin=1 since it should be run with ps
 # alredy masked out the threshold can be increased (even up to point
