@@ -10,6 +10,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 import asciitable
 from xspec_utils import *
+import pickle
 
 print
 
@@ -33,15 +34,19 @@ omega_k_0=0.0
 z = 0.6112
 r500 = 1043.0                    # [kpc]
 
-# load the values from XSPEC the table
-
-# 0559
 # fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-001-radial-master.tab'
-fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-009-radial-master.tab'
+
+# load the values from XSPEC the table
+# 0559
+fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
+fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.dev.pk'
 
 # 2332
-fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/SPT-CL-J2332-5358-run-002-radial-master.tab'
-fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
+# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/SPT-CL-J2332-5358-run-002-radial-master.tab'
+# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
+
+######################################################################
+# load in values
 
 data = asciitable.read(table=fname)
 
@@ -54,13 +59,12 @@ norm_err_p_array = data['norm_err_p']
 # SB best fit parameters
 pixscale = 2.5       # [arcsec]
 
-beta = 0.974467
-beta_err =  0.148686
-beta_norm = 0.001095
-beta_norm_err = 0.000145
-rcore = 14.230824 * pixscale         # [arcsec]
-rcore_err = 2.877397 * pixscale
-
+# beta = 0.974467
+# beta_err =  0.148686
+# beta_norm = 0.001095
+# beta_norm_err = 0.000145
+# rcore = 14.230824 * pixscale         # [arcsec]
+# rcore_err = 2.877397 * pixscale
 
 ######################################################################
 # load in beta fit results
@@ -68,13 +72,13 @@ rcore_err = 2.877397 * pixscale
 with open(fitted_pars_file, 'rb') as input:
     fitted_pars = pickle.load(input)
 
-print fitted_pars['params']['beta']['value']
-print fitted_pars['params']['rcore']['value'] * pixscale
-print fitted_pars['params']['norm']['value']
+beta = fitted_pars['params']['beta']['value']
+rcore = fitted_pars['params']['rcore']['value'] * pixscale
+beta_norm = fitted_pars['params']['norm']['value']
 
-print fitted_pars['params']['beta']['stderr']
-print fitted_pars['params']['rcore']['stderr'] * pixscale
-print fitted_pars['params']['norm']['stderr']
+beta_err = fitted_pars['params']['beta']['stderr']
+rcore_err = fitted_pars['params']['rcore']['stderr'] * pixscale
+beta_norm_err = fitted_pars['params']['norm']['stderr']
 
 ######################################################################
 # do the calculation

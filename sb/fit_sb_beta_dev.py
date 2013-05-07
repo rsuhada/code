@@ -338,10 +338,11 @@ if __name__ == '__main__':
     ######################################################################
     # settings
 
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
+    # 2332
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
 
-    # this is the 0559 fit
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-pn-003.dat'
+    # 0559
+    fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat'
 
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
     # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
@@ -351,9 +352,9 @@ if __name__ == '__main__':
 
 
     # radius
-    # r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
+    r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
     # r_500_proj_ang = 100.0   # projected radius [arcsec]
-    r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
+    # r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
 
     # PSF parameters
     theta = 65.8443 / 60.0
@@ -391,7 +392,7 @@ if __name__ == '__main__':
 
 
     ######################################################################
-    # do the actua
+    # do the actual fitting
 
     outpickle = fname+'.dev.pk'
 
