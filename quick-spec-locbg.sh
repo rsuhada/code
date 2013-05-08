@@ -48,6 +48,17 @@ then
     cp ${codedir}/templates/template-par-qspec-001.results ${specdir}/conf/${CLNAME}-par-qspec-001.results
 fi
 
+######################################################################
+# MANUAL: uncomment this part if you want only to pre-create the dirs
+# and config files
+
+# echo "configs written!"
+# sleep 1
+# exit 0
+
+######################################################################
+# load in the config
+
 source $config_file
 
 ######################################################################

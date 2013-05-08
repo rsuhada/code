@@ -14,7 +14,7 @@ dir=$1
 export specdir=../radial-spec            # work dir relative to the analysis directory
 export bgspecdir=../spec               # quick spectroscopyu dir with the local background
 export parfile=${CLNAME}-par-rspec-001.conf
-
+n
 ######################################################################
 # prepare paths
 
@@ -50,7 +50,17 @@ then
     cp ${codedir}/templates/template-par-ispec-001.results ${specdir}/conf/${CLNAME}-par-rspec-001.results
 fi
 
-# and now get the parameters
+######################################################################
+# MANUAL: uncomment this part if you want only to pre-create the dirs
+# and config files
+
+# echo "configs written!"
+# sleep 1
+# exit 0
+
+######################################################################
+# load in the config
+
 source $config_file
 
 ######################################################################
