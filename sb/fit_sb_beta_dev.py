@@ -338,34 +338,51 @@ if __name__ == '__main__':
     ######################################################################
     # settings
 
-    # 2332
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
 
-    # 0559
-    fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat'
+    fname=sys.argv[1]
+    r_500_proj_ang=sys.argv[2]
+    instrument=sys.argv[3]
+    theta=double(sys.argv[4]) / 60.0
+    energy=sys.argv[5]
+    MODEL=sys.argv[6]
+    MAKE_CONTROL_PLOT=sys.argv[7]
 
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
-    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
+    print '-->-'*10
+    print fname
+    print r_500_proj_ang
+    print theta
+    print energy
+    print instrument
+    print MAKE_CONTROL_PLOT
+    print MODEL
+    print '-->-'*10
 
+    # # 2332
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
 
-    # radius
-    r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
-    # r_500_proj_ang = 100.0   # projected radius [arcsec]
-    # r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
+    # # 0559
+    # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat'
 
-    # PSF parameters
-    theta = 65.8443 / 60.0
-    energy = 1.5
-    instrument = "pn"
-    psf_pars = (instrument, theta, energy)
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/sb-prof-mock-02-beta-ideal.dat'
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-02.fits-prof.dat'
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-03.fits-prof.dat'
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits-prof.dat'
+    # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
-    # module settings
-    MAKE_CONTROL_PLOT = False
-    FIT_BETA_MODEL = True
-    FIT_V06_MODEL = False
+    # # radius
+    # r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
+    # # r_500_proj_ang = 100.0   # projected radius [arcsec]
+    # # r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
+
+    # # PSF parameters
+    # theta = 65.8443 / 60.0
+    # energy = 1.5
+    # instrument = "pn"
+    # psf_pars = (instrument, theta, energy)
+
+    # # module settings
+    # MAKE_CONTROL_PLOT = False
+    # MODEL = "beta"
 
     ######################################################################
     # loading the XSPEC data
@@ -396,10 +413,10 @@ if __name__ == '__main__':
 
     outpickle = fname+'.dev.pk'
 
-    if FIT_BETA_MODEL:
+    if MODEL=="beta":
         fit_beta_model(r, sb_src, sb_src_err, outpickle)
 
-    if FIT_V06_MODEL:
+    if MODEL=="v06":
         fit_v06_model(r, sb_src, sb_src_err)
 
     print "done!"
