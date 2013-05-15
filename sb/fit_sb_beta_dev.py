@@ -336,18 +336,18 @@ if __name__ == '__main__':
     plt.close('all')
 
     ######################################################################
-    # settings
-
+    # input parameters
 
     fname=sys.argv[1]
-    r_500_proj_ang=sys.argv[2]
-    instrument=sys.argv[3]
-    theta=double(sys.argv[4]) / 60.0
-    energy=sys.argv[5]
-    MODEL=sys.argv[6]
-    MAKE_CONTROL_PLOT=sys.argv[7]
+    fitid=sys.argv[2]
+    r_500_proj_ang=double(sys.argv[3])
+    instrument=sys.argv[4]
+    theta=double(sys.argv[5]) / 60.0
+    energy=double(sys.argv[6])
+    MODEL=sys.argv[7]
+    MAKE_CONTROL_PLOT=sys.argv[8]
 
-    print '-->-'*10
+    print '---'*10
     print fname
     print r_500_proj_ang
     print theta
@@ -355,7 +355,7 @@ if __name__ == '__main__':
     print instrument
     print MAKE_CONTROL_PLOT
     print MODEL
-    print '-->-'*10
+    print '---'*10
 
     # # 2332
     # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
@@ -402,7 +402,7 @@ if __name__ == '__main__':
     # control plot
 
     if MAKE_CONTROL_PLOT:
-        outfig = fname+'.dev.png'
+        outfig = fname+'.'+fitid+'.dev.png'
 
         plot_sb_profile(r, sb_src, sb_src_err, sb_bg, sb_bg_err, outfig)
         os.system("open "+outfig)
@@ -411,7 +411,7 @@ if __name__ == '__main__':
     ######################################################################
     # do the actual fitting
 
-    outpickle = fname+'.dev.pk'
+    outpickle = fname+'.'+fitid+'.dev.pk'
 
     if MODEL=="beta":
         fit_beta_model(r, sb_src, sb_src_err, outpickle)
