@@ -163,6 +163,13 @@ def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
+
+        with open(results_pickle+'.txt', 'w') as f:
+            sys.stdout = f
+            lm.printfuncs.report_errors(result.params)
+            print "fitting took: "+str(t2-t1)+" s"
+            sys.stdout = sys.__stdout__
+
         print "fitting subroutine done!"
 
     ######################################################################
@@ -170,7 +177,7 @@ def fit_beta_model(r, sb_src, sb_src_err, results_pickle=None):
 
     if DO_FIT and PLOT_PROFILE:
 
-        output_figure = fname+'.beta_psf.png'
+        output_figure = results_pickle+'.beta_psf.png'
 
         print "result plot :: ", output_figure
 
@@ -353,8 +360,8 @@ if __name__ == '__main__':
     print theta
     print energy
     print instrument
-    print MAKE_CONTROL_PLOT
     print MODEL
+    print MAKE_CONTROL_PLOT
     print '---'*10
 
     # # 2332
@@ -401,8 +408,8 @@ if __name__ == '__main__':
     ######################################################################
     # control plot
 
-    if MAKE_CONTROL_PLOT:
-        outfig = fname+'.'+fitid+'.dev.png'
+    if MAKE_CONTROL_PLOT=="True":
+        outfig = fname+'.'+fitid+'.png'
 
         plot_sb_profile(r, sb_src, sb_src_err, sb_bg, sb_bg_err, outfig)
         os.system("open "+outfig)
@@ -411,7 +418,7 @@ if __name__ == '__main__':
     ######################################################################
     # do the actual fitting
 
-    outpickle = fname+'.'+fitid+'.dev.pk'
+    outpickle = fname+'.'+fitid+'.pk'
 
     if MODEL=="beta":
         fit_beta_model(r, sb_src, sb_src_err, outpickle)
