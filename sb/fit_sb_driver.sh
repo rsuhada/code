@@ -4,15 +4,18 @@ export PYTHONEXEC=/usr/bin/python2.6
 export codedir="/Users/rs/data1/sw/esaspi"
 
 
+# FIXME: add conf file interface
 
-fitid=01
-r500_proj_ang="153.0"      # [arcsec]
+# cluster settings
+
+source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit.conf
+
+######################################################################
+# model settings
+
 energy="1.5"                # [keV]
 MODEL="beta"
 MAKE_CONTROL_PLOT=False
-
-
-# FIXME: add conf file interface
 
 ######################################################################
 # loop through all instruments
@@ -27,7 +30,7 @@ do
     theta="65.8443"
 
     # Profile name
-    prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-"$instrument"-003.dat"
+    prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
 
     echo $PYTHONEXEC ${codedir}/sb/fit_sb_beta_dev.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
 
