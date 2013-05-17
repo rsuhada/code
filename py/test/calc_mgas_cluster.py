@@ -12,6 +12,52 @@ import asciitable
 from xspec_utils import *
 import pickle
 
+def output_results():
+    ######################################################################
+    # output
+
+    print
+    print "-"*60
+    print " z            :: ", z
+    print " da           :: ", da , "Mpc"
+    print " ang scale    :: ", angscale, "kpc/arcsec"
+    print "-"*60
+    print " rcore        :: ", rcore, "pix"
+    print " rcore phy    :: ", rcore_phy, "kpc"
+    print " beta         :: ", beta
+    print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
+    print "-"*60
+    print " norm         :: ", norm_dat, " 10**(-14)/((1+z)Da)**2"
+    print " rho0 density :: ", rho0_dat, "g cm**-3"
+    print " ne0 density  :: ", ne0_dat, "cm**-3"
+    print "-"*60
+    print " r500         :: ", r500, "kpc"
+    print " Mgas         :: ", mgas_dat, "Msol"
+    print "-"*60
+
+    return 0
+
+
+def print_report(fname=None):
+    if fname:
+        print "result goes to file :: ", fname
+        with open(fname, 'w') as f:
+            sys.stdout = f
+            output_results()
+            sys.stdout = sys.__stdout__
+    else:
+        output_results()
+
+    return 0
+
+
+
+
+######################################################################
+# main
+######################################################################
+
+
 print
 
 reload(xspec_utils)
@@ -39,7 +85,11 @@ r500 = 1043.0                    # [kpc]
 # load the values from XSPEC the table
 # 0559
 fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
-fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.dev.pk'
+
+# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.01.pk'
+# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-mos1-003.dat.01.pk'
+# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-mos2-003.dat.01.pk'
+
 
 # 2332
 # fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/SPT-CL-J2332-5358-run-002-radial-master.tab'
@@ -47,6 +97,8 @@ fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn
 
 ######################################################################
 # load in values
+
+mgas_results_fname=fitted_pars_file+'.mgas'
 
 data = asciitable.read(table=fname)
 
@@ -152,34 +204,8 @@ for i in xrange(1,):
 
         # mgas = mgas_dat[0]
 
-        print '#'*40
-        print
-
-        # print r1, r2, model_pars_phy, rho0, mgas
-
-        ######################################################################
-        # output
-
-        print
-        print "-"*60
-        print " z            :: ", z
-        print " da           :: ", da , "Mpc"
-        print " ang scale    :: ", angscale, "kpc/arcsec"
-        print "-"*60
-        print " rcore        :: ", rcore, "pix"
-        print " rcore phy    :: ", rcore_phy, "kpc"
-        print " beta         :: ", beta
-        print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
-        print "-"*60
-        print " norm         :: ", norm_dat, " 10**(-14)/((1+z)Da)**2"
-        print " rho0 density :: ", rho0_dat, "g cm**-3"
-        print " ne0 density  :: ", ne0_dat, "cm**-3"
-        print "-"*60
-        print " r500         :: ", r500, "kpc"
-        print " Mgas         :: ", mgas_dat, "Msol"
-        print "-"*60
-
-
+        print_report()
+        print_report(mgas_results_fname)
         ######################################################################
         ######################################################################
         ######################################################################

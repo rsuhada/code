@@ -16,8 +16,8 @@ source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit.conf
 # loop through all instruments
 
 # instruments=("pn" "mos1" "mos2")
-instruments=("mos1" "mos2")
-# instruments=("pn")
+# instruments=("mos1" "mos2")
+instruments=("pn")
 
 for instrument in ${instruments[@]}
 do
