@@ -60,15 +60,11 @@ def print_report(fname=None):
 
 print
 
-reload(xspec_utils)
+# reload(xspec_utils)
 
 ######################################################################
 # test calculation for 0559
 ######################################################################
-
-# TEST_MODEL_NAME = 'none'    # beta, v06mod
-TEST_MODEL_NAME = 'beta'    # beta, v06mod
-# TEST_MODEL_NAME = 'v06mod'    # beta, v06mod
 
 # cosmology
 h_0=70.2
@@ -77,23 +73,19 @@ omega_de_0=0.728
 omega_k_0=0.0
 
 # cluster - 0559
-z = 0.6112
-r500 = 1043.0                    # [kpc]
+z = double(sys.argv[1])
+r500 = double(sys.argv[2])
+fname= sys.argv[3]
+fitted_pars_file= sys.argv[4]
+TEST_MODEL_NAME = sys.argv[5]
 
-# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249-run-001-radial-master.tab'
-
-# load the values from XSPEC the table
-# 0559
-fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
-
+# # cluster - 0559
+# z = 0.6112
+# r500 = 1043.0                    # [kpc]
+# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
 # fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.01.pk'
-# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-mos1-003.dat.01.pk'
-# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-mos2-003.dat.01.pk'
+# TEST_MODEL_NAME = 'beta'    # beta, v06mod
 
-
-# 2332
-# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/SPT-CL-J2332-5358-run-002-radial-master.tab'
-# fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat.dev.pk'
 
 ######################################################################
 # load in values
