@@ -12,16 +12,11 @@ source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit.conf
 
 ######################################################################
 # model settings
-
-energy="1.5"                # [keV]
-MODEL="beta"
-MAKE_CONTROL_PLOT=False
-
 ######################################################################
 # loop through all instruments
 
-instruments=("pn" "mos1" "mos2")
-# instruments=("mos1" "mos2")
+# instruments=("pn" "mos1" "mos2")
+instruments=("mos1" "mos2")
 # instruments=("pn")
 
 for instrument in ${instruments[@]}

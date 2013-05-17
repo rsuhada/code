@@ -354,7 +354,7 @@ if __name__ == '__main__':
     MODEL=sys.argv[7]
     MAKE_CONTROL_PLOT=sys.argv[8]
 
-    print '---'*10
+    print '-'*70
     print fname
     print r_500_proj_ang
     print theta
@@ -362,7 +362,7 @@ if __name__ == '__main__':
     print instrument
     print MODEL
     print MAKE_CONTROL_PLOT
-    print '---'*10
+    print '-'*70
 
     # # 2332
     # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J2332-5358/sb-prof-pn-004.dat'
