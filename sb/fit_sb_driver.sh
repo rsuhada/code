@@ -27,7 +27,7 @@ do
     # Profile name
     prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
 
-    echo $PYTHONEXEC ${codedir}/sb/fit_sb_beta_dev.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
-    $PYTHONEXEC ${codedir}/sb/fit_sb_beta_dev.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+    echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+    $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
 
 done
