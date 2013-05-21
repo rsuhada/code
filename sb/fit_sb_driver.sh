@@ -15,19 +15,40 @@ source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit.conf
 ######################################################################
 # loop through all instruments
 
-# instruments=("pn" "mos1" "mos2")
-# instruments=("mos1" "mos2")
-instruments=("pn")
 
-for instrument in ${instruments[@]}
-do
-    # FIXME: will need to add individual thetas
-    theta="65.8443"
+if [[ ${INSTRUMENT_SETUP} == "single" ]]
+then
 
-    # Profile name
-    prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
+    # fit a set of individual instruments
 
-    echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
-    $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+    for instrument in ${instruments[@]}
+    do
+        echo "fitting individually :: " $instrument
+        # Profile name
+        prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
+        theta="theta"${instrument}
+        theta=${!theta}
 
-done
+        echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+        # $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+
+    done
+
+
+else
+
+    echo "fitting jointly :: " $instruments
+
+
+    for instrument in ${instruments[@]}
+    do
+        echo "fitting individually :: " $instrument
+        # Profile name
+        prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
+        theta="theta"${instrument}
+        theta=${!theta}
+
+        echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+        # $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+
+fi
