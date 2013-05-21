@@ -26,29 +26,24 @@ then
         echo "fitting individually :: " $instrument
         # Profile name
         prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
-        theta="theta"${instrument}
+        theta="theta_"${instrument}
         theta=${!theta}
+
 
         echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
         # $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
 
     done
 
-
 else
 
-    echo "fitting jointly :: " $instruments
+    # Profile name
+    prof_fname_pn="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-pn-${profile_id}.dat"
+    prof_fname_mos1="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-mos1-${profile_id}.dat"
+    prof_fname_mos2="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-mos2-${profile_id}.dat"
 
+    echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_joint.py $fitid $MODEL $MAKE_CONTROL_PLOT $r500_proj_ang $energy $pn_prof_fname $pn_prof_fname $prof_fname_pn $theta_pn $prof_fname_mos1 $theta_mos1 $prof_fname_mos2 $theta_mos2 $instruments
 
-    for instrument in ${instruments[@]}
-    do
-        echo "fitting individually :: " $instrument
-        # Profile name
-        prof_fname="/Users/rs/w/xspt/data/dev/0559/sb/${cluster}/sb-prof-${instrument}-${profile_id}.dat"
-        theta="theta"${instrument}
-        theta=${!theta}
-
-        echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
-        # $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_proj_ang $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+    $PYTHONEXEC ${codedir}/sb/fit_sb_model_joint.py $fitid $MODEL $MAKE_CONTROL_PLOT $r500_proj_ang $energy $pn_prof_fname $pn_prof_fname $prof_fname_pn $theta_pn $prof_fname_mos1 $theta_mos1 $prof_fname_mos2 $theta_mos2 "$instruments"
 
 fi
