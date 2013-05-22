@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     fname=sys.argv[1]
     fitid=sys.argv[2]
-    r_500_proj_ang=double(sys.argv[3])
+    r500_proj_ang=double(sys.argv[3])
     instrument=sys.argv[4]
     theta=double(sys.argv[5]) / 60.0
     energy=double(sys.argv[6])
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     print '-'*70
     print fname
-    print r_500_proj_ang
+    print r500_proj_ang
     print theta
     print energy
     print instrument
@@ -55,9 +55,9 @@ if __name__ == '__main__':
     # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     # # radius
-    # r_500_proj_ang = 153.0   # 0559 projected radius [arcsec]
-    # # r_500_proj_ang = 100.0   # projected radius [arcsec]
-    # # r_500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
+    # r500_proj_ang = 153.0   # 0559 projected radius [arcsec]
+    # # r500_proj_ang = 100.0   # projected radius [arcsec]
+    # # r500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
 
     # # PSF parameters
     # theta = 65.8443 / 60.0
@@ -70,11 +70,13 @@ if __name__ == '__main__':
     # MODEL = "beta"
 
     ######################################################################
-    # loading the XSPEC data
+    # loading sb curve
 
     (r, sb_src, sb_bg, sb_src_err, sb_bg_err) = sanitize_sb_curve(load_sb_curve(fname))
 
-    ids = where(r<=r_500_proj_ang)
+
+    # take only the profile inside r500
+    ids = where(r<=r500_proj_ang)
 
     r = r[ids]
     sb_src = sb_src[ids]
