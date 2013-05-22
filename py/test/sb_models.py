@@ -382,9 +382,11 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
         # is this biasing?
         if USE_ERROR: residuals = residuals / data_profile_err
 
+        print "resid :: ", residuals[0], data_profile[0], model_profile[0], data_profile_err[0]
         return residuals
 
 def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
+                                    distmatrix,
                                     instruments, theta, energy, APPLY_PSF,
                                     DO_ZERO_PAD, data_profile=None,
                                     data_profile_err=None):
@@ -409,13 +411,13 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
 
     for instrument in instruments:
-
         # model in 2d image beta x PSF = and extract profile
+
         model_image[instrument] = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                        instrument, theta[instrument], energy,
                                        APPLY_PSF, DO_ZERO_PAD)
 
-        r_length = model_image.shape[0]/2 + 1
+        r_length = model_image[instrument].shape[0]/2 + 1
         r = arange(1.0, r_length+1, 1.0)
 
         # FIXME: can be geometric areas removed from here and instead
@@ -435,10 +437,11 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         for instrument in instruments:
             residuals_inst = data_profile[instrument] - model_profile[instrument]
             # is this biasing?
-            if USE_ERROR: residuals_inst = residuals[instrument] / data_profile_err[instrument]
+            if USE_ERROR: residuals_inst = residuals_inst / data_profile_err[instrument]
 
-        residuals = residuals + residuals_inst
+            residuals = residuals + residuals_inst
 
+        print "resid :: ", residuals[0], data_profile[instrument][0], model_profile[instrument][0], data_profile_err[instrument][0]
         return residuals
 
 

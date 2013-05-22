@@ -216,7 +216,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    PLOT_PROFILE = True
+    PLOT_PROFILE = False
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -236,12 +236,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     ycen_obj = ysize_obj / 2
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
-    # setup data for the profile extraction - for speedup
-    # distmatrix is same for each instrument
-    # FIXME: should be refactored - pass it for speed not
-    # recalculate
-    distmatrix = distance_matrix(zeros[imsize],
-                                     xcen_obj, ycen_obj).astype(int) # need int for bincount
+    # pre-calculate distmatrix for speedup - it is same for all
+    # instruments
+    distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
     ######################################################################
     # init beta model
@@ -258,8 +255,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     # sb_src = sb_src * r
 
-    nonfit_args = (imsize, xsize_obj, ysize_obj, instruments, theta,
-                   energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+    nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
+                   theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
     leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
@@ -282,13 +279,15 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
+
         # get the output model
-        (r_model, profile_norm_model) = 0.0
-        beta_psf_2d_lmfit_profile_joint(pars, imsize,
-                                        xsize_obj, ysize_obj,
-                                        instrument, theta,
-                                        energy,
-                                        APPLY_PSF, DO_ZERO_PAD)
+        (r_model, profile_norm_model) = \
+            beta_psf_2d_lmfit_profile_joint(pars, imsize,
+                                            xsize_obj, ysize_obj,
+                                            distmatrix,
+                                            instruments, theta,
+                                            energy,
+                                            APPLY_PSF, DO_ZERO_PAD)
 
         ######################################################################
         # output
@@ -313,8 +312,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         print "result plot :: ", output_figure
 
-        plot_data_model_resid(r, sb_src,
-                              r_model, profile_norm_model,
+        # FIXME: implement plotter for joint fits
+        plot_data_model_resid(r, sb_src[instruments[0]],
+                              r_model, profile_norm_model[instruments[0]],
                               output_figure, sb_src_err)
 
     ######################################################################
