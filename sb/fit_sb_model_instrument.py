@@ -8,12 +8,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
 from esaspi_utils import *
-from sb_utils import distance_matrix
-from sb_models import beta_psf_2d_lmfit_profile, v06_psf_2d_lmfit_profile
-import lmfit as lm
-import time
 import asciitable as atab
-import pickle
 from sb_fitting_utils import *
 
 

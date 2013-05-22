@@ -183,7 +183,7 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
-    norm  = pars['norm'].value
+    norm  = pars['norm_'+instrument].value
     rcore = pars['rcore'].value
     beta  = pars['beta'].value
 
@@ -422,22 +422,22 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
 
         # FIXME: can be geoemtric areas removed from here and instead
         # passes? or is there some edge effect
-        (profile[instrument], geometric_area[instrument]) =
+        (profile[instrument], geometric_area[instrument]) = \
             extract_profile_fast(model_image[instrument],
                                  distmatrix, xcen_obj, ycen_obj)
 
         # trim the corners
         model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
 
-   if data_profile == None:
-       return (r, model_profile)
-   else:
-       for instrument in instruments:
-           residuals = data_profile[instrument] - model_profile[instrument]
-           # is this biasing?
-           if USE_ERROR: residuals[instrument] = residuals[instrument] / data_profile_err[instrument]
+    if data_profile == None:
+        return (r, model_profile)
+    else:
+        for instrument in instruments:
+            residuals = data_profile[instrument] - model_profile[instrument]
+            # is this biasing?
+            if USE_ERROR: residuals[instrument] = residuals[instrument] / data_profile_err[instrument]
 
-       return residuals
+        return residuals
 
 
 def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,

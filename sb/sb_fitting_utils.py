@@ -115,7 +115,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     # init beta model
 
     pars = lm.Parameters()
-    pars.add('norm', value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
+    pars.add('norm_'+instrument, value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
     pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
     pars.add('beta', value=0.8, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
@@ -270,12 +270,12 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         print "fitting took: ", t2-t1, " s"
 
         # get the output model
-        (r_model, profile_norm_model) =
-            beta_psf_2d_lmfit_profile_joint(pars, imsize,
-                                            xsize_obj, ysize_obj,
-                                            instrument, theta,
-                                            energy,
-                                            APPLY_PSF, DO_ZERO_PAD)
+        (r_model, profile_norm_model) = 0.0
+        beta_psf_2d_lmfit_profile_joint(pars, imsize,
+                                        xsize_obj, ysize_obj,
+                                        instrument, theta,
+                                        energy,
+                                        APPLY_PSF, DO_ZERO_PAD)
 
         ######################################################################
         # output
