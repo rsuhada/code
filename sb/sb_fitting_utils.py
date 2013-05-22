@@ -9,7 +9,7 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
 from esaspi_utils import *
 from sb_utils import distance_matrix
-from sb_models import beta_psf_2d_lmfit_profile, v06_psf_2d_lmfit_profile
+from sb_models import *
 import lmfit as lm
 import time
 import asciitable as atab
@@ -112,6 +112,11 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     r_aper = xsize_obj  / 2        # aperture for the fitting
 
     ######################################################################
+    # create the distance matrix for speedup
+
+    distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
+
+    ######################################################################
     # init beta model
 
     pars = lm.Parameters()
@@ -123,7 +128,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
 
     # sb_src = sb_src * r
 
-    nonfit_args = (imsize, xsize_obj, ysize_obj, instrument, theta,
+    nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instrument, theta,
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
@@ -152,6 +157,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                                                                   imsize,
                                                                   xsize_obj,
                                                                   ysize_obj,
+                                                                  distmatrix,
                                                                   instrument,
                                                                   theta,
                                                                   energy,
@@ -188,7 +194,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     ######################################################################
     # save structures
 
-    if results_pickle:
+    if DO_FIT and results_pickle:
         outstrct = lmfit_result_to_dict(result, pars)
 
         with open(results_pickle, 'wb') as output:
@@ -209,7 +215,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # settings
     APPLY_PSF = True
     DO_ZERO_PAD = True
-    DO_FIT = False
+    DO_FIT = True
     PLOT_PROFILE = True
 
     ######################################################################
@@ -229,6 +235,13 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
     r_aper = xsize_obj  / 2        # aperture for the fitting
+
+    # setup data for the profile extraction - for speedup
+    # distmatrix is same for each instrument
+    # FIXME: should be refactored - pass it for speed not
+    # recalculate
+    distmatrix = distance_matrix(zeros[imsize],
+                                     xcen_obj, ycen_obj).astype(int) # need int for bincount
 
     ######################################################################
     # init beta model
@@ -307,7 +320,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     ######################################################################
     # save structures
 
-    if results_pickle:
+    if DO_FIT and results_pickle:
         outstrct = lmfit_result_to_dict(result, pars)
 
         with open(results_pickle, 'wb') as output:

@@ -335,6 +335,7 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, psf_pars):
 
 
 def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
+                              distmatrix,
                               instrument, theta, energy, APPLY_PSF,
                               DO_ZERO_PAD, data_profile=None,
                               data_profile_err=None):
@@ -354,21 +355,24 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
     # this is the new version
     xcen_obj = xsize_obj / 2
     ycen_obj = ysize_obj / 2
+
+    # 2013-05-22 not needed anymore
     # we want just the relevant part of the image
     # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
-    data = model_image
+    # data = model_image
 
     # setup data for the profile extraction - for speedup
-    # FIXME: should be refactored - pass it for speed not
-    distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
-    r_length = data.shape[0]/2 + 1
+    # was refactored - pass it for speed not
+    # distmatrix = distance_matrix(model_image, xcen_obj, ycen_obj).astype(int) # need int for bincount
+
+    r_length = model_image.shape[0]/2 + 1
 
     # r = arange(0, r_length, 1.0)   # original line: before 2013-03-13
     r = arange(1.0, r_length+1, 1.0)
 
     # FIXME: can be geoemtric area removed from here and instead
     # passes? or is there some edge effect
-    (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
+    (profile, geometric_area) = extract_profile_fast(model_image, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
     if data_profile == None:
@@ -404,14 +408,8 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     # we want just the relevant part of the image
     # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
 
-    # setup data for the profile extraction - for speedup
-    # distmatrix is same for each instrument
-    # FIXME: should be refactored - pass it for speed not
-    # recalculate
-    distmatrix = distance_matrix(model_image[instrument[0]],
-                                     xcen_obj, ycen_obj).astype(int) # need int for bincount
-
     for instrument in instruments:
+
         # model in 2d image beta x PSF = and extract profile
         model_image[instrument] = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
                                        instrument, theta[instrument], energy,
@@ -420,8 +418,8 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         r_length = model_image.shape[0]/2 + 1
         r = arange(1.0, r_length+1, 1.0)
 
-        # FIXME: can be geoemtric areas removed from here and instead
-        # passes? or is there some edge effect
+        # FIXME: can be geometric areas removed from here and instead
+        # pass it? or is there some edge effect
         (profile[instrument], geometric_area[instrument]) = \
             extract_profile_fast(model_image[instrument],
                                  distmatrix, xcen_obj, ycen_obj)
@@ -432,10 +430,14 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     if data_profile == None:
         return (r, model_profile)
     else:
+        # combine the likelihoods
+        residuals = 0.0
         for instrument in instruments:
-            residuals = data_profile[instrument] - model_profile[instrument]
+            residuals_inst = data_profile[instrument] - model_profile[instrument]
             # is this biasing?
-            if USE_ERROR: residuals[instrument] = residuals[instrument] / data_profile_err[instrument]
+            if USE_ERROR: residuals_inst = residuals[instrument] / data_profile_err[instrument]
+
+        residuals = residuals + residuals_inst
 
         return residuals
 
