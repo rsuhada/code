@@ -57,60 +57,51 @@ if __name__ == '__main__':
     # load sb profile
 
     # dictionary for file names
-    sb_file_dict = {
-        'pn': prof_fname_pn,
-        'mos1': prof_fnamm_mos1,
-        'mos2': prof_fname_mos2
+    sb_file = {
+        'pn'   : prof_fname_pn,
+        'mos1' : prof_fname_mos1,
+        'mos2' : prof_fname_mos2
         }
 
     # dictionary for the data
 
-    sb_data_dict = {}
+    sb_src = {}
+    sb_bg = {}
+    sb_src_err = {}
+    sb_bg_err = {}
 
-    sb_src_pn, sb_bg_pn, sb_src_pn_err, sb_bg_pn_err
 
+    # load the data
     for instrument in instruments:
+        print "Loading SB data for :: ", instrument
 
-        (r, sb_src_pn, sb_bg_pn, sb_src_pn_err, sb_bg_pn_err) = sanitize_sb_curve(load_sb_curve(prof_fname_pn))
-    (r, sb_src_mos1, sb_bg_mos1, sb_src_mos1_err, sb_bg_mos1_err) = sanitize_sb_curve(load_sb_curve(prof_fname_mos1))
-    (r, sb_src_mos2, sb_bg_mos2, sb_src_mos2_err, sb_bg_mos2_err) = sanitize_sb_curve(load_sb_curve(prof_fname_mos2))
+        (r,
+         sb_src[instrument],
+         sb_bg[instrument],
+         sb_src_err[instrument],
+         sb_bg_err[instrument]
+         ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
-    # take only the profile inside r500
-    ids = where(r<=r500_proj_ang)
+        # take only the profile inside r500
+        ids = where(r<=r500_proj_ang)
+        r = r[ids]
 
-    r = r[ids]
+        sb_src[instrument] = sb_src[instrument][ids]
+        sb_bg[instrument] = sb_bg[instrument][ids]
+        sb_src_err[instrument] = sb_src_err[instrument][ids]
+        sb_bg_err[instrument] = sb_bg_err[instrument][ids]
 
-    sb_src_pn = sb_src_pn[ids]
-    sb_bg_pn = sb_bg_pn[ids]
-    sb_src_pn_err = sb_src_pn_err[ids]
-    sb_bg_pn_err = sb_bg_pn_err[ids]
+        n = len(r)
 
-    sb_src_mos1 = sb_src_mos1[ids]
-    sb_bg_mos1 = sb_bg_mos1[ids]
-    sb_src_mos1_err = sb_src_mos1_err[ids]
-    sb_bg_mos1_err = sb_bg_mos1_err[ids]
-
-    sb_src_mos2 = sb_src_mos2[ids]
-    sb_bg_mos2 = sb_bg_mos2[ids]
-    sb_src_mos2_err = sb_src_mos2_err[ids]
-    sb_bg_mos2_err = sb_bg_mos2_err[ids]
-
-    n = len(r)
+        # create the control the plot
+        if MAKE_CONTROL_PLOT=="True":
+            outfig = sb_file[instrument]+'.'+fitid+'.png'
+            print "Creating control plot :: ", instrument, outfig
+            plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
+            # os.system("open "+outfig)
 
     print "SB curves loaded!"
 
-    ######################################################################
-    # control plot
-
-    if MAKE_CONTROL_PLOT=="True":
-        for instrument in instruments:
-            print instrument
-            # outfig = prof_fname_+','+fitid+'.png'
-
-            # print outfig
-
-            # plot_sb_profile(r, sb_src, sb_src_err, sb_bg, sb_bg_err, outfig)
-            # os.system("open "+outfig)
 
     print "going to sleep!"
     from time import sleep
