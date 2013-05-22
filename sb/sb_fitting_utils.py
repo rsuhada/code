@@ -197,6 +197,126 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     print "results written to:: ", results_pickle
     return 0
 
+
+def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, results_pickle=None):
+    """
+    Fit a beta x psf model to any combination of instruments via joint
+    likelihood
+
+    Arguments:
+    """
+
+    # settings
+    APPLY_PSF = True
+    DO_ZERO_PAD = True
+    DO_FIT = False
+    PLOT_PROFILE = True
+
+    ######################################################################
+    # modelling is done in 2D and then projected - setup here the 2D
+    # parameters
+
+    size = 2.0 * r.max()
+    xsize = size
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+    # imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+    imsize = (size, size)         # FIXME: is this necessary? I could just use it inside the model
+
+    xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    r_aper = xsize_obj  / 2        # aperture for the fitting
+
+    ######################################################################
+    # init beta model
+
+    pars = lm.Parameters()
+    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
+    pars.add('beta', value=0.8, vary=True, min=0.1, max=10.0)
+    pars.add('xcen', value=xcen_obj, vary=False)
+    pars.add('ycen', value=ycen_obj, vary=False)
+
+    for instrument in instruments:
+        pars.add('norm_'+instrument, value=mean(sb_src[instrument]),
+                 vary=True, min=0.0, max=sum(abs(sb_src[instrument])))
+
+    # sb_src = sb_src * r
+
+    nonfit_args = (imsize, xsize_obj, ysize_obj, instruments, theta,
+                   energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+                   sb_src_err)
+
+    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+
+    ######################################################################
+    # do the fit: beta
+
+    if DO_FIT:
+        print "starting beta fit"
+        t1 = time.clock()
+
+        result = lm.minimize(beta_psf_2d_lmfit_profile_joint,
+                             pars,
+                             args=nonfit_args,
+                             **leastsq_kws)
+
+        result.leastsq()
+
+        t2 = time.clock()
+        print "fitting took: ", t2-t1, " s"
+
+        # get the output model
+        (r_model, profile_norm_model) =
+            beta_psf_2d_lmfit_profile_joint(pars, imsize,
+                                            xsize_obj, ysize_obj,
+                                            instrument, theta,
+                                            energy,
+                                            APPLY_PSF, DO_ZERO_PAD)
+
+        ######################################################################
+        # output
+
+        # print_result_tab(pars_true, pars)
+        lm.printfuncs.report_errors(result.params)
+
+        with open(results_pickle+'.txt', 'w') as f:
+            sys.stdout = f
+            lm.printfuncs.report_errors(result.params)
+            print "fitting took: "+str(t2-t1)+" s"
+            sys.stdout = sys.__stdout__
+
+        print "fitting subroutine done!"
+
+    ######################################################################
+    # plot beta fit and data profiles
+
+    if DO_FIT and PLOT_PROFILE:
+
+        output_figure = results_pickle+'.beta_psf.png'
+
+        print "result plot :: ", output_figure
+
+        plot_data_model_resid(r, sb_src,
+                              r_model, profile_norm_model,
+                              output_figure, sb_src_err)
+
+    ######################################################################
+    # save structures
+
+    if results_pickle:
+        outstrct = lmfit_result_to_dict(result, pars)
+
+        with open(results_pickle, 'wb') as output:
+            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+
+    print "results written to:: ", results_pickle
+    return 0
+
+
 # FIXME: implement outpickle
 def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pickle=None):
     """
@@ -218,7 +338,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     ysize = xsize
     xcen = xsize/2
     ycen = ysize/2
-    # imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+    # imsize = input_im.shape     # FIXME: is this necessary? I could just use it inside the model
     imsize = (size, size)         # FIXME: is this necessary? I could just use it inside the model
 
     xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize

@@ -178,8 +178,8 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     Arguments:
     """
     # FIXME: the _object coordinates are not needed anymore
-
-    # hdr = pyfits.getheader('pn-test.fits') # FIXME: would be better to create a fits header from scratch
+    # hdr = pyfits.getheader('pn-test.fits')
+    # FIXME: would be better to create a fits header from scratch
 
     xcen  = pars['xcen'].value
     ycen  = pars['ycen'].value
@@ -359,12 +359,15 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
     data = model_image
 
     # setup data for the profile extraction - for speedup
+    # FIXME: should be refactored - pass it for speed not
     distmatrix = distance_matrix(data, xcen_obj, ycen_obj).astype(int) # need int for bincount
     r_length = data.shape[0]/2 + 1
 
     # r = arange(0, r_length, 1.0)   # original line: before 2013-03-13
     r = arange(1.0, r_length+1, 1.0)
 
+    # FIXME: can be geoemtric area removed from here and instead
+    # passes? or is there some edge effect
     (profile, geometric_area) = extract_profile_fast(data, distmatrix, xcen_obj, ycen_obj)
     model_profile = profile[0:r_length] / geometric_area[0:r_length]    # trim the corners
 
@@ -376,6 +379,65 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
         if USE_ERROR: residuals = residuals / data_profile_err
 
         return residuals
+
+def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
+                                    instruments, theta, energy, APPLY_PSF,
+                                    DO_ZERO_PAD, data_profile=None,
+                                    data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image - beta model x psf for a combination of instruments
+    No bg.
+    Also allows to return directly residuals.
+    """
+    USE_ERROR=True             # debug option
+
+    # setup dictionaries
+    model_image = {}
+    profile = {}
+    geometric_area = {}
+    model_profile = {}
+
+    # this is the new version
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    # we want just the relevant part of the image
+    # data = model_image[ycen-ysize_obj/2:ycen+ysize_obj/2, xcen-xsize_obj/2:xcen+xsize_obj/2]
+
+    # setup data for the profile extraction - for speedup
+    # distmatrix is same for each instrument
+    # FIXME: should be refactored - pass it for speed not
+    # recalculate
+    distmatrix = distance_matrix(model_image[instrument[0]],
+                                     xcen_obj, ycen_obj).astype(int) # need int for bincount
+
+    for instrument in instruments:
+        # model in 2d image beta x PSF = and extract profile
+        model_image[instrument] = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
+                                       instrument, theta[instrument], energy,
+                                       APPLY_PSF, DO_ZERO_PAD)
+
+        r_length = model_image.shape[0]/2 + 1
+        r = arange(1.0, r_length+1, 1.0)
+
+        # FIXME: can be geoemtric areas removed from here and instead
+        # passes? or is there some edge effect
+        (profile[instrument], geometric_area[instrument]) =
+            extract_profile_fast(model_image[instrument],
+                                 distmatrix, xcen_obj, ycen_obj)
+
+        # trim the corners
+        model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
+
+   if data_profile == None:
+       return (r, model_profile)
+   else:
+       for instrument in instruments:
+           residuals = data_profile[instrument] - model_profile[instrument]
+           # is this biasing?
+           if USE_ERROR: residuals[instrument] = residuals[instrument] / data_profile_err[instrument]
+
+       return residuals
 
 
 def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,

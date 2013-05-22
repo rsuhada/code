@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print '-'*70
 
     ######################################################################
-    # load sb profile
+    # prepare structures
 
     # dictionary for file names
     sb_file = {
@@ -63,14 +63,19 @@ if __name__ == '__main__':
         'mos2' : prof_fname_mos2
         }
 
-    # dictionary for the data
+    theta = {
+        'pn'   : theta_pn,
+        'mos1' : theta_mos1,
+        'mos2' : theta_mos2
+        }
 
+    # dictionary for the data
     sb_src = {}
     sb_bg = {}
     sb_src_err = {}
     sb_bg_err = {}
 
-
+    ######################################################################
     # load the data
     for instrument in instruments:
         print "Loading SB data for :: ", instrument
@@ -102,21 +107,17 @@ if __name__ == '__main__':
 
     print "SB curves loaded!"
 
-
-    print "going to sleep!"
-    from time import sleep
-    sleep(1000)
-
     ######################################################################
     # do the actual fitting
 
-    outpickle = fname+'.'+fitid+'.pk'
+    outpickle = sb_file[instruments[0]]+'.'+fitid+'.pk'
+    outpickle = outpickle.replace(instruments[0], 'joint')
 
     if MODEL=="beta":
-        fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, outpickle)
+        fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
 
     if MODEL=="v06":
-        fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, outpickle)
+        fit_v06_model_joint(r, sb_src, sb_src_err, instrument, theta, energy, outpickle)
 
     print "done!"
 
