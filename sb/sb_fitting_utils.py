@@ -132,8 +132,8 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     ######################################################################
     # do the fit: beta
@@ -251,7 +251,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     for instrument in instruments:
         pars.add('norm_'+instrument, value=mean(sb_src[instrument]),
-                 vary=True, min=0.0, max=sum(abs(sb_src[instrument])))
+                 vary=True, min=min(sb_src[instrument]),
+                 max=sum(abs(sb_src[instrument])))
 
     # sb_src = sb_src * r
 
@@ -260,7 +261,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+6}
 
     ######################################################################
     # do the fit: beta
@@ -277,7 +279,12 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         result.leastsq()
 
         t2 = time.clock()
+
+        print
+        print
         print "fitting took: ", t2-t1, " s"
+        print
+        print
 
 
         # get the output model
@@ -315,8 +322,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
             # FIXME: implement plotter for joint fits
             plot_data_model_resid(r, sb_src[instrument],
-                              r_model, profile_norm_model[instruments],
-                              output_figure, sb_src_err)
+                              r_model, profile_norm_model[instrument],
+                              output_figure, sb_src_err[instrument])
 
     ######################################################################
     # save structures

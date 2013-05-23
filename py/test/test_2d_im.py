@@ -138,8 +138,8 @@ def make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy):
     (rcore, alpha) = get_psf_king_pars(instrument, energy, theta)
 
     # the dumb method
-    for i in range(imsize[0]):
-        for j in range(imsize[1]):
+    for i in range(int(imsize[0])):
+        for j in range(int(imsize[1])):
             r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
 
     im = 1.0 / ( 1.0 + r2/rcore**2 )**alpha
@@ -190,8 +190,8 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     r2 = zeros(imsize, dtype=double)
     # FIXME: refactor to pass distmatrix
 
-    for i in range(imsize[0]):
-        for j in range(imsize[1]):
+    for i in range(int(imsize[0])):
+        for j in range(int(imsize[1])):
             r2[i, j] = sqdistance(xcen, ycen, j , i) # this is already squared
 
     im = norm * (1.0 + r2/(rcore)**2)**(-3.0*beta + 0.5) # this is the projected Ix [erg s^-1 pix^-1]
