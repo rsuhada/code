@@ -216,7 +216,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    PLOT_PROFILE = False
+    PLOT_PROFILE = True
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -259,8 +259,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     ######################################################################
     # do the fit: beta
@@ -308,13 +308,14 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     if DO_FIT and PLOT_PROFILE:
 
-        output_figure = results_pickle+'.beta_psf.png'
+        for instrument in instruments:
+            output_figure = results_pickle+'.'+instrument+'.beta_psf.png'
 
-        print "result plot :: ", output_figure
+            print "result plot :: ", output_figure
 
-        # FIXME: implement plotter for joint fits
-        plot_data_model_resid(r, sb_src[instruments[0]],
-                              r_model, profile_norm_model[instruments[0]],
+            # FIXME: implement plotter for joint fits
+            plot_data_model_resid(r, sb_src[instrument],
+                              r_model, profile_norm_model[instruments],
                               output_figure, sb_src_err)
 
     ######################################################################

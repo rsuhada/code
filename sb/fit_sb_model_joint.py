@@ -26,11 +26,11 @@ if __name__ == '__main__':
     r500_proj_ang      = double(sys.argv[4])
     energy             = double(sys.argv[5])
     prof_fname_pn      = sys.argv[6]
-    theta_pn           = double(sys.argv[7])
+    theta_pn           = double(sys.argv[7]) / 60.0
     prof_fname_mos1    = sys.argv[8]
-    theta_mos1         = double(sys.argv[9])
+    theta_mos1         = double(sys.argv[9]) / 60.0
     prof_fname_mos2    = sys.argv[10]
-    theta_mos2         = double(sys.argv[11])
+    theta_mos2         = double(sys.argv[11]) / 60.0
     INSTRUMENT_SETUP   = sys.argv[12]
     instruments        = sys.argv[13].split()
 

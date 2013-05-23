@@ -187,8 +187,6 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
     rcore = pars['rcore'].value
     beta  = pars['beta'].value
 
-    t1 = time.clock()
-
     im_beta = make_2d_beta(imsize, xcen, ycen, norm, rcore, beta)
 
     # hdu = pyfits.PrimaryHDU(im_beta, hdr)    # extension - array, header
@@ -382,8 +380,8 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
         # is this biasing?
         if USE_ERROR: residuals = residuals / data_profile_err
 
-        print "resid :: ", residuals[0], data_profile[0], model_profile[0], data_profile_err[0]
         return residuals
+
 
 def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
                                     distmatrix,
@@ -441,7 +439,6 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
 
             residuals = residuals + residuals_inst
 
-        print "resid :: ", residuals[0], data_profile[instrument][0], model_profile[instrument][0], data_profile_err[instrument][0]
         return residuals
 
 
@@ -477,8 +474,6 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
     # print len(profile[0:r_length]), r_length
     # # print len(data_profile[0:r_length]), len(model_profile), r500, r_length
     # print '*'*30
-    # # from time import sleep
-    # # sleep(100)
 
     if data_profile == None:
         # return (r, model_profile, geometric_area)
