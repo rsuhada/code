@@ -241,11 +241,25 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
     ######################################################################
+    # scale the data
+
+    scale_sb_src = {}
+    scale_sb_src_err = {}
+
+    for instrument in instruments:
+        scale_sb_src[instrument] = median(sb_src[instrument])
+        scale_sb_src_err[instrument] = median(sb_src_err[instrument])
+
+        sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
+        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src_err[instrument]
+
+
+    ######################################################################
     # init beta model
 
     pars = lm.Parameters()
     pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
-    pars.add('beta', value=0.8, vary=True, min=0.1, max=10.0)
+    pars.add('beta', value=0.67, vary=True, min=0.1, max=10.0)
     pars.add('xcen', value=xcen_obj, vary=False)
     pars.add('ycen', value=ycen_obj, vary=False)
 
@@ -262,7 +276,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+6}
+    leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
     # do the fit: beta
@@ -309,6 +323,14 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             sys.stdout = sys.__stdout__
 
         print "fitting subroutine done!"
+
+
+    ######################################################################
+    # scale the data back
+
+    for instrument in instruments:
+        sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
+        sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src_err[instrument]
 
     ######################################################################
     # plot beta fit and data profiles
