@@ -248,11 +248,11 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     for instrument in instruments:
         scale_sb_src[instrument] = median(sb_src[instrument])
-        scale_sb_src_err[instrument] = median(sb_src_err[instrument])
+        # scale_sb_src_err[instrument] = median(sb_src_err[instrument])
 
         sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src_err[instrument]
-
+        # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src_err[instrument]
+        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
 
     ######################################################################
     # init beta model
@@ -274,7 +274,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
@@ -300,7 +302,24 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         print
         print
 
+        ######################################################################
+        # scale the data back
 
+        for instrument in instruments:
+            sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
+            # sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src_err[instrument]
+            sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
+
+            # scale also the fitted norm
+            pars['norm_'+instrument].value = pars['norm_'+instrument].value * scale_sb_src[instrument]
+            pars['norm_'+instrument].stderr = pars['norm_'+instrument].stderr * scale_sb_src[instrument]
+            pars['norm_'+instrument].max = pars['norm_'+instrument].max * scale_sb_src[instrument]
+            pars['norm_'+instrument].min = pars['norm_'+instrument].min * scale_sb_src[instrument]
+
+        import IPython
+        IPython.embed()
+
+        ######################################################################
         # get the output model
         (r_model, profile_norm_model) = \
             beta_psf_2d_lmfit_profile_joint(pars, imsize,
@@ -323,14 +342,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             sys.stdout = sys.__stdout__
 
         print "fitting subroutine done!"
-
-
-    ######################################################################
-    # scale the data back
-
-    for instrument in instruments:
-        sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
-        sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src_err[instrument]
 
     ######################################################################
     # plot beta fit and data profiles
