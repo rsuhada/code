@@ -78,6 +78,7 @@ def print_fit_diagnostics(result, delta_t=-1.0):
     print 'nvarys        :: ', result.nvarys
     print 'ndata         :: ', result.ndata
     print 'nfree         :: ', result.nfree
+    print 'residual      :: ', sum(result.residual)
     print 'chisqr        :: ', result.chisqr
     print 'redchi        :: ', result.redchi
 
@@ -316,8 +317,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
 
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-    leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
     # do the fit: beta

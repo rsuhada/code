@@ -433,12 +433,15 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         # combine the likelihoods
         residuals = 0.0
         for instrument in instruments:
-            residuals_inst = data_profile[instrument] - model_profile[instrument]
+            residuals_inst = abs(data_profile[instrument] - model_profile[instrument])
             # is this biasing?
             if USE_ERROR: residuals_inst = residuals_inst / data_profile_err[instrument]
 
+            print instrument, "resid :: ", sum(residuals_inst)
             residuals = residuals + residuals_inst
 
+        print "full resid :: ", sum(residuals)
+        print '='*20
         return residuals
 
 
