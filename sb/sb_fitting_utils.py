@@ -48,6 +48,44 @@ def load_sb_curve(fname):
     return r, sb_src, sb_bg, sb_src_err, sb_bg_err
 
 
+def print_fit_diagnostics(result, delta_t=-1.0):
+    """
+    Print fit diagnostic output
+
+    Arguments:
+    - `result`: lmfit result minimizer class
+    - `delta_t`: fit time
+    """
+
+    print
+    print '='*70
+    print 'Diagnostics'
+    print '='*70
+
+    print
+    print 'nfev          :: ', result.nfev
+    print 'message       :: ', result.message
+    print 'ier           :: ', result.ier
+    print 'lmdif_message :: ', result.lmdif_message
+
+    print
+    print
+    print '='*70
+
+    print 'fitting took  :: ', delta_t, ' s'
+    print 'success       :: ', result.success
+    print 'nfev          :: ', result.nfev
+    print 'nvarys        :: ', result.nvarys
+    print 'ndata         :: ', result.ndata
+    print 'nfree         :: ', result.nfree
+    print 'chisqr        :: ', result.chisqr
+    print 'redchi        :: ', result.redchi
+
+    print '='*70
+    print
+
+
+
 def sanitize_sb_curve(sb_curve_tuple):
     """
     Clean the curves by removing bins with negative values.
@@ -276,10 +314,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
 
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-    # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+6}
+    leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+7}
 
     ######################################################################
     # do the fit: beta
@@ -330,30 +368,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         # output
 
         if PRINT_FIT_DIAGNOSTICS:
-            print
-            print "="*70
-            print "Diagnostics"
-            print "="*70
-
-            print
-            print 'message       :: ', result.message
-            print 'ier           :: ', result.ier
-            print 'lmdif_message :: ', result.lmdif_message
-
-            print
-            print
-
-            print "fitting took  ::  "+str(t2-t1)+" s"
-            print 'success       :: ', result.success
-            print 'nfev          :: ', result.nfev
-            print 'nvarys        :: ', result.nvarys
-            print 'ndata         :: ', result.ndata
-            print 'nfree         :: ', result.nfree
-            print 'chisqr        :: ', result.chisqr
-            print 'redchi        :: ', result.redchi
-
-            print "="*70
-            print
+            print_fit_diagnostics(result, t2-t1)
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
@@ -361,19 +376,18 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         with open(results_pickle+'.txt', 'w') as f:
             sys.stdout = f
 
-            print 'success       :: ', result.success
-            print 'nfev          :: ', result.nfev
-            print 'nvarys        :: ', result.nvarys
-            print 'ndata         :: ', result.ndata
-            print 'nfree         :: ', result.nfree
-            print 'chisqr        :: ', result.chisqr
-            print 'redchi        :: ', result.redchi
+            if PRINT_FIT_DIAGNOSTICS:
+                print_fit_diagnostics(result, t2-t1)
 
+            print
+            print
             lm.printfuncs.report_errors(result.params)
-
+            print
+            print
 
             sys.stdout = sys.__stdout__
 
+        print
         print "fitting subroutine done!"
 
     ######################################################################
