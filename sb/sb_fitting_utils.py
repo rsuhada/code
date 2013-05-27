@@ -217,6 +217,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     DO_ZERO_PAD = True
     DO_FIT = True
     PLOT_PROFILE = True
+    PRINT_FIT_DIAGNOSTICS = True
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -275,10 +276,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    sb_src_err)
 
     # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
 
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-    leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
+    # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+6}
 
     ######################################################################
     # do the fit: beta
@@ -307,7 +308,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         for instrument in instruments:
             sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
-            # sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src_err[instrument]
             sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
 
             # scale also the fitted norm
@@ -315,9 +315,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             pars['norm_'+instrument].stderr = pars['norm_'+instrument].stderr * scale_sb_src[instrument]
             pars['norm_'+instrument].max = pars['norm_'+instrument].max * scale_sb_src[instrument]
             pars['norm_'+instrument].min = pars['norm_'+instrument].min * scale_sb_src[instrument]
-
-        import IPython
-        IPython.embed()
 
         ######################################################################
         # get the output model
@@ -332,13 +329,49 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         ######################################################################
         # output
 
+        if PRINT_FIT_DIAGNOSTICS:
+            print
+            print "="*70
+            print "Diagnostics"
+            print "="*70
+
+            print
+            print 'message       :: ', result.message
+            print 'ier           :: ', result.ier
+            print 'lmdif_message :: ', result.lmdif_message
+
+            print
+            print
+
+            print "fitting took  ::  "+str(t2-t1)+" s"
+            print 'success       :: ', result.success
+            print 'nfev          :: ', result.nfev
+            print 'nvarys        :: ', result.nvarys
+            print 'ndata         :: ', result.ndata
+            print 'nfree         :: ', result.nfree
+            print 'chisqr        :: ', result.chisqr
+            print 'redchi        :: ', result.redchi
+
+            print "="*70
+            print
+
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
 
         with open(results_pickle+'.txt', 'w') as f:
             sys.stdout = f
+
+            print 'success       :: ', result.success
+            print 'nfev          :: ', result.nfev
+            print 'nvarys        :: ', result.nvarys
+            print 'ndata         :: ', result.ndata
+            print 'nfree         :: ', result.nfree
+            print 'chisqr        :: ', result.chisqr
+            print 'redchi        :: ', result.redchi
+
             lm.printfuncs.report_errors(result.params)
-            print "fitting took: "+str(t2-t1)+" s"
+
+
             sys.stdout = sys.__stdout__
 
         print "fitting subroutine done!"
@@ -368,6 +401,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
 
     print "results written to:: ", results_pickle
+
+    # import IPython
+    # IPython.embed()
+
     return 0
 
 
