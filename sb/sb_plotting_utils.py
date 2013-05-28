@@ -701,8 +701,8 @@ def plot_data_model_resid(r_data, profile_data,
 
         res = (profile_data - profile_model) / profile_model
         res_err = profile_data_err / profile_model
-        print 'Mean residual :: ', mean(res)
-        print 'mean error :: ', mean(profile_data_err)
+        # print 'Mean residual :: ', mean(res)
+        # print 'mean error :: ', mean(profile_data_err)
 
         ax2.errorbar(r_data, res, res_err,
             color='black',
@@ -742,6 +742,56 @@ def plot_data_model_resid(r_data, profile_data,
 
     if output_figure:
         plt.savefig(output_figure)
+
+
+
+def plt_like_surface(x, y, likelihood, output_figure, xlabel, ylabel):
+    """
+    Simple plot of 2D likelihood surface
+
+    Arguments:
+    - `x`: par 1
+    - `y`: par 2
+    - `likelihood`: likelihood
+    - `output_figure`: output filename
+    - `xlabel`: xlabel
+    - `ylabel`: ylabel
+    """
+    ######################################################################
+    # start plot enviroment
+    ######################################################################
+    # start figure
+    rc('axes', linewidth=1.5)
+    fig_obj = plt.figure()          # figsize=(6, 6)
+    figname=output_figure
+    headline_text = fig_obj.text(0.5, 0.95, '',
+               horizontalalignment='center',
+               fontproperties=matplotlib.font_manager.FontProperties(size=16))
+
+    ax1 = fig_obj.add_subplot(111)                   # rows/cols/num of plot
+    plt.subplots_adjust(hspace=0.2, wspace=0.2)      # hdefault=0.2, 0.001 for touching
+
+    ######################################################################
+    # plot data sets
+
+    plt.contourf(x, y, likelihood)
+
+    ######################################################################
+    # subplot data sets
+    ax1.set_xscale('linear')           # linear/log nonposx='clip' /symlog
+    ax1.set_yscale('linear')           # linear/log nonposx='clip' /symlog
+
+    # subplot text sets
+    ax1.set_xlabel(xlabel, fontsize=14, fontweight="normal")          # fontsize=12
+    ax1.set_ylabel(ylabel, fontsize=14, fontweight="normal")          # fontsize=12
+
+    # save figure
+    plt.savefig(figname)
+
+    ######################################################################
+    # stop plot enviroment
+    ######################################################################
+
 
 
 

@@ -6,7 +6,7 @@ from pylab import rc
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
-from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid
+from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid, plt_like_surface
 from esaspi_utils import *
 from sb_utils import distance_matrix
 from sb_models import *
@@ -230,7 +230,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
         ######################################################################
         # output
 
-    if if DO_FIT:
+    if DO_FIT:
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
 
@@ -385,21 +385,20 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                                             APPLY_PSF, DO_ZERO_PAD)
 
 
-    ######################################################################
-    # save structures
+        ######################################################################
+        # save structures
 
-    if DO_FIT and results_pickle:
-        outstrct = lmfit_result_to_dict(result, pars)
+        if results_pickle:
+            outstrct = lmfit_result_to_dict(result, pars)
 
-        with open(results_pickle, 'wb') as output:
-            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+            with open(results_pickle, 'wb') as output:
+                pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
 
-        print "results written to:: ", results_pickle
+                print "results written to:: ", results_pickle
 
         ######################################################################
         # output
 
-    if DO_FIT:
         if PRINT_FIT_DIAGNOSTICS:
             print_fit_diagnostics(result, t2-t1, ndata)
 
@@ -427,7 +426,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # plot beta fit and data profiles
 
     if DO_FIT and PLOT_PROFILE:
-
         for instrument in instruments:
             output_figure = results_pickle+'.'+instrument+'.beta_psf.png'
 
@@ -453,16 +451,15 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         lm.printfuncs.report_ci(ci)
 
     if DO_FIT and  CALC_2D_CI:
+        output_figure = results_pickle+'.2d_like_beta_psf.png'
         from timer import Timer
 
         with Timer() as t:
             print "Calculating 2D confidence intervals"
-            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 10, 10)
-
-            # plt.contourf(x, y, likelihood, output_figure)
+            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 30, 30)
+            plt_like_surface(x, y, likelihood, output_figure, 'rcore', 'beta')
 
         print "elasped time:", t.secs, " s"
-
 
 
     # import IPython
