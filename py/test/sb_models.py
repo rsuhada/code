@@ -441,7 +441,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
             residuals = residuals + residuals_inst
 
         print "full resid :: ", sum(residuals)
-        print '='*20
+        print '='*35
         return residuals
 
 

@@ -48,13 +48,16 @@ def load_sb_curve(fname):
     return r, sb_src, sb_bg, sb_src_err, sb_bg_err
 
 
-def print_fit_diagnostics(result, delta_t=-1.0):
+def print_fit_diagnostics(result, delta_t=-1.0, ndata=None):
     """
     Print fit diagnostic output
 
     Arguments:
     - `result`: lmfit result minimizer class
     - `delta_t`: fit time
+    - `nfree_true`: tru number of degrees of freedom (differs from the
+      number in result if using multiple instruments - it sees only
+      one of them)
     """
 
     print
@@ -72,15 +75,27 @@ def print_fit_diagnostics(result, delta_t=-1.0):
     print
     print '='*70
 
-    print 'fitting took  :: ', delta_t, ' s'
-    print 'success       :: ', result.success
-    print 'nfev          :: ', result.nfev
-    print 'nvarys        :: ', result.nvarys
-    print 'ndata         :: ', result.ndata
-    print 'nfree         :: ', result.nfree
-    print 'residual      :: ', sum(result.residual)
-    print 'chisqr        :: ', result.chisqr
-    print 'redchi        :: ', result.redchi
+    print 'fitting took :: ', delta_t, ' s'
+    print 'success      :: ', result.success
+    print 'nfev         :: ', result.nfev
+    print 'nvarys       :: ', result.nvarys
+    print 'residual     :: ', sum(result.residual)
+    print 'chisqr       :: ', result.chisqr
+    print
+    print 'ndata lmfit  :: ', result.ndata
+    print 'nfree lmfit  :: ', result.nfree
+    print 'redchi lmfit :: ', result.redchi
+    print
+
+    if ndata:
+        print 'ndata        :: ', ndata
+        print 'nfree        :: ', ndata - result.nvarys
+        print 'redchi       :: ', result.chisqr / (ndata - result.nvarys)
+    else:
+        print 'ndata        :: ', result.ndata
+        print 'nfree        :: ', result.nfree
+        print 'redchi       :: ', result.redchi
+
 
     print '='*70
     print
@@ -203,9 +218,19 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                                                                   APPLY_PSF,
                                                                   DO_ZERO_PAD)
 
+    ######################################################################
+    # save structures
+
+    if DO_FIT and results_pickle:
+        outstrct = lmfit_result_to_dict(result, pars)
+
+        with open(results_pickle, 'wb') as output:
+            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+
         ######################################################################
         # output
 
+    if if DO_FIT:
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
 
@@ -230,15 +255,6 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                               r_model, profile_norm_model,
                               output_figure, sb_src_err)
 
-    ######################################################################
-    # save structures
-
-    if DO_FIT and results_pickle:
-        outstrct = lmfit_result_to_dict(result, pars)
-
-        with open(results_pickle, 'wb') as output:
-            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
-
     print "results written to:: ", results_pickle
     return 0
 
@@ -255,8 +271,12 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
+    CALC_1D_CI = False           # in most cases standard error is good
+                                # enough, this is not needed then
+    CALC_2D_CI = True
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
+
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -285,14 +305,13 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     scale_sb_src = {}
     scale_sb_src_err = {}
+    ndata = 0
 
     for instrument in instruments:
         scale_sb_src[instrument] = median(sb_src[instrument])
-        # scale_sb_src_err[instrument] = median(sb_src_err[instrument])
-
         sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-        # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src_err[instrument]
         sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
+        ndata += len(sb_src[instrument])
 
     ######################################################################
     # init beta model
@@ -365,11 +384,24 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                                             energy,
                                             APPLY_PSF, DO_ZERO_PAD)
 
+
+    ######################################################################
+    # save structures
+
+    if DO_FIT and results_pickle:
+        outstrct = lmfit_result_to_dict(result, pars)
+
+        with open(results_pickle, 'wb') as output:
+            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+
+        print "results written to:: ", results_pickle
+
         ######################################################################
         # output
 
+    if DO_FIT:
         if PRINT_FIT_DIAGNOSTICS:
-            print_fit_diagnostics(result, t2-t1)
+            print_fit_diagnostics(result, t2-t1, ndata)
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
@@ -378,7 +410,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             sys.stdout = f
 
             if PRINT_FIT_DIAGNOSTICS:
-                print_fit_diagnostics(result, t2-t1)
+                print_fit_diagnostics(result, t2-t1, ndata)
 
             print
             print
@@ -407,15 +439,31 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                               output_figure, sb_src_err[instrument])
 
     ######################################################################
-    # save structures
+    # FIXME: not yet ported, confidence intervals
 
-    if DO_FIT and results_pickle:
-        outstrct = lmfit_result_to_dict(result, pars)
+    if DO_FIT and CALC_1D_CI:
+        print "Calculating 1D confidence intervals"
+        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        sigmas = [0.682689492137, 0.954499736104]
+        ci_pars = ['rcore', 'beta']
 
-        with open(results_pickle, 'wb') as output:
-            pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+        ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                              trace=True, verbose=True, maxiter=1)
 
-    print "results written to:: ", results_pickle
+        lm.printfuncs.report_ci(ci)
+
+    if DO_FIT and  CALC_2D_CI:
+        from timer import Timer
+
+        with Timer() as t:
+            print "Calculating 2D confidence intervals"
+            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 10, 10)
+
+            # plt.contourf(x, y, likelihood, output_figure)
+
+        print "elasped time:", t.secs, " s"
+
+
 
     # import IPython
     # IPython.embed()
@@ -545,7 +593,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
         with Timer() as t:
             print "Calculating 2D confidence intervals"
             x, y, prob = lm.conf_interval2d(result,'rcore','beta',20,20)
-            plt.contourf(x,y,grid)
+            plt.contourf(x,y,prob)
 
         print "elasped time:", t.secs, " s"
 
