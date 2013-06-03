@@ -384,6 +384,232 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                                             energy,
                                             APPLY_PSF, DO_ZERO_PAD)
 
+        ######################################################################
+        # save structures
+
+        if results_pickle:
+            outstrct = lmfit_result_to_dict(result, pars)
+
+            with open(results_pickle, 'wb') as output:
+                pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+
+                print "results written to:: ", results_pickle
+
+        ######################################################################
+        # output
+
+        if PRINT_FIT_DIAGNOSTICS:
+            print_fit_diagnostics(result, t2-t1, ndata)
+
+        # print_result_tab(pars_true, pars)
+        lm.printfuncs.report_errors(result.params)
+
+        with open(results_pickle+'.txt', 'w') as f:
+            sys.stdout = f
+
+            if PRINT_FIT_DIAGNOSTICS:
+                print_fit_diagnostics(result, t2-t1, ndata)
+
+            print
+            print
+            lm.printfuncs.report_errors(result.params)
+            print
+            print
+
+            sys.stdout = sys.__stdout__
+
+        print
+        print "fitting subroutine done!"
+
+    ######################################################################
+    # plot beta fit and data profiles
+
+    if DO_FIT and PLOT_PROFILE:
+        for instrument in instruments:
+            output_figure = results_pickle+'.'+instrument+'.beta_psf.png'
+
+            print "result plot :: ", output_figure
+
+            # FIXME: implement plotter for joint fits
+            plot_data_model_resid(r, sb_src[instrument],
+                              r_model, profile_norm_model[instrument],
+                              output_figure, sb_src_err[instrument])
+
+    ######################################################################
+    # FIXME: not yet ported, confidence intervals
+
+    if DO_FIT and CALC_1D_CI:
+        print "Calculating 1D confidence intervals"
+        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        sigmas = [0.682689492137, 0.954499736104]
+        ci_pars = ['rcore', 'beta']
+
+        ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                              trace=True, verbose=True, maxiter=1)
+
+        lm.printfuncs.report_ci(ci)
+
+    if DO_FIT and  CALC_2D_CI:
+        output_figure = results_pickle+'.2d_like_beta_psf.png'
+        from timer import Timer
+
+        with Timer() as t:
+            print "Calculating 2D confidence intervals"
+            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 10, 10)
+            plt_like_surface(x, y, likelihood, output_figure, 'rcore', 'beta')
+
+        print "elasped time:", t.secs, " s"
+
+
+    # import IPython
+    # IPython.embed()
+
+    return 0
+
+
+def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, results_pickle=None):
+    """
+    Fit a v06 x psf model to any combination of instruments via joint
+    likelihood
+
+    Arguments:
+    """
+
+    # settings
+    APPLY_PSF = True
+    DO_ZERO_PAD = True
+    DO_FIT = True
+    CALC_1D_CI = False           # in most cases standard error is good
+                                # enough, this is not needed then
+    CALC_2D_CI = True
+    PLOT_PROFILE = True
+    PRINT_FIT_DIAGNOSTICS = True
+
+    ######################################################################
+    # modelling is done in 2D and then projected - setup here the 2D
+    # parameters
+
+    size = 2.0 * r.max()
+    xsize = size
+    ysize = xsize
+    xcen = xsize/2
+    ycen = ysize/2
+    # imsize = input_im.shape         # FIXME: is this necessary? I could just use it inside the model
+    imsize = (size, size)         # FIXME: is this necessary? I could just use it inside the model
+
+    xsize_obj = xsize # 100             # if running t1.fits set to 100 else xsize
+    ysize_obj = xsize_obj
+    xcen_obj = xsize_obj / 2
+    ycen_obj = ysize_obj / 2
+    r_aper = xsize_obj  / 2        # aperture for the fitting
+
+    # pre-calculate distmatrix for speedup - it is same for all
+    # instruments
+    distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
+
+    ######################################################################
+    # scale the data
+
+    scale_sb_src = {}
+    scale_sb_src_err = {}
+    ndata = 0
+
+    for instrument in instruments:
+        scale_sb_src[instrument] = median(sb_src[instrument])
+        sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
+        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
+        ndata += len(sb_src[instrument])
+
+    ######################################################################
+    # init beta model
+
+    n0 = 7e+0
+    rc = 20.0
+    beta = 4.0/3.0
+    rs = 20.0
+    alpha = 1.5
+    gamma = 3.0
+    epsilon = 1.5
+
+    rmax = 100.0
+    r500_pix = rmax
+
+    # v06 pars lmfit structure
+    pars = lm.Parameters()
+    pars.add('rc'      , value=rc, vary=True, min=0.05, max=rmax)
+    pars.add('beta'    , value=beta, vary=True, min=0.05, max=2.0)
+    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*rmax)
+    pars.add('alpha'   , value=alpha, vary=True, min=0.01, max=3.0)
+    pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
+    pars.add('gamma'   , value=gamma, vary=False)
+
+    # FIXME: reasonable initial value?
+    for instrument in instruments:
+        pars.add('n0_'+instrument, value=mean(sb_src[instrument]),
+                 vary=True, min=min(sb_src[instrument]),
+                 max=sum(abs(sb_src[instrument])))
+
+    # non-fit arguments
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+                   xcen_obj, ycen_obj, sb_src, sb_src_err)
+
+    # nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
+    #                theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+    #                sb_src_err)
+
+    # # fit stop criteria
+    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
+
+    ######################################################################
+    # do the fit: beta
+
+    if DO_FIT:
+        print "starting v06 fit"
+        t1 = time.clock()
+
+        result = lm.minimize(v06_psf_2d_lmfit_profile_joint,
+                             pars,
+                             args=nonfit_args,
+                             **leastsq_kws)
+
+        result.leastsq()
+
+        t2 = time.clock()
+
+        print
+        print
+        print "fitting took: ", t2-t1, " s"
+        print
+        print
+
+        ######################################################################
+        # scale the data back
+
+        for instrument in instruments:
+            sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
+            sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
+
+            # scale also the fitted norm
+            pars['n0_'+instrument].value = pars['n0_'+instrument].value * scale_sb_src[instrument]
+            pars['n0_'+instrument].stderr = pars['n0_'+instrument].stderr * scale_sb_src[instrument]
+            pars['n0_'+instrument].max = pars['n0_'+instrument].max * scale_sb_src[instrument]
+            pars['n0_'+instrument].min = pars['n0_'+instrument].min * scale_sb_src[instrument]
+
+        ######################################################################
+        # get the output model
+
+        # FIXME: need the proper pars
+        (r_model, profile_norm_model) = \
+            v06_psf_2d_lmfit_profile_joint(pars, imsize,
+                                            xsize_obj, ysize_obj,
+                                            distmatrix,
+                                            instruments, theta,
+                                            energy,
+                                            APPLY_PSF, DO_ZERO_PAD)
 
         ######################################################################
         # save structures
@@ -456,7 +682,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         with Timer() as t:
             print "Calculating 2D confidence intervals"
-            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 30, 30)
+            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 10, 10)
             plt_like_surface(x, y, likelihood, output_figure, 'rcore', 'beta')
 
         print "elasped time:", t.secs, " s"
@@ -466,6 +692,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # IPython.embed()
 
     return 0
+
 
 
 # FIXME: implement outpickle
