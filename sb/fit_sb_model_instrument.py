@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     fname=sys.argv[1]
     fitid=sys.argv[2]
-    r500_proj_ang=double(sys.argv[3])
+    r500_pix=double(sys.argv[3])
     instrument=sys.argv[4]
     theta=double(sys.argv[5]) / 60.0
     energy=double(sys.argv[6])
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     print '-'*70
     print fname
-    print r500_proj_ang
+    print r500_pix
     print theta
     print energy
     print instrument
@@ -50,9 +50,9 @@ if __name__ == '__main__':
     # # fname = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits-prof.dat'
 
     # # radius
-    # r500_proj_ang = 153.0   # 0559 projected radius [arcsec]
-    # # r500_proj_ang = 100.0   # projected radius [arcsec]
-    # # r500_proj_ang = 200.0   # 2332 test, projected radius [arcsec]
+    # r500_pix = 153.0   # 0559 projected radius [arcsec]
+    # # r500_pix = 100.0   # projected radius [arcsec]
+    # # r500_pix = 200.0   # 2332 test, projected radius [arcsec]
 
     # # PSF parameters
     # theta = 65.8443 / 60.0
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
 
     # take only the profile inside r500
-    ids = where(r<=r500_proj_ang)
+    ids = where(r<=r500_pix)
 
     r = r[ids]
     sb_src = sb_src[ids]

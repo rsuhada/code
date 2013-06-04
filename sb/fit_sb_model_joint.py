@@ -23,7 +23,7 @@ if __name__ == '__main__':
     fitid              = sys.argv[1]
     MODEL              = sys.argv[2]
     MAKE_CONTROL_PLOT  = sys.argv[3]
-    r500_proj_ang      = double(sys.argv[4])
+    r500_pix      = double(sys.argv[4])
     energy             = double(sys.argv[5])
     prof_fname_pn      = sys.argv[6]
     theta_pn           = double(sys.argv[7]) / 60.0
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     print "MODEL             :: ", MODEL
     print "INSTRUMENT_SETUP  :: ", INSTRUMENT_SETUP
     print "MAKE_CONTROL_PLOT :: ", MAKE_CONTROL_PLOT
-    print "r500_proj_ang     :: ", r500_proj_ang
+    print "r500_pix     :: ", r500_pix
     print "energy            :: ", energy
     print "prof_fname_pn     :: ", prof_fname_pn
     print "theta_pn          :: ", theta_pn
@@ -88,7 +88,7 @@ if __name__ == '__main__':
          ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
         # take only the profile inside r500
-        ids = where(r<=r500_proj_ang)
+        ids = where(r<=r500_pix)
         r = r[ids]
 
         sb_src[instrument] = sb_src[instrument][ids]

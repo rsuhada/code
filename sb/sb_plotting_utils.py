@@ -727,7 +727,7 @@ def plot_data_model_resid(r_data, profile_data,
 
         ax2.set_xscale("log", nonposx='clip')
         # ax2.set_yscale("log", nonposy='clip')
-        ax2.set_xlabel('Radius', fontsize=14, fontweight="normal")          # fontsize=12
+        ax2.set_xlabel('Radius [pix]', fontsize=14, fontweight="normal")          # fontsize=12
         ax2.set_ylabel('(data-model)/model', fontsize=12, fontweight="normal")          # fontsize=12
 
         width=std(res)

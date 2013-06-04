@@ -490,6 +490,64 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
         return residuals
 
 
+def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, theta, energy,
+                                   xcen_obj,ycen_obj,data_profile=None,
+                                   data_profile_err=None):
+    """
+    Fits the surface brightness profile by creating a 2D model of the
+    image - v06 model (without the central beta model) x psf for a
+    combinaiton of instruments
+    No bg.  Also allows to return directly
+    residuals.
+    """
+    USE_ERROR=True             # debug option
+
+    # setup dictionaries
+    model_image = {}
+    profile = {}
+    geometric_area = {}
+    model_profile = {}
+
+    # make first a 2D image
+    for insturment in instruments:
+        model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
+                                                  instrument, theta[instrument], energy)
+
+    # FIXME: is this necessary for each step?
+    # trim distmatrix size to image post convolution
+    distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
+    distmatrix = trim_fftconvolve(distmatrix)
+
+    # profile extraction
+    r_length = r500             # factor out r500
+    r = arange(1.0, r_length+1, 1.0)
+
+    (profile[instrument], geometric_area[instrument]) = \
+             extract_profile_fast2(model_image[instrument], distmatrix, bgrid)
+
+    # trim the corners
+    model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
+
+    if data_profile == None:
+        # return (r, model_profile, geometric_area)
+        return (r, model_profile)
+    else:
+        # combine the likelihoods
+        residuals = 0.0
+        for instrument in instruments:
+            residuals_inst = abs(data_profile[instrument] - model_profile[instrument])
+            # is this biasing?
+            if USE_ERROR: residuals_inst = residuals_inst / data_profile_err[instrument]
+
+            print instrument, "resid :: ", sum(residuals_inst)
+            residuals = residuals + residuals_inst
+
+        print "full resid :: ", sum(residuals)
+        print '='*35
+        return residuals
+
+
+
 def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_file, outfile, targ_cts=2000):
     """
     Take a synthetic sb model and turn it into a "observation" by

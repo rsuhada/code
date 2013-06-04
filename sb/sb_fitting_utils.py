@@ -277,7 +277,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
 
-
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
     # parameters
@@ -550,7 +549,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                  max=sum(abs(sb_src[instrument])))
 
     # non-fit arguments
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
     # nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
@@ -694,18 +693,19 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     return 0
 
 
-
-# FIXME: implement outpickle
 def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pickle=None):
     """
-    Testing simple 1D fit of v06 model with psf convolution
+    Fit of v06 model with psf convolution
     """
+    # settings
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    PLOT_PROFILE = True
-    CALC_1D_CI = False
+    CALC_1D_CI = False           # in most cases standard error is good
+                                # enough, this is not needed then
     CALC_2D_CI = False
+    PLOT_PROFILE = True
+    PRINT_FIT_DIAGNOSTICS = True
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -736,18 +736,21 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     gamma = 3.0
     epsilon = 1.5
 
-    rmax = 100.0
-    r500_pix = rmax
+    # rmax = 2*r500_pix
+    r500_pix = r.max()
+    ndata = len(sb_src)
 
     # v06 pars lmfit structure
     pars = lm.Parameters()
     pars.add('n0'      , value=n0, vary=True, min=1.0e-9, max=1.0e3)
-    pars.add('rc'      , value=rc, vary=True, min=0.05, max=rmax)
+    pars.add('rc'      , value=rc, vary=True, min=0.05, max=r.max())
     pars.add('beta'    , value=beta, vary=True, min=0.05, max=2.0)
-    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*rmax)
+    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*r.max())
     pars.add('alpha'   , value=alpha, vary=True, min=0.01, max=3.0)
     pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
     pars.add('gamma'   , value=gamma, vary=False)
+
+    psf_pars = (instrument, theta, energy)
 
     # set the ancilarry parameters
     # +1 bc of the central divergence
@@ -765,8 +768,9 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set quickest
+    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set some evol
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting v06 fit"
@@ -790,49 +794,84 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
                                                                  xcen_obj,
                                                                  ycen_obj)
 
-    ######################################################################
-    # output
+        ######################################################################
+        # save structures
 
-    if DO_FIT:
-        lm.printfuncs.report_errors(result.params)
+        if results_pickle:
+            outstrct = lmfit_result_to_dict(result, pars)
+
+            with open(results_pickle, 'wb') as output:
+                pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
+
+                print "results written to:: ", results_pickle
+
+        ######################################################################
+        # output
+
+        if PRINT_FIT_DIAGNOSTICS:
+            print_fit_diagnostics(result, t2-t1, ndata)
+
         # print_result_tab(pars_true, pars)
+        lm.printfuncs.report_errors(result.params)
+
+        with open(results_pickle+'.txt', 'w') as f:
+            sys.stdout = f
+
+            if PRINT_FIT_DIAGNOSTICS:
+                print_fit_diagnostics(result, t2-t1, ndata)
+
+            print
+            print
+            lm.printfuncs.report_errors(result.params)
+            print
+            print
+
+            sys.stdout = sys.__stdout__
+
+        print
+        print "fitting subroutine done!"
+
+    ######################################################################
+    # plot v06 fit and data profiles
+
+    if DO_FIT and PLOT_PROFILE:
+        output_figure = results_pickle+'.'+instrument+'.v06_psf.png'
+
+        print "result plot :: ", output_figure
+
+        # FIXME: implement plotter for joint fits
+        plot_data_model_resid(r, sb_src,
+                              r_model, profile_norm_model,
+                              output_figure, sb_src_err)
 
     ######################################################################
     # FIXME: not yet ported, confidence intervals
 
-    if CALC_1D_CI:
+    if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
         # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
         sigmas = [0.682689492137, 0.954499736104]
-        ci_pars = ['rcore', 'beta']
+        # just an example
+        ci_pars = ['rc', 'beta']
 
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
                               trace=True, verbose=True, maxiter=1)
 
         lm.printfuncs.report_ci(ci)
 
-    if CALC_2D_CI:
+    if DO_FIT and  CALC_2D_CI:
+        output_figure = results_pickle+'.2d_like_v06_psf.png'
         from timer import Timer
 
         with Timer() as t:
             print "Calculating 2D confidence intervals"
-            x, y, prob = lm.conf_interval2d(result,'rcore','beta',20,20)
-            plt.contourf(x,y,prob)
+            x, y, likelihood = lm.conf_interval2d(result,'rc','beta', 10, 10)
+            plt_like_surface(x, y, likelihood, output_figure, 'rc', 'beta')
 
         print "elasped time:", t.secs, " s"
 
-    ######################################################################
-    # plot v06 profiles
 
-    if DO_FIT and PLOT_PROFILE:
+    # import IPython
+    # IPython.embed()
 
-        # output_figure = '/Users/rs/w/xspt/data/dev/0559/sb/lmfit_v06_psf.png'
-        output_figure = fname+'.beta_fit.png'
-
-        print len(r), len( sb_src), len( r_model), len( profile_norm_model)
-
-        # plot_data_model_resid(r, sb_src,
-        #                       r_model, profile_norm_model,
-        #                       output_figure, sb_src_err)
-
-        print r[0], r_model[0]
+    return 0
