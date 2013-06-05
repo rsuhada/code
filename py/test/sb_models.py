@@ -302,7 +302,7 @@ def make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0, alpha, beta, gamma, epsilon
 
     return im
 
-def make_2d_v06_psf(pars, distmatrix, bgrid, r500, psf_pars):
+def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, theta, energy):
     """
     Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
     """
@@ -310,7 +310,7 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, psf_pars):
 
     rc = pars['rc'].value
     rs = pars['rs'].value
-    n0 = pars['n0'].value
+    n0  = pars['n0_'+instrument].value
     alpha = pars['alpha'].value
     beta = pars['beta'].value
     gamma = pars['gamma'].value
@@ -321,8 +321,7 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, psf_pars):
 
     if APPLY_PSF:
         # create PSF
-        im_psf = make_2d_king(distmatrix, psf_pars[0], psf_pars[1],
-                              psf_pars[2])
+        im_psf = make_2d_king(distmatrix, instrument, theta, energy)
 
         # convolve
         im_output = fftconvolve(im_output.astype(float),
@@ -445,7 +444,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         return residuals
 
 
-def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
+def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,instrument, theta, energy,
                              xcen_obj,ycen_obj,data_profile=None,
                              data_profile_err=None):
     """
@@ -458,7 +457,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
 
     # make first a 2D image
     model_image = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
-                                  psf_pars)
+                                  instrument, theta, energy)
 
     # FIXME: is this necessary for each step?
     # trim distmatrix size to image post convolution
@@ -489,7 +488,6 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,psf_pars,
         # return residuals
         return residuals
 
-
 def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, theta, energy,
                                    xcen_obj,ycen_obj,data_profile=None,
                                    data_profile_err=None):
@@ -509,7 +507,7 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
     model_profile = {}
 
     # make first a 2D image
-    for insturment in instruments:
+    for instrument in instruments:
         model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                                   instrument, theta[instrument], energy)
 

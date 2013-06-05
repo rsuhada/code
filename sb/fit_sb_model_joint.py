@@ -117,7 +117,7 @@ if __name__ == '__main__':
         fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
 
     if MODEL=="v06":
-        fit_v06_model_joint(r, sb_src, sb_src_err, instrument, theta, energy, outpickle)
+        fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
 
     print "done!"
 

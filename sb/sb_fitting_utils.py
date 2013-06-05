@@ -480,7 +480,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     DO_FIT = True
     CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
-    CALC_2D_CI = True
+    CALC_2D_CI = False
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
 
@@ -530,14 +530,18 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     gamma = 3.0
     epsilon = 1.5
 
-    rmax = 100.0
-    r500_pix = rmax
+    # rmax = 100.0
+    # r500_pix = rmax
+    # rmax = 2*r500_pix
+
+    r500_pix = r.max()
+    ndata = len(sb_src)
 
     # v06 pars lmfit structure
     pars = lm.Parameters()
-    pars.add('rc'      , value=rc, vary=True, min=0.05, max=rmax)
+    pars.add('rc'      , value=rc, vary=True, min=0.05, max=r.max())
     pars.add('beta'    , value=beta, vary=True, min=0.05, max=2.0)
-    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*rmax)
+    pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*r.max())
     pars.add('alpha'   , value=alpha, vary=True, min=0.01, max=3.0)
     pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
     pars.add('gamma'   , value=gamma, vary=False)
@@ -547,6 +551,12 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         pars.add('n0_'+instrument, value=mean(sb_src[instrument]),
                  vary=True, min=min(sb_src[instrument]),
                  max=sum(abs(sb_src[instrument])))
+
+    # set the ancilarry parameters
+    # +1 bc of the central divergence
+    data = empty(imsize)
+    distmatrix_input = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1
+    bgrid = unique(distmatrix_input.flat)
 
     # non-fit arguments
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
@@ -603,12 +613,9 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
         # FIXME: need the proper pars
         (r_model, profile_norm_model) = \
-            v06_psf_2d_lmfit_profile_joint(pars, imsize,
-                                            xsize_obj, ysize_obj,
-                                            distmatrix,
-                                            instruments, theta,
-                                            energy,
-                                            APPLY_PSF, DO_ZERO_PAD)
+            v06_psf_2d_lmfit_profile_joint(pars, distmatrix_input, bgrid,
+                                           r500_pix, instruments, theta, energy,
+                                           xcen_obj, ycen_obj)
 
         ######################################################################
         # save structures
@@ -742,15 +749,13 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
 
     # v06 pars lmfit structure
     pars = lm.Parameters()
-    pars.add('n0'      , value=n0, vary=True, min=1.0e-9, max=1.0e3)
+    pars.add('n0_'+instrument, value=n0, vary=True, min=1.0e-9, max=1.0e3)
     pars.add('rc'      , value=rc, vary=True, min=0.05, max=r.max())
     pars.add('beta'    , value=beta, vary=True, min=0.05, max=2.0)
     pars.add('rs'      , value=rs, vary=True, min=0.05, max=2*r.max())
     pars.add('alpha'   , value=alpha, vary=True, min=0.01, max=3.0)
     pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
     pars.add('gamma'   , value=gamma, vary=False)
-
-    psf_pars = (instrument, theta, energy)
 
     # set the ancilarry parameters
     # +1 bc of the central divergence
@@ -759,18 +764,18 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     bgrid = unique(distmatrix_input.flat)
 
     # gather all non-fit arguments
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, instrument, theta, energy,
                    xcen_obj, ycen_obj)
 
     ######################################################################
     # do the fit: v06
 
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, instrument, theta, energy,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set quickest
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set quickest
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set some evol
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
         print "starting v06 fit"
@@ -790,7 +795,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
                                                                  distmatrix_input,
                                                                  bgrid,
                                                                  r500_pix,
-                                                                 psf_pars,
+                                                                 instrument, theta, energy,
                                                                  xcen_obj,
                                                                  ycen_obj)
 
