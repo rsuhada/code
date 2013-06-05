@@ -186,7 +186,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                    energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     ######################################################################
@@ -332,10 +332,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                    theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
@@ -557,10 +557,10 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     #                sb_src_err)
 
     # # fit stop criteria
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set; some evol
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
 
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
@@ -728,7 +728,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     ######################################################################
     # init model
 
-    n0 = 7e+0
+    n0 = 1.0
     rc = 20.0
     beta = 4.0/3.0
     rs = 20.0
@@ -768,8 +768,8 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     nonfit_args = (distmatrix_input, bgrid, r500_pix, psf_pars,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+0} # debug set quickest
-    # leastsq_kws={'xtol': 1.0e7, 'ftol': 1.0e7, 'maxfev': 1.0e+4} # debug set some evol
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set quickest
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set some evol
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
     if DO_FIT:
@@ -859,6 +859,8 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
 
         lm.printfuncs.report_ci(ci)
 
+    # FIXME: this seems to fail for beta and rc (i think problem is
+    # due to parameter degeneracy no code issue)
     if DO_FIT and  CALC_2D_CI:
         output_figure = results_pickle+'.2d_like_v06_psf.png'
         from timer import Timer
@@ -875,3 +877,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     # IPython.embed()
 
     return 0
+
+
+
+
