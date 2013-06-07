@@ -42,7 +42,7 @@ if __name__ == '__main__':
     print "MODEL             :: ", MODEL
     print "INSTRUMENT_SETUP  :: ", INSTRUMENT_SETUP
     print "MAKE_CONTROL_PLOT :: ", MAKE_CONTROL_PLOT
-    print "r500_pix     :: ", r500_pix
+    print "r500_pix          :: ", r500_pix
     print "energy            :: ", energy
     print "prof_fname_pn     :: ", prof_fname_pn
     print "theta_pn          :: ", theta_pn

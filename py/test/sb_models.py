@@ -485,6 +485,8 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,instrument, theta, energ
         # is this biasing?
         if USE_ERROR: residuals = residuals / data_profile_err
 
+        print "full resid :: ", sum(residuals)
+
         # return residuals
         return residuals
 
@@ -506,25 +508,26 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
     geometric_area = {}
     model_profile = {}
 
+    # profile extraction
+    r_length = r500             # factor out r500
+    r = arange(1.0, r_length+1, 1.0)
+
     # make first a 2D image
     for instrument in instruments:
         model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
                                                   instrument, theta[instrument], energy)
 
-    # FIXME: is this necessary for each step?
-    # trim distmatrix size to image post convolution
-    distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
-    distmatrix = trim_fftconvolve(distmatrix)
+        # FIXME: is this necessary for each step? - would require to
+        # have 2 distance matrices!  trim distmatrix size to image
+        # post convolution
+        distmatrix = roll(roll(distmatrix,2,axis=0),2,axis=1)
+        distmatrix = trim_fftconvolve(distmatrix)
 
-    # profile extraction
-    r_length = r500             # factor out r500
-    r = arange(1.0, r_length+1, 1.0)
-
-    (profile[instrument], geometric_area[instrument]) = \
+        (profile[instrument], geometric_area[instrument]) = \
              extract_profile_fast2(model_image[instrument], distmatrix, bgrid)
 
-    # trim the corners
-    model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
+        # trim the corners
+        model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
 
     if data_profile == None:
         # return (r, model_profile, geometric_area)

@@ -506,18 +506,19 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     # instruments
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
+
     ######################################################################
     # scale the data
 
-    # scale_sb_src = {}
-    # scale_sb_src_err = {}
-    # ndata = 0
+    scale_sb_src = {}
+    scale_sb_src_err = {}
+    ndata = 0
 
-    # for instrument in instruments:
-    #     scale_sb_src[instrument] = median(sb_src[instrument])
-    #     sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-    #     sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
-    #     ndata += len(sb_src[instrument])
+    for instrument in instruments:
+        scale_sb_src[instrument] = median(sb_src[instrument])
+        # sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
+        # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
+        ndata += len(sb_src[instrument])
 
     ######################################################################
     # init beta model
@@ -567,8 +568,8 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     #                sb_src_err)
 
     # # fit stop criteria
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+1} # debug set; some evol
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
 
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
@@ -576,10 +577,10 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     ######################################################################
     # do the fit: beta
 
-    print ">>>>>", instrument, pars['n0_'+instrument].value, pars['n0_'+instrument].min, pars['n0_'+instrument].max, mean(sb_src[instrument])
-    print "going to sleep!"
-    from time import sleep
-    sleep(1000)
+    # print ">>>>>", instrument, pars['n0_'+instrument].value, pars['n0_'+instrument].min, pars['n0_'+instrument].max, mean(sb_src[instrument])
+    # print "going to sleep!"
+    # from time import sleep
+    # sleep(1000)
 
 
     if DO_FIT:
@@ -778,9 +779,9 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instrument, theta, energy,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set quickest
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set quickest
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set some evol
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
 
     if DO_FIT:
