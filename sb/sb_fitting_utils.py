@@ -48,7 +48,7 @@ def load_sb_curve(fname):
     return r, sb_src, sb_bg, sb_src_err, sb_bg_err
 
 
-def print_fit_diagnostics(result, delta_t=-1.0, ndata=None):
+def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     """
     Print fit diagnostic output
 
@@ -70,7 +70,7 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None):
     print 'message       :: ', result.message
     print 'ier           :: ', result.ier
     print 'lmdif_message :: ', result.lmdif_message
-
+    if leastsq_kws: print 'leastsq_kws   :: ', leastsq_kws
     print
     print
     print '='*70
@@ -398,7 +398,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         # output
 
         if PRINT_FIT_DIAGNOSTICS:
-            print_fit_diagnostics(result, t2-t1, ndata)
+            print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
@@ -407,7 +407,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             sys.stdout = f
 
             if PRINT_FIT_DIAGNOSTICS:
-                print_fit_diagnostics(result, t2-t1, ndata)
+                print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
             print
             print
@@ -509,20 +509,20 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     ######################################################################
     # scale the data
 
-    scale_sb_src = {}
-    scale_sb_src_err = {}
-    ndata = 0
+    # scale_sb_src = {}
+    # scale_sb_src_err = {}
+    # ndata = 0
 
-    for instrument in instruments:
-        scale_sb_src[instrument] = median(sb_src[instrument])
-        sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
-        ndata += len(sb_src[instrument])
+    # for instrument in instruments:
+    #     scale_sb_src[instrument] = median(sb_src[instrument])
+    #     sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
+    #     sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
+    #     ndata += len(sb_src[instrument])
 
     ######################################################################
     # init beta model
 
-    n0 = 7e+0
+    n0 = 1e+0
     rc = 20.0
     beta = 4.0/3.0
     rs = 20.0
@@ -535,7 +535,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     # rmax = 2*r500_pix
 
     r500_pix = r.max()
-    ndata = len(sb_src)
 
     # v06 pars lmfit structure
     pars = lm.Parameters()
@@ -546,11 +545,12 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     pars.add('epsilon' , value=epsilon, vary=True, min=0.0, max=5.0)
     pars.add('gamma'   , value=gamma, vary=False)
 
-    # FIXME: reasonable initial value?
+    # FIXME: reasonable initial value and bounds!
     for instrument in instruments:
-        pars.add('n0_'+instrument, value=mean(sb_src[instrument]),
-                 vary=True, min=min(sb_src[instrument]),
-                 max=sum(abs(sb_src[instrument])))
+        pars.add('n0_'+instrument, value=n0, #mean(sb_src[instrument]),
+                 vary=True,
+                 min=1.0e-9,
+                 max=1.0e3)
 
     # set the ancilarry parameters
     # +1 bc of the central divergence
@@ -568,13 +568,19 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     # # fit stop criteria
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+1} # debug set; some evol
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
     # do the fit: beta
+
+    print ">>>>>", instrument, pars['n0_'+instrument].value, pars['n0_'+instrument].min, pars['n0_'+instrument].max, mean(sb_src[instrument])
+    print "going to sleep!"
+    from time import sleep
+    sleep(1000)
+
 
     if DO_FIT:
         print "starting v06 fit"
@@ -586,7 +592,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                              **leastsq_kws)
 
         result.leastsq()
-
         t2 = time.clock()
 
         print
@@ -598,20 +603,20 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         ######################################################################
         # scale the data back
 
-        for instrument in instruments:
-            sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
-            sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
+        # for instrument in instruments:
+        #     sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
+        #     sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
 
-            # scale also the fitted norm
-            pars['n0_'+instrument].value = pars['n0_'+instrument].value * scale_sb_src[instrument]
-            pars['n0_'+instrument].stderr = pars['n0_'+instrument].stderr * scale_sb_src[instrument]
-            pars['n0_'+instrument].max = pars['n0_'+instrument].max * scale_sb_src[instrument]
-            pars['n0_'+instrument].min = pars['n0_'+instrument].min * scale_sb_src[instrument]
+            # # scale also the fitted norm
+            # pars['n0_'+instrument].value = pars['n0_'+instrument].value * scale_sb_src[instrument]
+            # pars['n0_'+instrument].stderr = pars['n0_'+instrument].stderr * scale_sb_src[instrument]
+            # pars['n0_'+instrument].max = pars['n0_'+instrument].max * scale_sb_src[instrument]
+            # pars['n0_'+instrument].min = pars['n0_'+instrument].min * scale_sb_src[instrument]
+            # print ">>>>>", instrument, pars['n0_'+instrument].value, mean(sb_src[instrument])
 
         ######################################################################
         # get the output model
 
-        # FIXME: need the proper pars
         (r_model, profile_norm_model) = \
             v06_psf_2d_lmfit_profile_joint(pars, distmatrix_input, bgrid,
                                            r500_pix, instruments, theta, energy,
@@ -632,7 +637,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         # output
 
         if PRINT_FIT_DIAGNOSTICS:
-            print_fit_diagnostics(result, t2-t1, ndata)
+            print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
@@ -641,7 +646,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
             sys.stdout = f
 
             if PRINT_FIT_DIAGNOSTICS:
-                print_fit_diagnostics(result, t2-t1, ndata)
+                print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
             print
             print
@@ -777,6 +782,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set some evol
     leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
 
+
     if DO_FIT:
         print "starting v06 fit"
         t1 = time.clock()
@@ -814,7 +820,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
         # output
 
         if PRINT_FIT_DIAGNOSTICS:
-            print_fit_diagnostics(result, t2-t1, ndata)
+            print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
         # print_result_tab(pars_true, pars)
         lm.printfuncs.report_errors(result.params)
@@ -823,7 +829,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
             sys.stdout = f
 
             if PRINT_FIT_DIAGNOSTICS:
-                print_fit_diagnostics(result, t2-t1, ndata)
+                print_fit_diagnostics(result, t2-t1, ndata, leastsq_kws)
 
             print
             print
