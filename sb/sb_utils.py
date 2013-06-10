@@ -334,16 +334,18 @@ def king_profile(r, rcore, alpha):
 
 
 
-def optibingrid(binnum=20, rmax=100, c=1.2):
+def optibingrid(binnum=20, rmax=100, c=1.5):
     """
     Calculate the profile grid using the "optimal" binning (see
     Andersson et al. 2011)
 
     Arguments:
     - 'binnum': total number of bins [20]
-    - 'rmax': maximal radius [100 pix, recommended 1.5r500]
+    - 'rmax': maximal radius [recommended 1.5r500]
+    - 'c': index [1.5 in McDonald13, 1.2 in Andersson11]
     """
-    r = array([(i * rmax**(1.0/c)/binnum)**c for i in range(binnum)])
+
+    r = array([rmax*(float(i)/binnum)**c for i in range(1, binnum)])
 
     return r
 

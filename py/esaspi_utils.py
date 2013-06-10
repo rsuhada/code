@@ -10,6 +10,23 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 import pickle
 
+
+# FIXME: finish this
+def forprint(*args):
+    """
+    IDL's forprint.
+    Only screen output.
+    Only equi-length input.
+
+    Arguments:
+    - `x*`:
+    """
+    s = ''
+    for x in args:
+        print x
+        # for i in range(len(args[0])):
+            # s = s + "s  |  " % (x)
+
 def show_in_ds9(fits_image):
     """
     Spawn a ds9 process showing fits file(s). Argument can be full ds9
