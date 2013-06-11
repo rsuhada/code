@@ -8,7 +8,7 @@ import matplotlib.font_manager
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from sb_plotting_utils import plot_sb_profile, plot_cts_profile, plot_data_model_simple, plot_data_model_resid, plt_like_surface
 from esaspi_utils import *
-from sb_utils import distance_matrix
+from sb_utils import distance_matrix, optibingrid
 from sb_models import *
 import lmfit as lm
 import time
@@ -273,9 +273,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     DO_FIT = True
     CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
-    CALC_2D_CI = True
+    CALC_2D_CI = False
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
+    BIN_PROFILE = False
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -300,7 +301,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
     ######################################################################
-    # scale the data
+    # scale the data - not really necessary
 
     scale_sb_src = {}
     scale_sb_src_err = {}
@@ -311,6 +312,19 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
         sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
         ndata += len(sb_src[instrument])
+
+    ######################################################################
+    # binning the profiles
+
+    if BIN_PROFILE:
+        for instrument in instruments:
+            # binning sets (20, 1.5*r500, 1.5) is the default in M13
+            rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
+            sb_src_err = histogram(x,bins=rbin2,weights=x)[0]
+
+    # print "going to sleep!"
+    # from time import sleep
+    # sleep(1000)
 
     ######################################################################
     # init beta model
@@ -326,14 +340,13 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                  vary=True, min=min(sb_src[instrument]),
                  max=sum(abs(sb_src[instrument])))
 
-    # sb_src = sb_src * r
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
                    theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
                    sb_src_err)
 
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
+    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
 
     # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
     # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
