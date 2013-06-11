@@ -18,8 +18,8 @@ function do_sb_extraction {
     ######################################################################
     # run
 
-    echo $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
-    $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $aperture $output
+    echo $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $rmin $rmax $binning $output
+    $PYTHONEXEC ${codedir}/sb/extract-sb-prof.py $image $expmap $bgmap $mask $xim $yim $rmin $rmax $binning $output
 
     if [[ $PLOT_CUMUL_PROF -eq 1 ]]
     then
@@ -37,7 +37,9 @@ cd $dir
 reduction_id="003"              # FIXME: add autonaming - see below
 elo="500"
 ehi="2000"
-aperture=200.0                  # [pix]
+rmin=0.0                    # [pix]
+rmax=200.0                  # [pix]
+binning=1.0                 # either fixed-width bin, or "a11", "m13"
 # bg_type_id=".spl"               # "" - 2comp, ".spl" - spline
 bg_type_id=""               # "" - 2comp, ".spl" - spline
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir

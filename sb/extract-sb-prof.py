@@ -207,17 +207,16 @@ if __name__ == '__main__':
         # do the profile extraction
         # FIXME: rewrite with the histogram binner trick
 
-
-
-        if binning == 'spt':
+        if binning == 'm13':
             # implement the m13 binning scheme
-            r = arange(rmin, rmax+1.0, binning)
+            # default in M13 binning (20, 1.5*r500, 1.5)
+            r = optibingrid(binnum=20, rmax=rmax, c=1.5)
+            r = hstack((0.0, r))
         else:
+            # equidistant binning
             r = arange(rmin, rmax+1.0, double(binning))
 
         # r = arange(1.0, aper+1.0, 1.0)
-
-        print r
 
         for i in xrange(len(r)-1):
             ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))

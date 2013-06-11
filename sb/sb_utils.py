@@ -345,7 +345,7 @@ def optibingrid(binnum=20, rmax=100, c=1.5):
     - 'c': index [1.5 in McDonald13, 1.2 in Andersson11]
     """
 
-    r = array([rmax*(float(i)/binnum)**c for i in range(1, binnum)])
+    r = array([rmax*(float(i)/binnum)**c for i in range(1, binnum+1)])
 
     return r
 
