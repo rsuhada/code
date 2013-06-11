@@ -9,7 +9,7 @@ if __name__ == '__main__':
     Extract cts/ctr/bg/exp/mask profiles from the input files for further analysis.
     """
 
-    if len(argv) == 9:
+    if len(argv) == 11:
         ######################################################################
         # gather arguments
 
@@ -21,8 +21,10 @@ if __name__ == '__main__':
         xim = double(argv[5]) - 1.0     # center x coord
         yim = double(argv[6]) - 1.0     # center y coord
 
-        aper = double(argv[7])          # [pix] maximal extraction aperture
-        outfile = argv[8]
+        rmin = double(argv[7])          # [pix] minimal extraction aperture
+        rmax = double(argv[8])          # [pix] maximal extraction aperture
+        binning = argv[9]                # binning scheme
+        outfile = argv[10]
 
         ######################################################################
         # start output file for profiles
@@ -38,7 +40,9 @@ if __name__ == '__main__':
         f.write('# mask  '+str(mask_file)+'\n')
         f.write('# xim   '+str(xim)+'\n')
         f.write('# yim   '+str(yim)+'\n')
-        f.write('# aper  '+str(aper)+'\n')
+        f.write('# rmin  '+str(rmin)+'\n')
+        f.write('# rmax  '+str(rmax)+'\n')
+        f.write('# binning  '+str(binning)+'\n')
         f.write('#\n')
 
         f.write('# r sb_src sb_bg sb_tot sb_src_err sb_bg_err sb_tot_err ctr_src ctr_bg ctr_tot ctr_src_err ctr_bg_err ctr_tot_err cts_src cts_bg cts_tot cts_src_err cts_bg_err cts_tot_err exp_time area_correction mask_area geometric_area sb_src_wps sb_bg_wps sb_tot_wps sb_src_wps_err sb_bg_wps_err sb_tot_wps_err ctr_src_wps ctr_bg_wps ctr_tot_wps ctr_src_wps_err ctr_bg_wps_err ctr_tot_wps_err cts_src_wps cts_bg_wps cts_tot_wps cts_src_wps_err cts_bg_wps_err cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
@@ -57,7 +61,9 @@ if __name__ == '__main__':
         g.write('# mask  '+str(mask_file)+'\n')
         g.write('# xim   '+str(xim)+'\n')
         g.write('# yim   '+str(yim)+'\n')
-        g.write('# aper  '+str(aper)+'\n')
+        g.write('# rmin  '+str(rmin)+'\n')
+        g.write('# rmax  '+str(rmax)+'\n')
+        g.write('# binning  '+str(binning)+'\n')
         g.write('#\n')
 
         g.write('# r cumul_sb_src cumul_sb_bg cumul_sb_tot cumul_sb_src_err cumul_sb_bg_err cumul_sb_tot_err cumul_ctr_src cumul_ctr_bg cumul_ctr_tot cumul_ctr_src_err cumul_ctr_bg_err cumul_ctr_tot_err cumul_cts_src cumul_cts_bg cumul_cts_tot cumul_cts_src_err cumul_cts_bg_err cumul_cts_tot_err exp_time area_correction mask_area geometric_area cumul_sb_src_wps cumul_sb_bg_wps cumul_sb_tot_wps cumul_sb_src_wps_err cumul_sb_bg_wps_err cumul_sb_tot_wps_err cumul_ctr_src_wps cumul_ctr_bg_wps cumul_ctr_tot_wps cumul_ctr_src_wps_err cumul_ctr_bg_wps_err cumul_ctr_tot_wps_err cumul_cts_src_wps cumul_cts_bg_wps cumul_cts_tot_wps cumul_cts_src_wps_err cumul_cts_bg_wps_err cumul_cts_tot_wps_err  exp_time_wps area_correction_wps mask_area_wps\n')
@@ -199,11 +205,23 @@ if __name__ == '__main__':
 
         ######################################################################
         # do the profile extraction
+        # FIXME: rewrite with the histogram binner trick
 
-        radii = arange(1.0, aper+1.0, 1.0)
-        for r in radii:
 
-            ids = where((distmatrix < r**2.0) & (distmatrix >= (r - 1.0)**2.0))
+
+        if binning == 'spt':
+            # implement the m13 binning scheme
+            r = arange(rmin, rmax+1.0, binning)
+        else:
+            r = arange(rmin, rmax+1.0, double(binning))
+
+        # r = arange(1.0, aper+1.0, 1.0)
+
+        print r
+
+        for i in xrange(len(r)-1):
+            ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))
+
             geometric_area = len(ids[0])      # [pix], total number of pix
 
             ######################################################################
@@ -233,7 +251,7 @@ if __name__ == '__main__':
             cts_src = cts_tot - cts_bg
 
 
-            print  "area:", r, mask_area, mask_area_wps
+            print  "area:", r[i], mask_area, mask_area_wps
             ######################################################################
             # calculate the counts/countrates/surface brightness (area corrected)
 
@@ -364,15 +382,15 @@ if __name__ == '__main__':
             ######################################################################
             # write output profile file
 
-            f.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, sb_src, sb_bg, sb_tot, sb_src_err, sb_bg_err, sb_tot_err, ctr_src, ctr_bg, ctr_tot, ctr_src_err, ctr_bg_err, ctr_tot_err, cts_src, cts_bg, cts_tot, cts_src_err, cts_bg_err, cts_tot_err, exp_time, area_correction, mask_area, geometric_area, sb_src_wps, sb_bg_wps, sb_tot_wps, sb_src_wps_err, sb_bg_wps_err, sb_tot_wps_err, ctr_src_wps, ctr_bg_wps, ctr_tot_wps, ctr_src_wps_err, ctr_bg_wps_err, ctr_tot_wps_err, cts_src_wps, cts_bg_wps, cts_tot_wps, cts_src_wps_err, cts_bg_wps_err, cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
+            f.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r[i+1], sb_src, sb_bg, sb_tot, sb_src_err, sb_bg_err, sb_tot_err, ctr_src, ctr_bg, ctr_tot, ctr_src_err, ctr_bg_err, ctr_tot_err, cts_src, cts_bg, cts_tot, cts_src_err, cts_bg_err, cts_tot_err, exp_time, area_correction, mask_area, geometric_area, sb_src_wps, sb_bg_wps, sb_tot_wps, sb_src_wps_err, sb_bg_wps_err, sb_tot_wps_err, ctr_src_wps, ctr_bg_wps, ctr_tot_wps, ctr_src_wps_err, ctr_bg_wps_err, ctr_tot_wps_err, cts_src_wps, cts_bg_wps, cts_tot_wps, cts_src_wps_err, cts_bg_wps_err, cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
 
 
             ######################################################################
             # write output cumulative profile file
 
-            g.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r, cumul_sb_src, cumul_sb_bg, cumul_sb_tot, cumul_sb_src_err, cumul_sb_bg_err, cumul_sb_tot_err, cumul_ctr_src, cumul_ctr_bg, cumul_ctr_tot, cumul_ctr_src_err, cumul_ctr_bg_err, cumul_ctr_tot_err, cumul_cts_src, cumul_cts_bg, cumul_cts_tot, cumul_cts_src_err, cumul_cts_bg_err, cumul_cts_tot_err, exp_time, area_correction, mask_area, geometric_area, cumul_sb_src_wps, cumul_sb_bg_wps, cumul_sb_tot_wps, cumul_sb_src_wps_err, cumul_sb_bg_wps_err, cumul_sb_tot_wps_err, cumul_ctr_src_wps, cumul_ctr_bg_wps, cumul_ctr_tot_wps, cumul_ctr_src_wps_err, cumul_ctr_bg_wps_err, cumul_ctr_tot_wps_err, cumul_cts_src_wps, cumul_cts_bg_wps, cumul_cts_tot_wps, cumul_cts_src_wps_err, cumul_cts_bg_wps_err, cumul_cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
+            g.write('%f %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e %e\n' % (r[i+1], cumul_sb_src, cumul_sb_bg, cumul_sb_tot, cumul_sb_src_err, cumul_sb_bg_err, cumul_sb_tot_err, cumul_ctr_src, cumul_ctr_bg, cumul_ctr_tot, cumul_ctr_src_err, cumul_ctr_bg_err, cumul_ctr_tot_err, cumul_cts_src, cumul_cts_bg, cumul_cts_tot, cumul_cts_src_err, cumul_cts_bg_err, cumul_cts_tot_err, exp_time, area_correction, mask_area, geometric_area, cumul_sb_src_wps, cumul_sb_bg_wps, cumul_sb_tot_wps, cumul_sb_src_wps_err, cumul_sb_bg_wps_err, cumul_sb_tot_wps_err, cumul_ctr_src_wps, cumul_ctr_bg_wps, cumul_ctr_tot_wps, cumul_ctr_src_wps_err, cumul_ctr_bg_wps_err, cumul_ctr_tot_wps_err, cumul_cts_src_wps, cumul_cts_bg_wps, cumul_cts_tot_wps, cumul_cts_src_wps_err, cumul_cts_bg_wps_err, cumul_cts_tot_wps_err, exp_time_wps, area_correction_wps, mask_area_wps))
 
-            print "r :: ", r-1.0, r, geometric_area
+            print "r :: ", r[i-1], r[i], geometric_area
 
         f.close()
         g.close()
@@ -382,14 +400,16 @@ if __name__ == '__main__':
 
         print
         print "#"*70
-        print "image :: ", im_file
-        print "bg    :: ", bg_file
-        print "exp   :: ", exp_file
-        print "mask  :: ", mask_file
+        print "image   :: ", im_file
+        print "bg      :: ", bg_file
+        print "exp     :: ", exp_file
+        print "mask    :: ", mask_file
         print "#"*70
-        print "xim   :: ", xim
-        print "yim   :: ", yim
-        print "aper  :: ", aper
+        print "xim     :: ", xim
+        print "yim     :: ", yim
+        print 'rmin    ::  '+str(rmin)
+        print 'rmax    ::  '+str(rmax)
+        print 'binning ::  '+str(binning)
         print "#"*70
         print
 
