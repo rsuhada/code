@@ -116,7 +116,18 @@ x=sb_src['pn']
 x=arange(1, 6)
 r=x
 
-xb2 = histogram(x,bins=rbin,weights=x)[0]
+
+min_dist=1.0                    # [pix]
+
+# merge innermost bins if they are too small
+# rbin2 contains: start-end=start-end bin boundaries
+rbin2=hstack((0.0, rbin[rbin>=min_dist]))
+
+xb = histogram(x,bins=rbin2,weights=x)[0]
+
+print xb
+print rbin
+print rbin2
 
 
 for i in range(len(r)):
@@ -124,34 +135,10 @@ for i in range(len(r)):
 
 print
 print
-# for i in xrange(len(rbin)):
-for i in xrange(3):
-    print rbin[i], xb[i], xb2[i]
+
+for i in xrange(len(xb)):
+    print rbin2[i], rbin2[i+1], xb[i]
+
 
 print
 print
-
-# for i in xrange(len(r)):
-# for i in xrange(4):
-    # print r[i], x[i]
-
-
-
-# 0.838525491562 0.0017056771
-# 2.37170824513 0.0009961027
-# 4.35710626448 0.0011220168
-# 6.7082039325 0.0005805488
-
-
-
-
-# 1.0 0.0004767233
-# 2.0 0.0007265975
-# 3.0 0.0005023563
-# 4.0 0.0005278483
-# 5.0 0.0004682544
-# 6.0 0.0004167865
-# 7.0 0.000398113
-# 8.0 0.0003071173
-# 9.0 0.0003214037
-# 10.0 0.0002591451
