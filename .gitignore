@@ -20,3 +20,4 @@ TAGS
 # direcotries end with /
 scratch/
 test_results/
+py/lmfit_custom_minimizers.py

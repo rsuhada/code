@@ -55,9 +55,8 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     Arguments:
     - `result`: lmfit result minimizer class
     - `delta_t`: fit time
-    - `nfree_true`: tru number of degrees of freedom (differs from the
-      number in result if using multiple instruments - it sees only
-      one of them)
+    - `ndata`: true number of data (differs from the number in result
+               if using multiple instruments - it sees only one of them)
     """
 
     print
@@ -68,38 +67,44 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print
     print 'nfev          :: ', result.nfev
     print 'message       :: ', result.message
-    print 'ier           :: ', result.ier
-    print 'lmdif_message :: ', result.lmdif_message
+
+    # not all fitters have it
+    if hasattr(result, 'ier') and callable(getattr(result, 'ier')):
+        print 'ier           :: ', result.ier
+        print 'lmdif_message :: ', result.lmdif_message
+
     if leastsq_kws: print 'leastsq_kws   :: ', leastsq_kws
+
     print
     print
     print '='*70
 
     print 'fitting took :: ', delta_t, ' s'
-    print 'success      :: ', result.success
     print 'nfev         :: ', result.nfev
     print 'nvarys       :: ', result.nvarys
-    print 'residual     :: ', sum(result.residual)
-    print 'chisqr       :: ', result.chisqr
-    print
-    print 'ndata lmfit  :: ', result.ndata
-    print 'nfree lmfit  :: ', result.nfree
-    print 'redchi lmfit :: ', result.redchi
     print
 
-    if ndata:
-        print 'ndata        :: ', ndata
-        print 'nfree        :: ', ndata - result.nvarys
-        print 'redchi       :: ', result.chisqr / (ndata - result.nvarys)
-    else:
-        print 'ndata        :: ', result.ndata
-        print 'nfree        :: ', result.nfree
-        print 'redchi       :: ', result.redchi
+    if hasattr(result, 'chisqr') and callable(getattr(result, 'chisqr')):
+        print 'success      :: ', result.success
+        print 'ndata lmfit  :: ', result.ndata
+        print 'nfree lmfit  :: ', result.nfree
+        print 'residual     :: ', sum(result.residual)
+        print 'chisqr       :: ', result.chisqr
+        print
+        print 'redchi lmfit :: ', result.redchi
+        print
 
+        if ndata:
+            print 'ndata        :: ', ndata
+            print 'nfree        :: ', ndata - result.nvarys
+            print 'redchi       :: ', result.chisqr / (ndata - result.nvarys)
+        else:
+            print 'ndata        :: ', result.ndata
+            print 'nfree        :: ', result.nfree
+            print 'redchi       :: ', result.redchi
 
     print '='*70
     print
-
 
 
 def sanitize_sb_curve(sb_curve_tuple):
@@ -491,8 +496,11 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    CALC_1D_CI = False           # in most cases standard error is good
-                                # enough, this is not needed then
+    FIT_METHOD = 'nelder'
+    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+                              # 'nelder' - simplex
+    CALC_1D_CI = False        # in most cases standard error is good
+                              # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
@@ -518,7 +526,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     # pre-calculate distmatrix for speedup - it is same for all
     # instruments
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
-
 
     ######################################################################
     # scale the data
@@ -576,25 +583,22 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
                    xcen_obj, ycen_obj, sb_src, sb_src_err)
 
-    # nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
-    #                theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
-    #                sb_src_err)
-
     # # fit stop criteria
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
+    if FIT_METHOD == 'leastsq':
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-    # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
+    if FIT_METHOD == 'nelder':
+        leastsq_kws={} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     ######################################################################
     # do the fit: beta
-
-    # print ">>>>>", instrument, pars['n0_'+instrument].value, pars['n0_'+instrument].min, pars['n0_'+instrument].max, mean(sb_src[instrument])
-    # print "going to sleep!"
-    # from time import sleep
-    # sleep(1000)
-
 
     if DO_FIT:
         print "starting v06 fit"
@@ -603,16 +607,11 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         result = lm.minimize(v06_psf_2d_lmfit_profile_joint,
                              pars,
                              args=nonfit_args,
-                             method='leastsq',
+                             method=FIT_METHOD,
                              **leastsq_kws)
-
-        # print "ok1"
-        # result.leastsq()
-        # print "ok2"
 
         # import IPython
         # IPython.embed()
-
 
         t2 = time.clock()
 
