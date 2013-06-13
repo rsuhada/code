@@ -206,8 +206,6 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
                              args=nonfit_args,
                              **leastsq_kws)
 
-        result.leastsq()
-
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
 
@@ -367,8 +365,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
                              pars,
                              args=nonfit_args,
                              **leastsq_kws)
-
-        result.leastsq()
 
         t2 = time.clock()
 
@@ -811,7 +807,6 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
                              pars,
                              args=nonfit_args,
                              **leastsq_kws)
-        result.leastsq()
 
         t2 = time.clock()
         print "fitting took: ", t2-t1, " s"
