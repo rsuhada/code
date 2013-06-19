@@ -69,9 +69,10 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print 'message       :: ', result.message
 
     # not all fitters have it
-    if hasattr(result, 'ier') and callable(getattr(result, 'ier')):
+    if hasattr(result, 'ier'):
         print 'ier           :: ', result.ier
         print 'lmdif_message :: ', result.lmdif_message
+        print 'success      :: ', result.success
 
     if leastsq_kws: print 'leastsq_kws   :: ', leastsq_kws
 
@@ -84,8 +85,7 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print 'nvarys       :: ', result.nvarys
     print
 
-    if hasattr(result, 'chisqr') and callable(getattr(result, 'chisqr')):
-        print 'success      :: ', result.success
+    if hasattr(result, 'chisqr'):
         print 'ndata lmfit  :: ', result.ndata
         print 'nfree lmfit  :: ', result.nfree
         print 'residual     :: ', sum(result.residual)
@@ -151,9 +151,9 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     DO_ZERO_PAD = True
     DO_FIT = True
     PLOT_PROFILE = True
-    FIT_METHOD = 'nelder'
+    FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
-                                 # 'nelder' - simplex
+                                 # 'simplex' - simplex
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -201,7 +201,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
-    if FIT_METHOD == 'nelder':
+    if FIT_METHOD == 'simplex':
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
         leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
@@ -288,9 +288,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'nelder'
+    FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
-                                 # 'nelder' - simplex
+                                 # 'simplex' - simplex
     CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
     CALC_2D_CI = False
@@ -372,7 +372,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
-    if FIT_METHOD == 'nelder':
+    if FIT_METHOD == 'simplex':
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
         leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
@@ -517,13 +517,13 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'nelder'
+    FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
-                              # 'nelder' - simplex
-    CALC_1D_CI = False        # in most cases standard error is good
+                              # 'simplex' - simplex
+    CALC_1D_CI = False         # in most cases standard error is good
                               # enough, this is not needed then
     CALC_2D_CI = False
-    PLOT_PROFILE = True
+    PLOT_PROFILE = False
     PRINT_FIT_DIAGNOSTICS = True
 
     ######################################################################
@@ -611,17 +611,17 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
-    if FIT_METHOD == 'nelder':
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
+    if FIT_METHOD == 'simplex':
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+1} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfun': 1.0e+9}
 
     ######################################################################
     # do the fit: beta
 
     if DO_FIT:
-        print "starting v06 fit"
+        print "starting v06 fit with method :: ", FIT_METHOD
         t1 = time.clock()
 
         result = lm.minimize(v06_psf_2d_lmfit_profile_joint,
@@ -630,10 +630,10 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                              method=FIT_METHOD,
                              **leastsq_kws)
 
+        t2 = time.clock()
+
         # import IPython
         # IPython.embed()
-
-        t2 = time.clock()
 
         print
         print
@@ -720,8 +720,12 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
         # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
-        sigmas = [0.682689492137, 0.954499736104]
-        ci_pars = ['rcore', 'beta']
+        # sigmas = [0.682689492137, 0.954499736104]
+        # sigmas = [0.997300203937]
+        sigmas = [0.682689492137,]
+        # ci_pars = ['rc', 'beta']
+        # ci_pars = ['rc']
+        ci_pars = ['n0_pn']
 
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
                               trace=True, verbose=True, maxiter=1)
@@ -754,10 +758,10 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'nelder'
+    FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
-                                 # 'nelder' - simplex
-    CALC_1D_CI = False           # in most cases standard error is good
+                                 # 'simplex' - simplex
+    CALC_1D_CI = True           # in most cases standard error is good
                                 # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
@@ -829,7 +833,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
-    if FIT_METHOD == 'nelder':
+    if FIT_METHOD == 'simplex':
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
         leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
@@ -839,7 +843,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     # do the actual fitting
 
     if DO_FIT:
-        print "starting v06 fit"
+        print "starting v06 fit with method :: ", FIT_METHOD
         t1 = time.clock()
 
         result = lm.minimize(v06_psf_2d_lmfit_profile,

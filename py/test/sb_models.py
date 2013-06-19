@@ -545,7 +545,7 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
 
         print pars['n0_pn'].value, pars['alpha'].value, pars['beta'].value, pars['epsilon'].value, pars['rc'].value, pars['rs'].value
 
-        print "full resid :: ", sum(residuals)
+        print "full resid :: ", sum(residuals), "Chisqr :: ", sum(residuals**2)
         print '='*35
         return residuals
 

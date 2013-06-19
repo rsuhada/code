@@ -1,5 +1,4 @@
 """
-
 ######################################################################
 # RS
 
@@ -303,6 +302,16 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         fmin_kws.update(self.kws)
         fmin_kws.update(kws)
 
+        # ugly hack to get number of data ndata - it causes 1 extra
+        # func evaluation. Given the structure of the class it has to
+        # happen *before* fitting, otherwise wipes best fit pars
+        def ret_ndata(params):
+            "custom function just to get the number of data points, because fmin doesn't do that"
+            r = self.__residual(params)
+            return len(r)
+
+        self.ndata = ret_ndata(self.vars) # is this the simplest way?
+
         def penalty(params):
             "local penalty function -- eval sum-squares residual"
             r = self.__residual(params)
@@ -313,16 +322,17 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         ret = scipy_fmin(penalty, self.vars, **fmin_kws)
         xout, fout, iter, funccalls, warnflag, allvecs = ret
 
+        print '!'*40
+        print xout
+        print '!'*40
+        print fout
+        print '!'*40
+        print allvecs
+
         # RS: part hacked
         sum_sqr = fout
         self.chisqr = sum_sqr
-
-        def ret_ndata(params):
-            "custom function just to get the number of data points, because fmin doesn't do that"
-            r = self.__residual(params)
-            return len(r)
-
-        self.ndata = ret_ndata(self.vars) # is this the simplest way?
+        self.residual = 0.0
 
         self.nfree = (self.ndata - self.nvarys)
         self.redchi = sum_sqr / self.nfree
