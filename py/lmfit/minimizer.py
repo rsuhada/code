@@ -195,7 +195,6 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         else:
             raise MinimizerException(self.err_nonparam)
 
-
     def prepare_fit(self, params=None):
         """prepare parameters for fit"""
         # determine which parameters are actually variables
@@ -322,17 +321,11 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         ret = scipy_fmin(penalty, self.vars, **fmin_kws)
         xout, fout, iter, funccalls, warnflag, allvecs = ret
 
-        print '!'*40
-        print xout
-        print '!'*40
-        print fout
-        print '!'*40
-        print allvecs
-
         # RS: part hacked
         sum_sqr = fout
         self.chisqr = sum_sqr
-        self.residual = 0.0
+        self.residual = -99     # FIXME: residula not implemented yet
+                                # - it is bit tricky to get to it
 
         self.nfree = (self.ndata - self.nvarys)
         self.redchi = sum_sqr / self.nfree

@@ -1,6 +1,33 @@
+#!/usr/bin/env python2.6
 import lmfit as lm
 from numpy import *
 import time
+from sb_fitting_utils import print_fit_diagnostics
+
+
+def do_fit():
+    """
+    Run the fitter region
+    """
+
+    print "starting fit with method :: ", FIT_METHOD
+    t1 = time.clock()
+
+    result = lm.minimize(residual,
+                         pars,
+                         method=FIT_METHOD,
+                         **leastsq_kws)
+
+    t2 = time.clock()
+
+    #  outputs
+    # print "fitting took: ", t2-t1, " s"
+    # print
+
+    lm.printfuncs.report_errors(result.params)
+    print_fit_diagnostics(result, t2-t1, len(y), leastsq_kws)
+
+    return result
 
 
 # model
@@ -59,52 +86,96 @@ def residual(pars):
     return funct(a, b) - y
 
 # create parameter container
-pars=lmfit.Parameters()
+pars=lm.Parameters()
 pars.add_many(('a', 2.0),('b', 3.0))
 
-
-# setup
-FIT_METHOD='leastsq'
-
-# fit stop criteria
-if FIT_METHOD == 'leastsq':
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
-
-if FIT_METHOD == 'simplex':
-    leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+1} # debug set; quickest
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-    # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
-
-######################################################################
-# do the fitting
-
-print "starting fit with method :: ", FIT_METHOD
-t1 = time.clock()
-
-result = lm.minimize(residual,
-                     pars,
-                     method=FIT_METHOD,
-                     **leastsq_kws)
-
-t2 = time.clock()
-
-#  outputs
-print "fitting took: ", t2-t1, " s"
 print
-
 print 'a_true = ', a_true
 print 'b_true = ', b_true
+print
 
-lm.printfuncs.report_errors(result.params)
+######################################################################
+# do the fitting: leastsq
+
+print
+print
+print '='*70
+print '='*70
+
+# create parameter container
+pars=lm.Parameters()
+pars.add_many(('a', 2.0),('b', 3.0))
+
+FIT_METHOD='leastsq'
+leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+result = do_fit()
+
+# confidence interval
+# sigmas = [0.682689492137]
+sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+ci_pars = ['a', 'b']
+ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                      trace=True, verbose=True, maxiter=1e3)
+lm.printfuncs.report_ci(ci)
+
+print
+
+######################################################################
+# do the fitting: simplex
+
+print
+print
+print '='*70
+print '='*70
+
+# create parameter container
+pars=lm.Parameters()
+pars.add_many(('a', 2.0),('b', 3.0))
+
+FIT_METHOD='simplex'
+leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7} # debug set; quickest
+result = do_fit()
+
+# confidence interval
+# sigmas = [0.682689492137]
+sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+ci_pars = ['a', 'b']
+ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+                      trace=True, verbose=True, maxiter=1e3)
+lm.printfuncs.report_ci(ci)
 
 
 
-# import IPython
-# IPython.embed()
-
-
+###########################################################################
+# TEST RESULTS                                                            #
+# for fixed data set                                                      #
+#                                                                         #
+# a_true =  0.1                                                           #
+# b_true =  2.0                                                           #
+#                                                                         #
+# ======================================================================  #
+# starting fit with method ::  leastsq                                    #
+#   a:     0.100109 +/- 0.000200 (0.20%) initial =  2.000000              #
+#   b:     2.009682 +/- 0.012503 (0.62%) initial =  3.000000              #
+# Correlations:                                                           #
+#     C(a, b)                      =  0.601                               #
+# Calculating CI for a                                                    #
+# Calculating CI for b                                                    #
+#      99.73%    95.45%    68.27%     0.00%    68.27%    95.45%    99.73% #
+# a   0.09931   0.09931   0.09931   0.10011   0.10091   0.10091   0.10091 #
+# b   1.97154   1.98450   1.99739   2.00968   2.02198   2.03486   2.04783 #
+#                                                                         #
+# ======================================================================  #
+# starting fit with method ::  simplex                                    #
+#   a:     0.100109 initial =  2.000000                                   #
+#   b:     2.009682 initial =  3.000000                                   #
+# Correlations:                                                           #
+# Calculating CI for a                                                    #
+# Calculating CI for b                                                    #
+#      99.73%    95.45%    68.27%     0.00%    68.27%    95.45%    99.73% #
+# a   0.09887   0.09898   0.09840   0.10011   0.10182   0.10123   0.10134 #
+# b   1.97086   1.98480   1.99738   2.00968   2.02199   2.03456   2.04851 #
+###########################################################################
 
 
 

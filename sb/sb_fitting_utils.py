@@ -64,7 +64,6 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print 'Diagnostics'
     print '='*70
 
-    print
     print 'nfev          :: ', result.nfev
     print 'message       :: ', result.message
 
@@ -76,7 +75,6 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
 
     if leastsq_kws: print 'leastsq_kws   :: ', leastsq_kws
 
-    print
     print
     print '='*70
 
@@ -722,7 +720,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
         # sigmas = [0.682689492137, 0.954499736104]
         # sigmas = [0.997300203937]
-        sigmas = [0.682689492137,]
+        sigmas = [0.682689492137]
         # ci_pars = ['rc', 'beta']
         # ci_pars = ['rc']
         ci_pars = ['n0_pn']
