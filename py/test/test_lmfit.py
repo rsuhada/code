@@ -3,6 +3,7 @@ import lmfit as lm
 from numpy import *
 import time
 from sb_fitting_utils import print_fit_diagnostics
+import matplotlib.pylab as plt
 
 
 def do_fit():
@@ -28,6 +29,16 @@ def do_fit():
     print_fit_diagnostics(result, t2-t1, len(y), leastsq_kws)
 
     return result
+
+# FIXME: not working at the moment
+# plot contours
+def plot_conf(result):
+    x, y, grid=lm.conf_interval2d(result,'a','b',30,30)
+    plt.contourf(x,y,grid,np.linspace(0,1,11))
+    plt.xlabel('a');
+    plt.colorbar();
+    plt.ylabel('b');
+
 
 
 # model
@@ -129,20 +140,28 @@ print '='*70
 print '='*70
 
 # create parameter container
-pars=lm.Parameters()
-pars.add_many(('a', 2.0),('b', 3.0))
+pars_simplex=lm.Parameters()
+pars_simplex.add_many(('a', 2.0),('b', 3.0))
 
 FIT_METHOD='simplex'
 leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7} # debug set; quickest
-result = do_fit()
+result_simplex = do_fit()
 
 # confidence interval
 # sigmas = [0.682689492137]
 sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
 ci_pars = ['a', 'b']
-ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
+ci, trace = lm.conf_interval(result_simplex, p_names=ci_pars, sigmas=sigmas,
                       trace=True, verbose=True, maxiter=1e3)
 lm.printfuncs.report_ci(ci)
+
+# plot_conf(result_simplex)
+# plot_conf(result)
+
+
+
+import IPython
+IPython.embed()
 
 
 
@@ -176,6 +195,7 @@ lm.printfuncs.report_ci(ci)
 # a   0.09887   0.09898   0.09840   0.10011   0.10182   0.10123   0.10134 #
 # b   1.97086   1.98480   1.99738   2.00968   2.02199   2.03456   2.04851 #
 ###########################################################################
+
 
 
 

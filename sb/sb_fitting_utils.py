@@ -481,7 +481,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         ci_pars = ['rcore', 'beta']
 
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=True, verbose=True, maxiter=1)
+                              trace=True, verbose=True, maxiter=1e3)
 
         lm.printfuncs.report_ci(ci)
 
@@ -521,7 +521,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     CALC_1D_CI = False         # in most cases standard error is good
                               # enough, this is not needed then
     CALC_2D_CI = False
-    PLOT_PROFILE = False
+    PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
 
     ######################################################################
@@ -554,9 +554,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     ndata = 0
 
     for instrument in instruments:
-        scale_sb_src[instrument] = median(sb_src[instrument])
-        # sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-        # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
         ndata += len(sb_src[instrument])
 
     ######################################################################
@@ -569,11 +566,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     alpha = 1.5
     gamma = 3.0
     epsilon = 1.5
-
-    # rmax = 100.0
-    # r500_pix = rmax
-    # rmax = 2*r500_pix
-
     r500_pix = r.max()
 
     # v06 pars lmfit structure
@@ -610,9 +602,9 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+1} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+1} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfun': 1.0e+9}
 
     ######################################################################
@@ -638,20 +630,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         print "fitting took: ", t2-t1, " s"
         print
         print
-
-        ######################################################################
-        # scale the data back
-
-        # for instrument in instruments:
-        #     sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
-        #     sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
-
-            # # scale also the fitted norm
-            # pars['n0_'+instrument].value = pars['n0_'+instrument].value * scale_sb_src[instrument]
-            # pars['n0_'+instrument].stderr = pars['n0_'+instrument].stderr * scale_sb_src[instrument]
-            # pars['n0_'+instrument].max = pars['n0_'+instrument].max * scale_sb_src[instrument]
-            # pars['n0_'+instrument].min = pars['n0_'+instrument].min * scale_sb_src[instrument]
-            # print ">>>>>", instrument, pars['n0_'+instrument].value, mean(sb_src[instrument])
 
         ######################################################################
         # get the output model
@@ -717,16 +695,20 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
-        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
         # sigmas = [0.682689492137, 0.954499736104]
         # sigmas = [0.997300203937]
-        sigmas = [0.682689492137]
+        # sigmas = [0.682689492137]
         # ci_pars = ['rc', 'beta']
         # ci_pars = ['rc']
         ci_pars = ['n0_pn']
 
+        t1 = time.clock()
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=True, verbose=True, maxiter=1)
+                              trace=True, verbose=True, maxiter=1e3)
+        t2 = time.clock()
+        print
+        print "Confidence interval calculation took : ", t2 - t1
 
         lm.printfuncs.report_ci(ci)
 
@@ -923,7 +905,7 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
         ci_pars = ['rc', 'beta']
 
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=True, verbose=True, maxiter=1)
+                              trace=True, verbose=True, maxiter=1e3)
 
         lm.printfuncs.report_ci(ci)
 
