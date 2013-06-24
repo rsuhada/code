@@ -195,6 +195,13 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         else:
             raise MinimizerException(self.err_nonparam)
 
+    # def set_fitmethod(self, method='leastsq'):
+    #     """
+    #     RS: Helper funciton to set the name of fitting method for the
+    #     current fit.
+    #     """
+    #     self.fitmethod=method
+
     def prepare_fit(self, params=None):
         """prepare parameters for fit"""
         # determine which parameters are actually variables
@@ -331,7 +338,9 @@ or set  leastsq_kws['maxfev']  to increase this maximum."""
         self.redchi = sum_sqr / self.nfree
 
         self.nfev =  funccalls
-        self.fitmethod = 'simplex'
+        # self.set_fitmethod('simplex')
+        self.fitmethod='simplex'
+
 
     def scalar_minimize(self, method='Nelder-Mead', hess=None, tol=None, **kws):
         """use one of the scaler minimization methods from scipy.

@@ -13,22 +13,15 @@ def do_fit():
 
     print "starting fit with method :: ", FIT_METHOD
     t1 = time.clock()
-
-    result = lm.minimize(residual,
-                         pars,
-                         method=FIT_METHOD,
-                         **leastsq_kws)
-
+    out = lm.minimize(residual,
+                      pars,
+                      method=FIT_METHOD,
+                      **leastsq_kws)
     t2 = time.clock()
+    lm.printfuncs.report_errors(out.params)
+    print_fit_diagnostics(out, t2-t1, len(y), leastsq_kws)
 
-    #  outputs
-    # print "fitting took: ", t2-t1, " s"
-    # print
-
-    lm.printfuncs.report_errors(result.params)
-    print_fit_diagnostics(result, t2-t1, len(y), leastsq_kws)
-
-    return result
+    return out
 
 # FIXME: not working at the moment
 # plot contours
@@ -40,20 +33,14 @@ def plot_conf(result):
     plt.ylabel('b');
 
 
-
 # model
 def funct(a, b):
     return 1/(a*x) + b
 
-# create data
-a_true = 0.1
-b_true = 2.0
-x=linspace(0.3,10,100)
-y=funct(a_true, b_true) + 0.1*random.randn(x.size)
-
 #  use stock data for repeatability
 a_true = 0.1
 b_true = 2.0
+noise_ampl = 0.1
 y = array(( 35.31974891,  27.2502685,   22.14511225,  18.72513472,  16.38344418 ,
   14.6186514   , 13.29029116  ,  11.97833455  ,  11.23311135 ,  10.48015721  ,
    9.7801057   ,  9.30701759  ,   9.05237106  ,   8.23312357 ,   8.02829518  ,
@@ -88,6 +75,15 @@ y = array(( 35.31974891,  27.2502685,   22.14511225,  18.72513472,  16.38344418 
 # Correlations:                                                  #
 #    C(a, b)                      =  0.601 #                     #
 ##################################################################
+
+
+# create new data
+a_true = 0.8
+b_true = 2.0
+noise_ampl = 0.3                # [0.1]
+x=linspace(0.3,10,100)
+y=funct(a_true, b_true) + noise_ampl*random.randn(x.size)
+
 
 
 # residuals for titing
@@ -140,11 +136,12 @@ print '='*70
 print '='*70
 
 # create parameter container
-pars_simplex=lm.Parameters()
-pars_simplex.add_many(('a', 2.0),('b', 3.0))
+pars=lm.Parameters()
+pars.add_many(('a', 2.0),('b', 3.0))
 
 FIT_METHOD='simplex'
 leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7} # debug set; quickest
+
 result_simplex = do_fit()
 
 # confidence interval
@@ -155,15 +152,12 @@ ci, trace = lm.conf_interval(result_simplex, p_names=ci_pars, sigmas=sigmas,
                       trace=True, verbose=True, maxiter=1e3)
 lm.printfuncs.report_ci(ci)
 
+# import IPython
+# IPython.embed()
+
+
 # plot_conf(result_simplex)
 # plot_conf(result)
-
-
-
-import IPython
-IPython.embed()
-
-
 
 ###########################################################################
 # TEST RESULTS                                                            #
@@ -200,3 +194,17 @@ IPython.embed()
 
 
 
+# -*- mode: snippet -*-
+# -*- coding: utf-8 -*-
+# name: root
+# contributor: Robert Suhada
+# -
+from scipy.optimize import newton
+
+def func(x):
+    ez_b=ez_func(z=z, h_0=h_0_b, omega_m_0=x, omega_de_0=omega_de_0_b, omega_k_0=omega_k_0_b, w=w_b)
+    return ez_a - ez_b
+
+x0=0.3
+res=newton(func, x0, fprime=None, args=(), tol=1.48e-08, maxiter=1e4, fprime2=None)
+print res

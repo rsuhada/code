@@ -201,6 +201,7 @@ def conf_interval(minimizer, p_names=None, sigmas=(0.674, 0.95, 0.997),
             if minimizer.fitmethod=='leastsq': minimizer.leastsq()
             if minimizer.fitmethod=='simplex': minimizer.fmin()
             out = minimizer
+            # print 'fitmethod', out.fitmethod
             prob = prob_func(out.ndata, out.ndata - out.nfree,
                              out.chisqr, best_chi)
 
@@ -228,6 +229,10 @@ def conf_interval(minimizer, p_names=None, sigmas=(0.674, 0.95, 0.997),
                 i += 1
                 limit += step * direction
                 new_prob = calc_prob(limit)
+
+                print "@@@ prob ", new_prob
+
+
                 change = new_prob - old_prob
                 old_prob = new_prob
                 if i > maxiter:

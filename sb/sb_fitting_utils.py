@@ -289,12 +289,11 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                                  # 'simplex' - simplex
-    CALC_1D_CI = False           # in most cases standard error is good
+    CALC_1D_CI = True           # in most cases standard error is good
                                 # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
-    BIN_PROFILE = False
 
     ######################################################################
     # modelling is done in 2D and then projected - setup here the 2D
@@ -321,28 +320,15 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     ######################################################################
     # scale the data - not really necessary
 
-    scale_sb_src = {}
-    scale_sb_src_err = {}
+    # scale_sb_src = {}
+    # scale_sb_src_err = {}
     ndata = 0
 
     for instrument in instruments:
-        scale_sb_src[instrument] = median(sb_src[instrument])
-        sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
-        sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
+        # scale_sb_src[instrument] = median(sb_src[instrument])
+        # sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
+        # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
         ndata += len(sb_src[instrument])
-
-    ######################################################################
-    # binning the profiles
-
-    if BIN_PROFILE:
-        for instrument in instruments:
-            # binning sets (20, 1.5*r500, 1.5) is the default in M13
-            rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
-            sb_src_err = histogram(x,bins=rbin2,weights=x)[0]
-
-    # print "going to sleep!"
-    # from time import sleep
-    # sleep(1000)
 
     ######################################################################
     # init beta model
@@ -365,9 +351,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
@@ -400,15 +386,15 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         ######################################################################
         # scale the data back
 
-        for instrument in instruments:
-            sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
-            sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
+        # for instrument in instruments:
+        #     sb_src[instrument] = sb_src[instrument] * scale_sb_src[instrument]
+        #     sb_src_err[instrument] = sb_src_err[instrument] * scale_sb_src[instrument]
 
-            # scale also the fitted norm
-            pars['norm_'+instrument].value = pars['norm_'+instrument].value * scale_sb_src[instrument]
-            pars['norm_'+instrument].stderr = pars['norm_'+instrument].stderr * scale_sb_src[instrument]
-            pars['norm_'+instrument].max = pars['norm_'+instrument].max * scale_sb_src[instrument]
-            pars['norm_'+instrument].min = pars['norm_'+instrument].min * scale_sb_src[instrument]
+        #     # scale also the fitted norm
+        #     pars['norm_'+instrument].value = pars['norm_'+instrument].value * scale_sb_src[instrument]
+        #     pars['norm_'+instrument].stderr = pars['norm_'+instrument].stderr * scale_sb_src[instrument]
+        #     pars['norm_'+instrument].max = pars['norm_'+instrument].max * scale_sb_src[instrument]
+        #     pars['norm_'+instrument].min = pars['norm_'+instrument].min * scale_sb_src[instrument]
 
         ######################################################################
         # get the output model
@@ -476,29 +462,29 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
-        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
-        sigmas = [0.682689492137, 0.954499736104]
-        ci_pars = ['rcore', 'beta']
+        sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        # sigmas = [0.682689492137, 0.954499736104]
+        # sigmas = [0.997300203937]
+        # sigmas = [0.682689492137]
+        # ci_pars = ['rc', 'beta']
+        # ci_pars = ['rc']
+        # ci_pars = ['norm_pn', 'rc']
+        ci_pars = ['norm_'+instruments[0]]
 
+        t1 = time.clock()
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=True, verbose=True, maxiter=1e3)
+                                     trace=True, verbose=True, maxiter=1)
+
+        t2 = time.clock()
+
+        # save to file
+        with open(results_pickle+'.ci', 'wb') as output:
+            pickle.dump(ci, output, pickle.HIGHEST_PROTOCOL)
+
+        print
+        print "Confidence interval calculation took : ", t2 - t1
 
         lm.printfuncs.report_ci(ci)
-
-    if DO_FIT and  CALC_2D_CI:
-        output_figure = results_pickle+'.2d_like_beta_psf.png'
-        from timer import Timer
-
-        with Timer() as t:
-            print "Calculating 2D confidence intervals"
-            x, y, likelihood = lm.conf_interval2d(result,'rcore','beta', 10, 10)
-            plt_like_surface(x, y, likelihood, output_figure, 'rcore', 'beta')
-
-        print "elasped time:", t.secs, " s"
-
-
-    # import IPython
-    # IPython.embed()
 
     return 0
 
@@ -518,7 +504,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                               # 'simplex' - simplex
-    CALC_1D_CI = False         # in most cases standard error is good
+    CALC_1D_CI = True         # in most cases standard error is good
                               # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
@@ -596,9 +582,9 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
@@ -691,7 +677,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                               output_figure, sb_src_err[instrument])
 
     ######################################################################
-    # FIXME: not yet ported, confidence intervals
+    # calculate confidence intervals
 
     if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
@@ -701,16 +687,32 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         # sigmas = [0.682689492137]
         # ci_pars = ['rc', 'beta']
         # ci_pars = ['rc']
-        ci_pars = ['n0_pn']
+        # ci_pars = ['n0_pn', 'rc']
+        ci_pars = ['n0_'+instruments[0]]
 
         t1 = time.clock()
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                              trace=True, verbose=True, maxiter=1e3)
+                                     trace=True, verbose=True, maxiter=1)
+
+        # import IPython
+        # IPython.embed()
+
         t2 = time.clock()
+
+        # save to file
+        with open(results_pickle+'.ci', 'wb') as output:
+            pickle.dump(ci, output, pickle.HIGHEST_PROTOCOL)
+
         print
         print "Confidence interval calculation took : ", t2 - t1
 
         lm.printfuncs.report_ci(ci)
+
+    ######################################################################
+    # FIXME: not done yet: Calculate 2D confidence intervals
+
+    # import IPython
+    # IPython.embed()
 
     if DO_FIT and  CALC_2D_CI:
         output_figure = results_pickle+'.2d_like_beta_psf.png'
