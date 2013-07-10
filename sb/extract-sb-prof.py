@@ -213,7 +213,7 @@ if __name__ == '__main__':
             r = optibingrid(binnum=20, rmax=rmax, c=1.5)
             r = hstack((0.0, r))
         else:
-            # equidistant binning
+            # equidistant binning: "unbinned" - 1 pixel annuli
             r = arange(rmin, rmax+1.0, double(binning))
 
         # r = arange(1.0, aper+1.0, 1.0)

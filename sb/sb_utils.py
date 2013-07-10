@@ -342,7 +342,7 @@ def optibingrid(binnum=20, rmax=100, c=1.5):
     Arguments:
     - 'binnum': total number of bins [20]
     - 'rmax': maximal radius [recommended 1.5r500]
-    - 'c': index [1.5 in McDonald13, 1.2 in Andersson11]
+    - 'c': index [1.5 in MacDonald13, 1.2 in Andersson11]
     """
 
     r = array([rmax*(float(i)/binnum)**c for i in range(1, binnum+1)])
@@ -360,6 +360,7 @@ def optibin(im, xcen, ycen, rgrid):
     - 'ycen': x coordinate of the center [pix]
     - 'rgrid': radii grid (recommendation: 1.5r500) [pix]
     """
+    # FIXME: implement it here
 
     return 0
 

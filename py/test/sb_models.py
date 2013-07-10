@@ -529,6 +529,8 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
         # trim the corners
         model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
 
+        # FIXME: bin here
+
     if data_profile == None:
         # return (r, model_profile, geometric_area)
         return (r, model_profile)

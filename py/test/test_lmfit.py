@@ -85,7 +85,6 @@ x=linspace(0.3,10,100)
 y=funct(a_true, b_true) + noise_ampl*random.randn(x.size)
 
 
-
 # residuals for titing
 def residual(pars):
     a=pars['a'].value

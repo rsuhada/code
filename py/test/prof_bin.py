@@ -20,17 +20,18 @@ from sb_fitting_utils import *
 # 0559
 cluster='SPT-CL-J0559-5249'
 profile_id='003'
-r500_pix=float("50.0")      # [pixel]
-fitid='v06-joint-test-quick'
+r500_pix=float("60.0")      # [pixel]
+fitid='binning_test'
 theta_pn="65.8443"                 # [arcsec]
 theta_mos1="65.8443"                 # [arcsec]
 theta_mos2="65.8443"                 # [arcsec]
 energy="1.5"                # [keV]
 MODEL="v06"
-MAKE_CONTROL_PLOT=True
+MAKE_CONTROL_PLOT=False
 INSTRUMENT_SETUP="joint"       # "single" or "joint"
 # instruments=("pn mos1 mos2") # any for individual, or "joint" "on" "mos1" etc.
 instruments=("pn") # any for individual, or "joint" "on" "mos1" etc.
+# instruments=("")
 
 # Profile name
 prof_fname_pn="/Users/rs/w/xspt/data/dev/0559/sb/"+cluster+"/sb-prof-pn-"+profile_id+".dat"
@@ -91,7 +92,7 @@ for instrument in instruments.split():
      ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
     # take only the profile inside r500
-    ids = where(r<=r500_pix)
+    ids = where(r<=1.5*r500_pix)
     r = r[ids]
 
     sb_src[instrument] = sb_src[instrument][ids]
@@ -102,43 +103,118 @@ for instrument in instruments.split():
     n = len(r)
 
     # create the control the plot
-    if MAKE_CONTROL_PLOT=="True":
+    if MAKE_CONTROL_PLOT:
         outfig = sb_file[instrument]+'.'+fitid+'.png'
         print "Creating control plot :: ", instrument, outfig
         plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
 
 
-print "SB curves loaded!"
-# reload(sb_utils)
-rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)[:3]
 
-x=sb_src['pn']
-x=arange(1, 6)
-r=x
+# print "SB curves loaded!"
+# # reload(sb_utils)
+# rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
+
+# # x = sb_src['pn']
+# # x = arange(1, 6)
+# r = arange(0, 1.5*r500_pix)
+# x = ones(len(r))
+
+# min_dist = 1.0    # [pix]
+
+# # merge innermost bins if they are too small
+# # rbin2 contains: start-end=start-end bin boundaries
+# rbin2=hstack((0.0, rbin[rbin>=min_dist]))
+# xb = histogram(r, bins=rbin2, weights=x)[0]
+
+# # profile = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
 
 
-min_dist=1.0                    # [pix]
+# print len(rbin2)
+# print len(x)
+# print len(xb)
+# print
+# print "profile unbined :: ", x
+# print "r unbinned      :: ", r
+# print "bin boundaries  :: ", rbin2
+# print "profile binned  :: ", xb
+
+
+# for i in range(len(r)):
+#     print r[i], x[i]
+
+# print
+# print
+
+# for i in xrange(len(xb)):
+#     print rbin2[i], rbin2[i+1], xb[i]
+
+
+
+
+
+######################################################################
+#
+# toy test
+#
+######################################################################
+
+r500_pix = 60.0
+rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
+
+# give the bin midpoint and symmetric range ("errorbar on r")
+mid = [(rbin2[i] + rbin2[i+1])/2.0 for i in range(len(rbin2)-1)]
+mid_range = rbin2[1:] - mid
+
+r = arange(0, 1.5*r500_pix)
+# x = ones(len(r))
+x = sb_src['pn'][:len(r)]
+x_err = sb_src_err['pn'][:len(r)]
+
+min_dist = 1.0    # [pix]
 
 # merge innermost bins if they are too small
 # rbin2 contains: start-end=start-end bin boundaries
 rbin2=hstack((0.0, rbin[rbin>=min_dist]))
+xb = histogram(r, bins=rbin2, weights=x)[0]
+xb_err = histogram(r, bins=rbin2, weights=x_err)[0]
+num = histogram(r, bins=rbin2)[0]
 
-xb = histogram(x,bins=rbin2,weights=x)[0]
+print len(r)
+print len(x)
+print len(rbin2)
+print len(xb)
+print
+print "profile unbined :: ", x
+print "r unbinned      :: ", r
+print "bin boundaries  :: ", rbin2
+print "profile binned  :: ", xb
+print "bin counts  :: ", num
+print
 
-print xb
-print rbin
-print rbin2
+plt.ion()
+plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
 
+# plt.plot(rbin2[1:], xb/num,
+plt.errorbar(mid, xb/num, xb_err/num, mid_range,
+    color='red',
+    linestyle='',              # -/--/:/-.
+    linewidth=1,                # linewidth=1
+    marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
+    markerfacecolor='red',
+    markersize=8,               # markersize=6
+    label=r"data"               # '__nolegend__'
+    )
 
-for i in range(len(r)):
-    print r[i], x[i]
+plt.xscale('log', nonposx='clip')
+plt.xlim(xmin=mid[0])
+plt.show()
 
 print
-print
+mid = []
+for i in range(len(rbin2)-1):
+    mid.append((rbin2[i] + rbin2[i+1])/2.0)
 
-for i in xrange(len(xb)):
-    print rbin2[i], rbin2[i+1], xb[i]
+print mid
+print len(mid)
 
 
-print
-print

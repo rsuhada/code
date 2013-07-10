@@ -113,7 +113,6 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
     # start figure
     rc('axes', linewidth=1.5)
     fig_obj = plt.figure()
-    fig_name=fname
     headline_text = fig_obj.text(0.5, 0.95, '',
                                  horizontalalignment='center',
                                  fontproperties=matplotlib.font_manager.FontProperties(size=16))
@@ -159,7 +158,7 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
 
     # subplot text sets
     # ax1.set_title('plot title', fontsize=16, fontweight="bold")  # fontsize=16
-    ax1.set_xlabel('r [arcsec]', fontsize=14, fontweight="normal")          # fontsize=12
+    ax1.set_xlabel('r [pix]', fontsize=14, fontweight="normal")          # fontsize=12
     ax1.set_ylabel('surface brightness [cts/s/pix]', fontsize=14, fontweight="normal")          # fontsize=12
 
     # legend
@@ -182,7 +181,7 @@ def plot_sb_profile(r, c1, c1_err, c2, c2_err, fname):
 
     plt.get_current_fig_manager().window.wm_geometry("+1100+0")
     # save figure
-    plt.savefig(fig_name)
+    plt.savefig(fname)
 
     ######################################################################
     # stop plot enviroment

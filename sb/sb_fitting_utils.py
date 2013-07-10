@@ -398,7 +398,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         ######################################################################
         # get the output model
-        (r_model, profile_norm_model) = \
+        (r_mot, profile_norm_model) = \
             beta_psf_2d_lmfit_profile_joint(pars, imsize,
                                             xsize_obj, ysize_obj,
                                             distmatrix,
@@ -444,7 +444,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         print "fitting subroutine done!"
 
     ######################################################################
-    # plot beta fit and data profiles
+    # plot beta fit and detcprofiles
 
     if DO_FIT and PLOT_PROFILE:
         for instrument in instruments:
@@ -462,9 +462,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     if DO_FIT and CALC_1D_CI:
         print "Calculating 1D confidence intervals"
-        sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
+        # sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
         # sigmas = [0.682689492137, 0.954499736104]
         # sigmas = [0.997300203937]
+        sigmas = [0.954499736104]
         # sigmas = [0.682689492137]
         # ci_pars = ['rc', 'beta']
         # ci_pars = ['rc']
@@ -473,7 +474,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         t1 = time.clock()
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                                     trace=True, verbose=True, maxiter=1)
+                                     trace=True, verbose=True, maxiter=1e3)
 
         t2 = time.clock()
 
@@ -684,6 +685,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         sigmas = [0.682689492137, 0.954499736104, 0.997300203937]
         # sigmas = [0.682689492137, 0.954499736104]
         # sigmas = [0.997300203937]
+        # sigmas = [0.954499736104]
         # sigmas = [0.682689492137]
         # ci_pars = ['rc', 'beta']
         # ci_pars = ['rc']
@@ -692,7 +694,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
         t1 = time.clock()
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
-                                     trace=True, verbose=True, maxiter=1)
+                                     trace=True, verbose=True, maxiter=1e3)
 
         # import IPython
         # IPython.embed()
