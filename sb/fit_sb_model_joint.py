@@ -16,108 +16,106 @@ import asciitable as atab
 import pickle
 from sb_fitting_utils import *
 
+plt.close('all')
 
-if __name__ == '__main__':
-    plt.close('all')
+fitid              = sys.argv[1]
+MODEL              = sys.argv[2]
+MAKE_CONTROL_PLOT  = sys.argv[3]
+r500_pix      = double(sys.argv[4])
+energy             = double(sys.argv[5])
+prof_fname_pn      = sys.argv[6]
+theta_pn           = double(sys.argv[7]) / 60.0
+prof_fname_mos1    = sys.argv[8]
+theta_mos1         = double(sys.argv[9]) / 60.0
+prof_fname_mos2    = sys.argv[10]
+theta_mos2         = double(sys.argv[11]) / 60.0
+INSTRUMENT_SETUP   = sys.argv[12]
+instruments        = sys.argv[13].split()
 
-    fitid              = sys.argv[1]
-    MODEL              = sys.argv[2]
-    MAKE_CONTROL_PLOT  = sys.argv[3]
-    r500_pix      = double(sys.argv[4])
-    energy             = double(sys.argv[5])
-    prof_fname_pn      = sys.argv[6]
-    theta_pn           = double(sys.argv[7]) / 60.0
-    prof_fname_mos1    = sys.argv[8]
-    theta_mos1         = double(sys.argv[9]) / 60.0
-    prof_fname_mos2    = sys.argv[10]
-    theta_mos2         = double(sys.argv[11]) / 60.0
-    INSTRUMENT_SETUP   = sys.argv[12]
-    instruments        = sys.argv[13].split()
+######################################################################
+# input parameters
 
-    ######################################################################
-    # input parameters
+print '-'*70
+print "fitid             :: ", fitid
+print "MODEL             :: ", MODEL
+print "INSTRUMENT_SETUP  :: ", INSTRUMENT_SETUP
+print "MAKE_CONTROL_PLOT :: ", MAKE_CONTROL_PLOT
+print "r500_pix          :: ", r500_pix
+print "energy            :: ", energy
+print "prof_fname_pn     :: ", prof_fname_pn
+print "theta_pn          :: ", theta_pn
+print "prof_fname_mos1   :: ", prof_fname_mos1
+print "theta_mos1        :: ", theta_mos1
+print "prof_fname_mos2   :: ", prof_fname_mos2
+print "theta_mos2        :: ", theta_mos2
+print "instruments       :: ", instruments
+print '-'*70
 
-    print '-'*70
-    print "fitid             :: ", fitid
-    print "MODEL             :: ", MODEL
-    print "INSTRUMENT_SETUP  :: ", INSTRUMENT_SETUP
-    print "MAKE_CONTROL_PLOT :: ", MAKE_CONTROL_PLOT
-    print "r500_pix          :: ", r500_pix
-    print "energy            :: ", energy
-    print "prof_fname_pn     :: ", prof_fname_pn
-    print "theta_pn          :: ", theta_pn
-    print "prof_fname_mos1   :: ", prof_fname_mos1
-    print "theta_mos1        :: ", theta_mos1
-    print "prof_fname_mos2   :: ", prof_fname_mos2
-    print "theta_mos2        :: ", theta_mos2
-    print "instruments       :: ", instruments
-    print '-'*70
+######################################################################
+# prepare structures
 
-    ######################################################################
-    # prepare structures
+# dictionary for file names
+sb_file = {
+    'pn'   : prof_fname_pn,
+    'mos1' : prof_fname_mos1,
+    'mos2' : prof_fname_mos2
+    }
 
-    # dictionary for file names
-    sb_file = {
-        'pn'   : prof_fname_pn,
-        'mos1' : prof_fname_mos1,
-        'mos2' : prof_fname_mos2
-        }
+theta = {
+    'pn'   : theta_pn,
+    'mos1' : theta_mos1,
+    'mos2' : theta_mos2
+    }
 
-    theta = {
-        'pn'   : theta_pn,
-        'mos1' : theta_mos1,
-        'mos2' : theta_mos2
-        }
+# dictionary for the data
+sb_src = {}
+sb_bg = {}
+sb_src_err = {}
+sb_bg_err = {}
 
-    # dictionary for the data
-    sb_src = {}
-    sb_bg = {}
-    sb_src_err = {}
-    sb_bg_err = {}
+######################################################################
+# load the data
+for instrument in instruments:
+    print "Loading SB data for :: ", instrument
 
-    ######################################################################
-    # load the data
-    for instrument in instruments:
-        print "Loading SB data for :: ", instrument
+    (r,
+     sb_src[instrument],
+     sb_bg[instrument],
+     sb_src_err[instrument],
+     sb_bg_err[instrument]
+     ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
-        (r,
-         sb_src[instrument],
-         sb_bg[instrument],
-         sb_src_err[instrument],
-         sb_bg_err[instrument]
-         ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
+    # take only the profile inside r500
+    ids = where(r<=r500_pix)
+    r = r[ids]
 
-        # take only the profile inside r500
-        ids = where(r<=r500_pix)
-        r = r[ids]
+    sb_src[instrument] = sb_src[instrument][ids]
+    sb_bg[instrument] = sb_bg[instrument][ids]
+    sb_src_err[instrument] = sb_src_err[instrument][ids]
+    sb_bg_err[instrument] = sb_bg_err[instrument][ids]
 
-        sb_src[instrument] = sb_src[instrument][ids]
-        sb_bg[instrument] = sb_bg[instrument][ids]
-        sb_src_err[instrument] = sb_src_err[instrument][ids]
-        sb_bg_err[instrument] = sb_bg_err[instrument][ids]
+    n = len(r)
 
-        n = len(r)
+    # create the control the plot
+    if MAKE_CONTROL_PLOT=="True":
+        outfig = sb_file[instrument]+'.'+fitid+'.png'
+        print "Creating control plot :: ", instrument, outfig
+        plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
+        # os.system("open "+outfig)
 
-        # create the control the plot
-        if MAKE_CONTROL_PLOT=="True":
-            outfig = sb_file[instrument]+'.'+fitid+'.png'
-            print "Creating control plot :: ", instrument, outfig
-            plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
-            # os.system("open "+outfig)
+print "SB curves loaded!"
 
-    print "SB curves loaded!"
+######################################################################
+# do the actual fitting
 
-    ######################################################################
-    # do the actual fitting
+outpickle = sb_file[instruments[0]]+'.'+fitid+'.pk'
+outpickle = outpickle.replace(instruments[0], 'joint')
 
-    outpickle = sb_file[instruments[0]]+'.'+fitid+'.pk'
-    outpickle = outpickle.replace(instruments[0], 'joint')
+if MODEL=="beta":
+    fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
 
-    if MODEL=="beta":
-        fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
+if MODEL=="v06":
+    fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
 
-    if MODEL=="v06":
-        fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, outpickle)
-
-    print "done!"
+print "done!"
 

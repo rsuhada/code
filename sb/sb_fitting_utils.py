@@ -22,28 +22,25 @@ def load_sb_curve(fname):
     Arguments:
     - `fname`: file name
     """
+    # FIXME: refactor to have a unified reading based on topcatformat
 
-    data = atab.read(table=fname,
-                     data_start=0, data_end=None, header_start=9,
-                     delimiter=' ', comment='#', quotechar='"')
+    try:
+        # old format: headerstart=9
+        data = atab.read(table=fname,
+                         data_start=0, data_end=None, header_start=9,
+                         delimiter=' ', comment='#', quotechar='"')
+
+    except Exception, e:
+        # new format: headerstart=11
+        data = atab.read(table=fname,
+                         data_start=0, data_end=None, header_start=11,
+                         delimiter=' ', comment='#', quotechar='"')
 
     r = data['r']
     sb_src = data['ctr_src']
     sb_bg = data['ctr_bg']
     sb_src_err = data['ctr_src_err']
     sb_bg_err = data['ctr_bg_err']
-
-    # dat=loadtxt(fname, dtype='string', comments='#', delimiter=None, converters=None,
-    #         skiprows=0, unpack=False,
-    #         # usecols=(0,1,2,4,5)
-    #         usecols=(0,1,2,4,5,6,7,10,11)
-    #         )
-
-    # r = double(dat[:,0])
-    # sb_src = double(dat[:,1])
-    # sb_bg = double(dat[:,2])
-    # sb_src_err = double(dat[:,3])
-    # sb_bg_err = double(dat[:,4])
 
     return r, sb_src, sb_bg, sb_src_err, sb_bg_err
 
@@ -357,9 +354,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfun': 1.0e+9}
 
     ######################################################################
