@@ -21,16 +21,17 @@ plt.close('all')
 fitid              = sys.argv[1]
 MODEL              = sys.argv[2]
 MAKE_CONTROL_PLOT  = sys.argv[3]
-r500_pix      = double(sys.argv[4])
-energy             = double(sys.argv[5])
-prof_fname_pn      = sys.argv[6]
-theta_pn           = double(sys.argv[7]) / 60.0
-prof_fname_mos1    = sys.argv[8]
-theta_mos1         = double(sys.argv[9]) / 60.0
-prof_fname_mos2    = sys.argv[10]
-theta_mos2         = double(sys.argv[11]) / 60.0
-INSTRUMENT_SETUP   = sys.argv[12]
-instruments        = sys.argv[13].split()
+rsbfit             = double(sys.argv[4])
+rsbexc             = double(sys.argv[5])
+energy             = double(sys.argv[6])
+prof_fname_pn      = sys.argv[7]
+theta_pn           = double(sys.argv[8]) / 60.0
+prof_fname_mos1    = sys.argv[9]
+theta_mos1         = double(sys.argv[10]) / 60.0
+prof_fname_mos2    = sys.argv[11]
+theta_mos2         = double(sys.argv[12]) / 60.0
+INSTRUMENT_SETUP   = sys.argv[13]
+instruments        = sys.argv[14].split()
 
 ######################################################################
 # input parameters
@@ -40,7 +41,8 @@ print "fitid             :: ", fitid
 print "MODEL             :: ", MODEL
 print "INSTRUMENT_SETUP  :: ", INSTRUMENT_SETUP
 print "MAKE_CONTROL_PLOT :: ", MAKE_CONTROL_PLOT
-print "r500_pix          :: ", r500_pix
+print "rsbfit            :: ", rsbfit
+print "rsbexc            :: ", rsbexc
 print "energy            :: ", energy
 print "prof_fname_pn     :: ", prof_fname_pn
 print "theta_pn          :: ", theta_pn
@@ -86,8 +88,18 @@ for instrument in instruments:
      ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
     # take only the profile inside r500
-    ids = where(r<=r500_pix)
+
+    # with binning this is probably rudimentary - because cutting
+    # should happen before binning (i.e. the curve read here should be
+    # already *exactly* what you want to fit including binning)
+    ids = where(logical_and(r<=rsbfit, r>rsbexc))
     r = r[ids]
+
+    print r
+    print "going to sleep!"
+    from time import sleep
+    sleep(1000)
+
 
     sb_src[instrument] = sb_src[instrument][ids]
     sb_bg[instrument] = sb_bg[instrument][ids]
@@ -100,8 +112,9 @@ for instrument in instruments:
     if MAKE_CONTROL_PLOT=="True":
         outfig = sb_file[instrument]+'.'+fitid+'.png'
         print "Creating control plot :: ", instrument, outfig
-        plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
-        # os.system("open "+outfig)
+        plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument],
+                        sb_bg[instrument], sb_bg_err[instrument],
+                        outfig)
 
 print "SB curves loaded!"
 

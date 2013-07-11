@@ -186,7 +186,7 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
     # sb_src = sb_src * r
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instrument, theta,
-                   energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+                   energy, APPLY_PSF, DO_ZERO_PAD, r, sb_src,
                    sb_src_err)
 
     # fit stop criteria
@@ -296,6 +296,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # modelling is done in 2D and then projected - setup here the 2D
     # parameters
 
+    # FIXME:
+    # 2013-07-11 - lot of vars are deprecated, but it works ok, just
+    # redundant
+
     size = 2.0 * r.max()
     xsize = size
     ysize = xsize
@@ -343,7 +347,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
 
     nonfit_args = (imsize, xsize_obj, ysize_obj, distmatrix, instruments,
-                   theta, energy, APPLY_PSF, DO_ZERO_PAD, sb_src,
+                   theta, energy, APPLY_PSF, DO_ZERO_PAD, r, sb_src,
                    sb_src_err)
 
     # fit stop criteria
@@ -576,7 +580,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     # non-fit arguments
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
-                   xcen_obj, ycen_obj, sb_src, sb_src_err)
+                   xcen_obj, ycen_obj, r, sb_src, sb_src_err)
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
@@ -797,15 +801,11 @@ def fit_v06_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pick
     distmatrix_input = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1
     bgrid = unique(distmatrix_input.flat)
 
-    # gather all non-fit arguments
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, instrument, theta, energy,
-                   xcen_obj, ycen_obj)
-
     ######################################################################
     # do the fit: v06
 
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instrument, theta, energy,
-                   xcen_obj, ycen_obj, sb_src, sb_src_err)
+                   xcen_obj, ycen_obj, r, sb_src, sb_src_err)
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':

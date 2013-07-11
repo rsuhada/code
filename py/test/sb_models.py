@@ -384,8 +384,10 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
 
 def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
                                     distmatrix,
-                                    instruments, theta, energy, APPLY_PSF,
-                                    DO_ZERO_PAD, data_profile=None,
+                                    instruments, theta, energy,
+                                    APPLY_PSF, DO_ZERO_PAD,
+                                    data_r=None, data_rexc=0.0,
+                                    data_profile=None,
                                     data_profile_err=None):
     """
     Fits the surface brightness profile by creating a 2D model of the
@@ -393,6 +395,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     No bg.
     Also allows to return directly residuals.
     """
+
     USE_ERROR=True             # debug option
 
     # setup dictionaries
@@ -425,6 +428,9 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
 
         # trim the corners
         model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
+
+        import IPython
+        IPython.embed()
 
     if data_profile == None:
         return (r, model_profile)
@@ -490,7 +496,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,instrument, theta, energ
         # return residuals
         return residuals
 
-def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, theta, energy,
+def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid, rfit, instruments, theta, energy,
                                    xcen_obj,ycen_obj,data_profile=None,
                                    data_profile_err=None):
     """
@@ -509,12 +515,11 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
     model_profile = {}
 
     # profile extraction
-    r_length = r500             # factor out r500
-    r = arange(1.0, r_length+1, 1.0)
+    r = arange(1.0, rfit+1, 1.0)
 
     # make first a 2D image
     for instrument in instruments:
-        model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, r500,
+        model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, rfit,
                                                   instrument, theta[instrument], energy)
 
         # FIXME: is this necessary for each step? - would require to
@@ -527,7 +532,7 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid,r500, instruments, thet
              extract_profile_fast2(model_image[instrument], distmatrix, bgrid)
 
         # trim the corners
-        model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
+        model_profile[instrument] = profile[instrument][0:rfit] / geometric_area[instrument][0:rfit]
 
         # FIXME: bin here
 
