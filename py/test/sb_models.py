@@ -567,10 +567,10 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
     POISSONIZE_IMAGE = True
 
     # load images
-    srcmodel, hdr = load_fits_im(srcmodel_file)
     expmap, hdr = load_fits_im(expmap_file)
     bgmap, hdr = load_fits_im(bgmap_file)
     maskmap, hdr = load_fits_im(maskmap_file, 1) # mask is in ext1
+    srcmodel, hdr = load_fits_im(srcmodel_file)
 
     # trim sizes if necessary (should be needed only in case of manual
     # testing) and works only in the (most typical) case of
@@ -611,6 +611,12 @@ def make_synthetic_observation(srcmodel_file, expmap_file, bgmap_file, maskmap_f
 
     output_im = output_im_poi + bgmap_poi      # bg is already in cts
     output_im = output_im * maskmap    # final masking to be sure
+
+    # write header information
+    hdr['expmap'] = expmap_file
+    hdr['bgmap'] = bgmap_file
+    hdr['maskmap'] = maskmap_file
+    hdr['srcmodel'] = srcmodel_file
 
     # save output
     hdu = pyfits.PrimaryHDU(output_im, hdr)    # extension - array, header

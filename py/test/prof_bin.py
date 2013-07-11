@@ -109,63 +109,20 @@ for instrument in instruments.split():
         plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
 
 
-
-# print "SB curves loaded!"
-# # reload(sb_utils)
-# rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
-
-# # x = sb_src['pn']
-# # x = arange(1, 6)
-# r = arange(0, 1.5*r500_pix)
-# x = ones(len(r))
-
-# min_dist = 1.0    # [pix]
-
-# # merge innermost bins if they are too small
-# # rbin2 contains: start-end=start-end bin boundaries
-# rbin2=hstack((0.0, rbin[rbin>=min_dist]))
-# xb = histogram(r, bins=rbin2, weights=x)[0]
-
-# # profile = array(histogram(distmatrix, bins=rgrid, weights=im)[0])
-
-
-# print len(rbin2)
-# print len(x)
-# print len(xb)
-# print
-# print "profile unbined :: ", x
-# print "r unbinned      :: ", r
-# print "bin boundaries  :: ", rbin2
-# print "profile binned  :: ", xb
-
-
-# for i in range(len(r)):
-#     print r[i], x[i]
-
-# print
-# print
-
-# for i in xrange(len(xb)):
-#     print rbin2[i], rbin2[i+1], xb[i]
-
-
-
-
-
 ######################################################################
 #
 # toy test
 #
 ######################################################################
 
-r500_pix = 60.0
+
 rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
 
 # give the bin midpoint and symmetric range ("errorbar on r")
 mid = [(rbin2[i] + rbin2[i+1])/2.0 for i in range(len(rbin2)-1)]
 mid_range = rbin2[1:] - mid
 
-r = arange(0, 1.5*r500_pix)
+# r = arange(0, 1.5*r500_pix)
 # x = ones(len(r))
 x = sb_src['pn'][:len(r)]
 x_err = sb_src_err['pn'][:len(r)]
@@ -173,20 +130,20 @@ x_err = sb_src_err['pn'][:len(r)]
 min_dist = 1.0    # [pix]
 
 # merge innermost bins if they are too small
-# rbin2 contains: start-end=start-end bin boundaries
-rbin2=hstack((0.0, rbin[rbin>=min_dist]))
-xb = histogram(r, bins=rbin2, weights=x)[0]
-xb_err = histogram(r, bins=rbin2, weights=x_err)[0]
-num = histogram(r, bins=rbin2)[0]
+# rbin contains: start-end=start-end bin boundaries
+rbin=hstack((0.0, rbin[rbin>=min_dist]))
+xb = histogram(r, bins=rbin, weights=x)[0]
+xb_err = histogram(r, bins=rbin, weights=x_err)[0]
+num = histogram(r, bins=rbin)[0]
 
 print len(r)
 print len(x)
-print len(rbin2)
+print len(rbin)
 print len(xb)
 print
 print "profile unbined :: ", x
 print "r unbinned      :: ", r
-print "bin boundaries  :: ", rbin2
+print "bin boundaries  :: ", rbin
 print "profile binned  :: ", xb
 print "bin counts  :: ", num
 print
@@ -194,7 +151,7 @@ print
 plt.ion()
 plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
 
-# plt.plot(rbin2[1:], xb/num,
+# plt.plot(rbin[1:], xb/num,
 plt.errorbar(mid, xb/num, xb_err/num, mid_range,
     color='red',
     linestyle='',              # -/--/:/-.
@@ -208,13 +165,4 @@ plt.errorbar(mid, xb/num, xb_err/num, mid_range,
 plt.xscale('log', nonposx='clip')
 plt.xlim(xmin=mid[0])
 plt.show()
-
-print
-mid = []
-for i in range(len(rbin2)-1):
-    mid.append((rbin2[i] + rbin2[i+1])/2.0)
-
-print mid
-print len(mid)
-
 

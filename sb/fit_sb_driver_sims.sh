@@ -7,11 +7,13 @@ export codedir="/Users/rs/data1/sw/esaspi"
 # FIXME: add conf file interface
 
 # cluster settings
-source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit.conf
+
+source /Users/rs/w/xspt/data/dev/0559/sb/sb_fit_sims.conf
 
 ######################################################################
 # model settings
 ######################################################################
+
 # loop through all instruments
 
 
@@ -30,7 +32,7 @@ then
 
 
         echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_pix $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
-        $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_pix $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
+        # $PYTHONEXEC ${codedir}/sb/fit_sb_model_instrument.py $prof_fname $fitid $r500_pix $instrument $theta $energy $MODEL $MAKE_CONTROL_PLOT
 
     done
 
@@ -43,6 +45,6 @@ else
 
     echo $PYTHONEXEC ${codedir}/sb/fit_sb_model_joint.py $fitid $MODEL $MAKE_CONTROL_PLOT $r500_pix $energy $pn_prof_fname $pn_prof_fname $prof_fname_pn $theta_pn $prof_fname_mos1 $theta_mos1 $prof_fname_mos2 $theta_mos2 $INSTRUMENT_SETUP $instruments
 
-    $PYTHONEXEC ${codedir}/sb/fit_sb_model_joint.py $fitid $MODEL $MAKE_CONTROL_PLOT $r500_pix $energy $pn_prof_fname $pn_prof_fname $prof_fname_pn $theta_pn $prof_fname_mos1 $theta_mos1 $prof_fname_mos2 $theta_mos2 $INSTRUMENT_SETUP "$instruments"
+    # $PYTHONEXEC ${codedir}/sb/fit_sb_model_joint.py $fitid $MODEL $MAKE_CONTROL_PLOT $r500_pix $energy $pn_prof_fname $pn_prof_fname $prof_fname_pn $theta_pn $prof_fname_mos1 $theta_mos1 $prof_fname_mos2 $theta_mos2 $INSTRUMENT_SETUP "$instruments"
 
 fi

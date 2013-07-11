@@ -92,7 +92,7 @@ def test_lmfit_beta(fname='beta_image_cts.fits'):
     pars.add('imsize' , value=(xsize_obj, ysize_obj), vary=False) # FIXME: should be moved from par list to args
     pars.add('xcen'   , value=xcen_obj, vary=False)
     pars.add('ycen'   , value=ycen_obj, vary=False)
-    pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
+    pars.add('norm_'+instrument   , value=2.0, vary=True, min=0.0, max=sum(input_im))
     pars.add('rcore'  , value=10.0, vary=True, min=1.0, max=80.0)
     pars.add('beta'   , value=0.8, vary=True, min=0.1, max=10.0)
 
@@ -235,7 +235,7 @@ def test_lmfit_beta_1d(fname='beta_image_cts.fits'):
     # init model
     pars = lm.Parameters()
 
-    pars.add('norm'   , value=2.0, vary=True, min=0.0, max=sum(input_im))
+    pars.add('norm_'+instrument , value=2.0, vary=True, min=0.0, max=sum(input_im))
     pars.add('rcore'  , value=10.0, vary=True, min=1.0, max=80.0)
     pars.add('beta'   , value=0.8, vary=True, min=0.1, max=10.0)
 
@@ -324,7 +324,7 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
     pars = lm.Parameters()
     pars.add('xcen'   , value=xcen)
     pars.add('ycen'   , value=ycen)
-    pars.add('norm'   , value=normalization)
+    pars.add('norm_'+instrument   , value=normalization)
     pars.add('rcore'  , value=rcore)
     pars.add('beta'   , value=beta)
 
@@ -357,6 +357,16 @@ def test_create_beta_psf_im(imname='beta_image_cts.fits'):
         ids = where(im_conv != 0.0)
         im_conv[ids] = poisson.rvs(im_conv[ids])
         print "poisson sum:", im_conv.sum()
+
+    # write header information
+    hdr['SIMUL'] = True
+    hdr['SRCSCRPT'] = "test_2d_im_lmfit.py"
+    hdr['xcen'] = xcen
+    hdr['ycen'] = ycen
+    hdr['norm'] = normalization
+    hdr['rcore'] = rcore
+    hdr['beta'] = beta
+    hdr['tot_cts'] = im_conv.sum()
 
     # poissonized beta model image [counts] - no background/mask
     hdu = pyfits.PrimaryHDU(im_conv, hdr)    # extension - array, header
@@ -944,7 +954,7 @@ psf_pars = (instrument, theta, energy)
 
 # setup for the beta model
 targ_num_cts       = 2.0e3             # Will be the normalization
-rcore         = 1.0              # [pix]
+rcore         = 10.0              # [pix]
 beta          = 4.0 / 3.0
 normalization = 1.0
 imname='t1.fits'
@@ -1090,14 +1100,17 @@ pars_true.add('ycen', value=450, vary=False)
 # bgmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/zero-bg.fits"
 # maskmap_file="/Users/rs/w/xspt/data/dev/0559/sb/aux-fits/unit-mask.fits"
 
-im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-05.fits'
-out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits'
+# im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-05.fits'
+# out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-05.fits'
+
+im_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_src-06.fits'
+out_file = '/Users/rs/w/xspt/data/dev/0559/sb/beta_image_obs-06.fits'
 
 # synthetic image: beta
 
-# test_create_beta_psf_im(im_file)
-# make_synthetic_observation(im_file, expmap_file,
-#                            bgmap_file, maskmap_file, out_file, targ_num_cts)
+test_create_beta_psf_im(im_file)
+make_synthetic_observation(im_file, expmap_file,
+                           bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # testing fitting: beta
 # test_create_beta_psf_im(im_file)
@@ -1146,9 +1159,9 @@ out_file = '/Users/rs/w/xspt/data/dev/0559/sb/v06_image_obs-03.fits'
 
 # create the synthetic images
 
-test_create_v06_psf_im(im_file)
-make_synthetic_observation(im_file, expmap_file,
-                           bgmap_file, maskmap_file, out_file, targ_num_cts)
+# test_create_v06_psf_im(im_file)
+# make_synthetic_observation(im_file, expmap_file,
+#                            bgmap_file, maskmap_file, out_file, targ_num_cts)
 
 # test_lmfit_v06_psf_1d(im_file)
 
