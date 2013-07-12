@@ -278,7 +278,6 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     Arguments:
     """
-
     # settings
     APPLY_PSF = True
     DO_ZERO_PAD = True
@@ -286,7 +285,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     FIT_METHOD = 'simplex'
     # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                                  # 'simplex' - simplex
-    CALC_1D_CI = True           # in most cases standard error is good
+    CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
@@ -318,8 +317,11 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # instruments
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
+    # r contains the start of the innermost bin for integration, but not needed for plotting
+    rplt = r[1:]
+
     ######################################################################
-    # scale the data - not really necessary
+    # scale the data - not really necessary? do val-min/(max-min)
 
     # scale_sb_src = {}
     # scale_sb_src_err = {}
@@ -358,9 +360,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfun': 1.0e+9}
 
     ######################################################################
@@ -399,7 +401,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
         ######################################################################
         # get the output model
-        (r_mot, profile_norm_model) = \
+
+        (r_model, profile_norm_model) = \
             beta_psf_2d_lmfit_profile_joint(pars, imsize,
                                             xsize_obj, ysize_obj,
                                             distmatrix,
@@ -454,7 +457,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
             print "result plot :: ", output_figure
 
             # FIXME: implement plotter for joint fits
-            plot_data_model_resid(r, sb_src[instrument],
+            plot_data_model_resid(rplt, sb_src[instrument],
                               r_model, profile_norm_model[instrument],
                               output_figure, sb_src_err[instrument])
 

@@ -386,7 +386,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
                                     distmatrix,
                                     instruments, theta, energy,
                                     APPLY_PSF, DO_ZERO_PAD,
-                                    data_r=None, data_rexc=0.0,
+                                    data_r=None,
                                     data_profile=None,
                                     data_profile_err=None):
     """
@@ -395,6 +395,9 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     No bg.
     Also allows to return directly residuals.
     """
+
+    # import IPython
+    # IPython.embed()
 
     USE_ERROR=True             # debug option
 
@@ -429,8 +432,8 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         # trim the corners
         model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
 
-        import IPython
-        IPython.embed()
+        # import IPython
+        # IPython.embed()
 
     if data_profile == None:
         return (r, model_profile)

@@ -210,8 +210,14 @@ if __name__ == '__main__':
         if binning == 'm13':
             # implement the m13 binning scheme
             # default in M13 binning (20, 1.5*r500, 1.5)
+
+            # bin from 0
             r = optibingrid(binnum=20, rmax=rmax, c=1.5)
-            r = hstack((0.0, r))
+
+            # for core excision: remove the inermost bins, +1 to
+            # ensure 1st binsize>1pix
+            r = append(rmin, r[r>rmin+1])
+
         else:
             # equidistant binning: "unbinned" - 1 pixel annuli
             r = arange(rmin, rmax+1.0, double(binning))

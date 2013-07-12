@@ -87,24 +87,31 @@ for instrument in instruments:
      sb_bg_err[instrument]
      ) = sanitize_sb_curve(load_sb_curve(sb_file[instrument]))
 
-    # take only the profile inside r500
-
-    # with binning this is probably rudimentary - because cutting
-    # should happen before binning (i.e. the curve read here should be
-    # already *exactly* what you want to fit including binning)
-    ids = where(logical_and(r<=rsbfit, r>rsbexc))
-    r = r[ids]
+    # prepend the first bin start value - this is for integration, for
+    # plotting you need r[1:]. note the rmin has to be consistent with
+    # the sb file (i.e. the sb has to be extracted with this exact
+    # rmin)
 
     print r
-    print "going to sleep!"
-    from time import sleep
-    sleep(1000)
+    r = append(rsbexc, r)
 
+    # take only the profile inside r500
 
-    sb_src[instrument] = sb_src[instrument][ids]
-    sb_bg[instrument] = sb_bg[instrument][ids]
-    sb_src_err[instrument] = sb_src_err[instrument][ids]
-    sb_bg_err[instrument] = sb_bg_err[instrument][ids]
+    # with m13/a11 binning this is redundant - because cutting
+    # happened at sb extraction (i.e. the curve read here should be
+    # already *exactly* what you want to fit including binning)
+    # ids = where(r<=rsbfit)
+    # r = r[ids]
+
+    # sb_src[instrument] = sb_src[instrument][ids]
+    # sb_bg[instrument] = sb_bg[instrument][ids]
+    # sb_src_err[instrument] = sb_src_err[instrument][ids]
+    # sb_bg_err[instrument] = sb_bg_err[instrument][ids]
+
+    # print r
+    # print "going to sleep!"
+    # from time import sleep
+    # sleep(1000)
 
     n = len(r)
 
