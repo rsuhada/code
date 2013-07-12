@@ -396,9 +396,6 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     Also allows to return directly residuals.
     """
 
-    # import IPython
-    # IPython.embed()
-
     USE_ERROR=True             # debug option
 
     # setup dictionaries
@@ -406,6 +403,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
     profile = {}
     geometric_area = {}
     model_profile = {}
+    model_profile_bin = {}
 
     # this is the new version
     xcen_obj = xsize_obj / 2
@@ -432,8 +430,18 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         # trim the corners
         model_profile[instrument] = profile[instrument][0:r_length] / geometric_area[instrument][0:r_length]
 
-        # import IPython
-        # IPython.embed()
+        import IPython
+        IPython.embed()
+
+        # binning
+        model_profile_bin[instrument] = [(data_r[i], data_r[i+1]) for i in xrange(r_length)]
+        # print data_r[i], data_r[i+1], r[logical_and(r>=data_r[i], r<data_r[i+1])]
+        # start here
+        i = 6
+        print data_r[i], data_r[i+1], r[logical_and(r>=data_r[i], r<data_r[i+1])]
+
+        # model_profile_bin[instrument] = [(data_r[i] + data_r[i+1]) for i in xrange(r_length)]
+        # i3 = simps(y[:2], x[:2])
 
     if data_profile == None:
         return (r, model_profile)

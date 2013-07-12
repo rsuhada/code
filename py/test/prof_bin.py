@@ -115,7 +115,6 @@ for instrument in instruments.split():
 #
 ######################################################################
 
-
 rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
 
 # give the bin midpoint and symmetric range ("errorbar on r")
