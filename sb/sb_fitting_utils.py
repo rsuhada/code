@@ -573,7 +573,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     # FIXME: reasonable initial value and bounds!
     for instrument in instruments:
-        pars.add('n0_'+instrument, value=mean(sb_src[instrument]),
+        pars.add('n0_'+instrument, value=n0, #value=mean(sb_src[instrument]),
                  vary=True, min=1.0e-9, max=1.0e3)
 
     # set the ancilarry parameters

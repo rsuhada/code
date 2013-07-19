@@ -92,7 +92,6 @@ for instrument in instruments:
     # the sb file (i.e. the sb has to be extracted with this exact
     # rmin)
 
-    print r
     r = append(rsbexc, r)
 
     # take only the profile inside r500
@@ -100,18 +99,14 @@ for instrument in instruments:
     # with m13/a11 binning this is redundant - because cutting
     # happened at sb extraction (i.e. the curve read here should be
     # already *exactly* what you want to fit including binning)
+    # you can keep it for back-consistency with some existing sb
+    # curves
     # ids = where(r<=rsbfit)
     # r = r[ids]
-
     # sb_src[instrument] = sb_src[instrument][ids]
     # sb_bg[instrument] = sb_bg[instrument][ids]
     # sb_src_err[instrument] = sb_src_err[instrument][ids]
     # sb_bg_err[instrument] = sb_bg_err[instrument][ids]
-
-    # print r
-    # print "going to sleep!"
-    # from time import sleep
-    # sleep(1000)
 
     n = len(r)
 
