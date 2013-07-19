@@ -506,10 +506,10 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'simplex'
-    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+    # FIT_METHOD = 'simplex'
+    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                               # 'simplex' - simplex
-    CALC_1D_CI = True         # in most cases standard error is good
+    CALC_1D_CI = False         # in most cases standard error is good
                               # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
@@ -536,6 +536,9 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     # pre-calculate distmatrix for speedup - it is same for all
     # instruments
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
+
+    # r contains the start of the innermost bin for integration, but not needed for plotting
+    rplt = r[1:]
 
     ######################################################################
     # scale the data
@@ -570,10 +573,8 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
     # FIXME: reasonable initial value and bounds!
     for instrument in instruments:
-        pars.add('n0_'+instrument, value=n0, #mean(sb_src[instrument]),
-                 vary=True,
-                 min=1.0e-9,
-                 max=1.0e3)
+        pars.add('n0_'+instrument, value=mean(sb_src[instrument]),
+                 vary=True, min=1.0e-9, max=1.0e3)
 
     # set the ancilarry parameters
     # +1 bc of the central divergence
@@ -612,9 +613,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                              **leastsq_kws)
 
         t2 = time.clock()
-
-        # import IPython
-        # IPython.embed()
 
         print
         print
@@ -677,7 +675,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
             print "result plot :: ", output_figure
 
             # FIXME: implement plotter for joint fits
-            plot_data_model_resid(r, sb_src[instrument],
+            plot_data_model_resid(rplt, sb_src[instrument],
                               r_model, profile_norm_model[instrument],
                               output_figure, sb_src_err[instrument])
 
@@ -700,9 +698,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         ci, trace = lm.conf_interval(result, p_names=ci_pars, sigmas=sigmas,
                                      trace=True, verbose=True, maxiter=1e3)
 
-        # import IPython
-        # IPython.embed()
-
         t2 = time.clock()
 
         # save to file
@@ -717,9 +712,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     ######################################################################
     # FIXME: not done yet: Calculate 2D confidence intervals
 
-    # import IPython
-    # IPython.embed()
-
     if DO_FIT and  CALC_2D_CI:
         output_figure = results_pickle+'.2d_like_beta_psf.png'
         from timer import Timer
@@ -730,10 +722,6 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
             plt_like_surface(x, y, likelihood, output_figure, 'rcore', 'beta')
 
         print "elasped time:", t.secs, " s"
-
-
-    # import IPython
-    # IPython.embed()
 
     return 0
 

@@ -320,8 +320,8 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, theta, energy):
                             alpha, beta, gamma, epsilon)
 
     if APPLY_PSF:
-        # FIXME: PSF should be passed and not recalculated for each step! - also for beta model!
-        # create PSF
+        # FIXME: PSF should be passed and not recalculated for each
+        # step! - also for beta model!  create PSF
         im_psf = make_2d_king(distmatrix, instrument, theta, energy)
 
         # convolve
@@ -434,9 +434,6 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
 
         ######################################################################
         # binning
-
-
-
         ######################################################################
 
 
@@ -504,8 +501,11 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,instrument, theta, energ
         # return residuals
         return residuals
 
-def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid, rfit, instruments, theta, energy,
-                                   xcen_obj,ycen_obj,data_profile=None,
+def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid, rfit,
+                                   instruments, theta, energy,
+                                   xcen_obj,ycen_obj,
+                                   data_r=None,
+                                   data_profile=None,
                                    data_profile_err=None):
     """
     Fits the surface brightness profile by creating a 2D model of the
