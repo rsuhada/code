@@ -27,7 +27,7 @@ theta_mos1="65.8443"                 # [arcsec]
 theta_mos2="65.8443"                 # [arcsec]
 energy="1.5"                # [keV]
 MODEL="v06"
-MAKE_CONTROL_PLOT=False
+MAKE_CONTROL_PLOT=True
 INSTRUMENT_SETUP="joint"       # "single" or "joint"
 # instruments=("pn mos1 mos2") # any for individual, or "joint" "on" "mos1" etc.
 instruments=("pn") # any for individual, or "joint" "on" "mos1" etc.
@@ -117,22 +117,23 @@ for instrument in instruments.split():
 
 rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
 
+# merge innermost bins if they are too small
+# rbin contains: start-end=start-end bin boundaries
+min_dist = 1.0    # [pix]
+rbin=hstack((0.0, rbin[rbin>=min_dist]))
+
 # give the bin midpoint and symmetric range ("errorbar on r")
-mid = [(rbin2[i] + rbin2[i+1])/2.0 for i in range(len(rbin2)-1)]
-mid_range = rbin2[1:] - mid
+mid = [(rbin[i] + rbin[i+1])/2.0 for i in range(len(rbin)-1)]
+mid_range = rbin[1:] - mid
 
 # r = arange(0, 1.5*r500_pix)
 # x = ones(len(r))
 x = sb_src['pn'][:len(r)]
 x_err = sb_src_err['pn'][:len(r)]
 
-min_dist = 1.0    # [pix]
-
-# merge innermost bins if they are too small
-# rbin contains: start-end=start-end bin boundaries
-rbin=hstack((0.0, rbin[rbin>=min_dist]))
 xb = histogram(r, bins=rbin, weights=x)[0]
 xb_err = histogram(r, bins=rbin, weights=x_err)[0]
+
 num = histogram(r, bins=rbin)[0]
 
 print len(r)
@@ -148,9 +149,10 @@ print "bin counts  :: ", num
 print
 
 plt.ion()
-plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument], sb_bg[instrument], sb_bg_err[instrument], outfig)
+plot_sb_profile(r, sb_src[instrument], sb_src_err[instrument],
+                sb_bg[instrument], sb_bg_err[instrument], outfig)
 
-# plt.plot(rbin[1:], xb/num,
+# plt.plot(rbin[1:], xb/num
 plt.errorbar(mid, xb/num, xb_err/num, mid_range,
     color='red',
     linestyle='',              # -/--/:/-.
@@ -158,10 +160,14 @@ plt.errorbar(mid, xb/num, xb_err/num, mid_range,
     marker='o',                  # ./o/*/+/x/^/</>/v/s/p/h/H
     markerfacecolor='red',
     markersize=8,               # markersize=6
-    label=r"data"               # '__nolegend__'
+    label=r"binned"               # '__nolegend__'
     )
+
+plt.legend()
 
 plt.xscale('log', nonposx='clip')
 plt.xlim(xmin=mid[0])
 plt.show()
+plt.savefig(outfig)
 
+print "figure saved to ::", outfig

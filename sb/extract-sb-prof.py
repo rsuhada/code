@@ -218,6 +218,17 @@ if __name__ == '__main__':
             # ensure 1st binsize>1pix
             r = append(rmin, r[r>rmin+1])
 
+            # FXIME: you might want ot save bin midpoint and binrange
+            ## rbin = optibingrid(binnum=20, rmax=1.5*r500_pix, c=1.5)
+            ## # merge innermost bins if they are too small
+            ## # rbin contains: start-end=start-end bin boundaries
+            ## min_dist = 1.0    # [pix]
+            ## rbin=hstack((0.0, rbin[rbin>=min_dist]))
+            ## # give the bin midpoint and symmetric range ("errorbar on r")
+            ## mid = [(rbin[i] + rbin[i+1])/2.0 for i in range(len(rbin)-1)]
+            ## mid_range = rbin[1:] - mid
+
+
         else:
             # equidistant binning: "unbinned" - 1 pixel annuli
             r = arange(rmin, rmax+1.0, double(binning))
@@ -225,9 +236,8 @@ if __name__ == '__main__':
         # r = arange(1.0, aper+1.0, 1.0)
 
         for i in xrange(len(r)-1):
-            ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))
-
-            geometric_area = len(ids[0])      # [pix], total number of pix
+            ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))[0]
+            geometric_area = len(ids)      # [pix], total number of pix
 
             ######################################################################
             # with ps (wps), area corrected
