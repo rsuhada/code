@@ -172,7 +172,7 @@ def beta_2d_lmfit_profile(pars, imsize=None, data_profile=None, data_profile_err
 
         return residuals
 
-def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, energy, APPLY_PSF, DO_ZERO_PAD):
+def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, im_psf, APPLY_PSF, DO_ZERO_PAD):
     """
     Creates a 2D image of a beta model convolved with psf
     Arguments:
@@ -201,18 +201,14 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     im_output = im_beta
 
-    # create PSF
-    im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
+    if APPLY_PSF:
+        # create PSF
+        # im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
+        # im_psf = psf[instrument]
 
-
-    hdr = pyfits.getheader('/Users/rs/data1/sw/esaspi/py/test/pn-test.fits')
-    hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension - array, header
-    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-    hdulist.writeto('old.fits', clobber=True)
-
-    # convolve
-    im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-    im_output = trim_fftconvolve(im_output)
+        # convolve
+        im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+        im_output = trim_fftconvolve(im_output)
 
     return im_output
 
@@ -390,7 +386,7 @@ def beta_psf_2d_lmfit_profile(pars, imsize, xsize_obj, ysize_obj,
 
 def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
                                     distmatrix,
-                                    instruments, theta, energy,
+                                    instruments, psf_dict,
                                     APPLY_PSF, DO_ZERO_PAD,
                                     data_r=None,
                                     data_profile=None,
@@ -421,7 +417,7 @@ def beta_psf_2d_lmfit_profile_joint(pars, imsize, xsize_obj, ysize_obj,
         # model in 2d image beta x PSF = and extract profile
 
         model_image[instrument] = make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj,
-                                       instrument, theta[instrument], energy,
+                                       instrument, psf_dict[instrument],
                                        APPLY_PSF, DO_ZERO_PAD)
 
         r_length = model_image[instrument].shape[0]/2 + 1
