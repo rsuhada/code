@@ -61,6 +61,7 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print 'Diagnostics'
     print '='*70
 
+    print 'fit method    :: ', result.fitmethod
     print 'nfev          :: ', result.nfev
     print 'message       :: ', result.message
 
@@ -282,8 +283,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'simplex'
-    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+    # FIT_METHOD = 'simplex'
+    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                                  # 'simplex' - simplex
     CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
@@ -506,8 +507,8 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    # FIT_METHOD = 'simplex'
-    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+    FIT_METHOD = 'simplex'
+    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                               # 'simplex' - simplex
     CALC_1D_CI = False         # in most cases standard error is good
                               # enough, this is not needed then
