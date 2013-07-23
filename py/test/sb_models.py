@@ -201,13 +201,18 @@ def make_2d_beta_psf(pars, imsize, xsize_obj, ysize_obj, instrument, theta, ener
 
     im_output = im_beta
 
-    if APPLY_PSF:
-        # create PSF
-        im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
+    # create PSF
+    im_psf = make_2d_king_old(imsize, xcen, ycen, instrument, theta, energy)
 
-        # convolve
-        im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
-        im_output = trim_fftconvolve(im_output)
+
+    hdr = pyfits.getheader('/Users/rs/data1/sw/esaspi/py/test/pn-test.fits')
+    hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('old.fits', clobber=True)
+
+    # convolve
+    im_output = fftconvolve(im_beta.astype(float), im_psf.astype(float), mode = 'same')
+    im_output = trim_fftconvolve(im_output)
 
     return im_output
 

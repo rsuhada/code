@@ -327,12 +327,29 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # scale_sb_src = {}
     # scale_sb_src_err = {}
     ndata = 0
+    psf = {}
 
     for instrument in instruments:
         # scale_sb_src[instrument] = median(sb_src[instrument])
         # sb_src[instrument] = sb_src[instrument] / scale_sb_src[instrument]
         # sb_src_err[instrument] = sb_src_err[instrument] / scale_sb_src[instrument]
         ndata += len(sb_src[instrument])
+
+        # calculate the PSF
+        # create PSF
+        from sb_models import make_2d_king_old
+
+        print '*'*70
+        print "pars1", imsize, xcen, ycen, instrument, theta, energy
+        print '*'*70
+
+        psf[instrument] = make_2d_king_old(imsize, xcen, ycen, instrument, theta[instrument], energy)
+
+    hdr = pyfits.getheader('/Users/rs/data1/sw/esaspi/py/test/pn-test.fits')
+    hdu = pyfits.PrimaryHDU(psf['pn'], hdr)    # extension - array, header
+    hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+    hdulist.writeto('new.fits', clobber=True)
+
 
     ######################################################################
     # init beta model
@@ -355,9 +372,9 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
