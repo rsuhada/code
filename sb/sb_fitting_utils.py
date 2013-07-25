@@ -515,8 +515,8 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    # FIT_METHOD = 'simplex'
-    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+    FIT_METHOD = 'simplex'
+    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                                # 'simplex' - simplex
     CALC_1D_CI = False         # in most cases standard error is good
                                # enough, this is not needed then
@@ -594,14 +594,14 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
                  vary=True, min=1.0e-9, max=1.0e3)
 
     # non-fit arguments
-    nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
+    nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, psf_dict,
                    xcen_obj, ycen_obj, r, sb_src, sb_src_err)
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
@@ -636,7 +636,7 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
 
         (r_model, profile_norm_model) = \
             v06_psf_2d_lmfit_profile_joint(pars, distmatrix_input, bgrid,
-                                           r500_pix, instruments, theta, energy,
+                                           r500_pix, instruments, psf_dict,
                                            xcen_obj, ycen_obj)
 
         ######################################################################

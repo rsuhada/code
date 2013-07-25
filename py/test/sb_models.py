@@ -299,15 +299,16 @@ def make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0, alpha, beta, gamma, epsilon
     # create the 2d image
     im = zeros(distmatrix.shape)
     for i, b in enumerate(bgrid):
-        im[where(distmatrix==b)] =  dens_prof_los[i]
+        im[where(distmatrix==b)] = dens_prof_los[i]
 
     return im
 
-def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, theta, energy):
+
+def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, im_psf):
     """
     Creates a 2D image of a vikhlinin et al. 2006 model convolved with psf.
     """
-    APPLY_PSF = True
+    # APPLY_PSF = True
 
     rc = pars['rc'].value
     rs = pars['rs'].value
@@ -320,20 +321,10 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, theta, energy):
     im_output = make_2d_v06(distmatrix, bgrid, r500, rc, rs, n0,
                             alpha, beta, gamma, epsilon)
 
-    if APPLY_PSF:
-        # FIXME: PSF should be passed and not recalculated for each
-        # step! - also for beta model!  create PSF
-        im_psf = make_2d_king(distmatrix, instrument, theta, energy)
-
-        hdr = pyfits.getheader('/Users/rs/data1/sw/esaspi/py/test/pn-test.fits')
-        hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension - array, header
-        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
-        hdulist.writeto('old.fits', clobber=True)
-
-        # convolve
-        im_output = fftconvolve(im_output.astype(float),
-                                im_psf.astype(float), mode = 'same')
-        im_output = trim_fftconvolve(im_output)
+    # convolve
+    im_output = fftconvolve(im_output.astype(float),
+                            im_psf.astype(float), mode = 'same')
+    im_output = trim_fftconvolve(im_output)
 
     return im_output
 
@@ -508,7 +499,7 @@ def v06_psf_2d_lmfit_profile(pars,distmatrix,bgrid,r500,instrument, theta, energ
         return residuals
 
 def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid, rfit,
-                                   instruments, theta, energy,
+                                   instruments, psf_dict,
                                    xcen_obj,ycen_obj,
                                    data_r=None,
                                    data_profile=None,
@@ -534,7 +525,7 @@ def v06_psf_2d_lmfit_profile_joint(pars,distmatrix,bgrid, rfit,
     # make first a 2D image
     for instrument in instruments:
         model_image[instrument] = make_2d_v06_psf(pars, distmatrix, bgrid, rfit,
-                                                  instrument, theta[instrument], energy)
+                                                  instrument, psf_dict[instrument])
 
         # FIXME: is this necessary for each step? - would require to
         # have 2 distance matrices!  trim distmatrix size to image
