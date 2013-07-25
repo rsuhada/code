@@ -15,6 +15,7 @@ import time
 import asciitable as atab
 import pickle
 
+
 def load_sb_curve(fname):
     """
     Loads the surface brightness curve from file.
@@ -240,8 +241,8 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
         with open(results_pickle, 'wb') as output:
             pickle.dump(outstrct, output, pickle.HIGHEST_PROTOCOL)
 
-        ######################################################################
-        # output
+    ######################################################################
+    # output
 
     if DO_FIT:
         # print_result_tab(pars_true, pars)
@@ -514,11 +515,11 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'simplex'
-    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
-                              # 'simplex' - simplex
+    # FIT_METHOD = 'simplex'
+    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+                               # 'simplex' - simplex
     CALC_1D_CI = False         # in most cases standard error is good
-                              # enough, this is not needed then
+                               # enough, this is not needed then
     CALC_2D_CI = False
     PLOT_PROFILE = True
     PRINT_FIT_DIAGNOSTICS = True
@@ -545,18 +546,26 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
     # instruments
     distmatrix = distance_matrix(zeros((imsize[0]-2, imsize[1]-2)), xcen_obj, ycen_obj).astype(int) # need int for bincount
 
+    # set the ancilarry parameters
+    # +1 bc of the central divergence
+    data = empty(imsize)
+    distmatrix_input = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1
+    bgrid = unique(distmatrix_input.flat)
+
     # r contains the start of the innermost bin for integration, but not needed for plotting
     rplt = r[1:]
 
     ######################################################################
     # scale the data
 
-    scale_sb_src = {}
-    scale_sb_src_err = {}
+    # scale_sb_src = {}
+    # scale_sb_src_err = {}
+    psf_dict = {}
     ndata = 0
 
     for instrument in instruments:
         ndata += len(sb_src[instrument])
+        psf_dict[instrument] = make_2d_king(distmatrix_input, instrument, theta[instrument], energy)
 
     ######################################################################
     # init beta model
@@ -584,21 +593,15 @@ def fit_v06_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resul
         pars.add('n0_'+instrument, value=n0, #value=mean(sb_src[instrument]),
                  vary=True, min=1.0e-9, max=1.0e3)
 
-    # set the ancilarry parameters
-    # +1 bc of the central divergence
-    data = empty(imsize)
-    distmatrix_input = distance_matrix(data, xcen_obj, ycen_obj).astype('int') + 1
-    bgrid = unique(distmatrix_input.flat)
-
     # non-fit arguments
     nonfit_args = (distmatrix_input, bgrid, r500_pix, instruments, theta, energy,
                    xcen_obj, ycen_obj, r, sb_src, sb_src_err)
 
     # fit stop criteria
     if FIT_METHOD == 'leastsq':
-        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':

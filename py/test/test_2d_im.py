@@ -164,7 +164,8 @@ def make_2d_king(r, instrument, theta, energy):
     Creates a 2D image of the PSF
 
     Arguments:
-    - 'r': distance from the center (2D numpy array)
+    - 'r': distance from the center (2D numpy array standardly called
+      distmatrix)
     - 'energy': energy [keV]
     - 'theta': offaxis angle [arcmin]
     - 'instrument': pn/m1/m2

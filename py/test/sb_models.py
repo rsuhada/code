@@ -325,6 +325,11 @@ def make_2d_v06_psf(pars, distmatrix, bgrid, r500, instrument, theta, energy):
         # step! - also for beta model!  create PSF
         im_psf = make_2d_king(distmatrix, instrument, theta, energy)
 
+        hdr = pyfits.getheader('/Users/rs/data1/sw/esaspi/py/test/pn-test.fits')
+        hdu = pyfits.PrimaryHDU(im_psf, hdr)    # extension - array, header
+        hdulist = pyfits.HDUList([hdu])                  # list all extensions here
+        hdulist.writeto('old.fits', clobber=True)
+
         # convolve
         im_output = fftconvolve(im_output.astype(float),
                                 im_psf.astype(float), mode = 'same')
