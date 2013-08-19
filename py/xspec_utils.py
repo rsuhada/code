@@ -80,8 +80,16 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
     da = da * mpc_to_cm
 
     # the constant factor
-    const = norm * 2 * mu_e * mu_h * mp_cgs**2 * (da*(1+z))**2 * 1.0e14
     integ_profile = 1.0
+    const = norm * 2 * mu_e * mu_h * mp_cgs**2 * (da*(1+z))**2 * 1.0e14
+
+    # is the 2 needed here?
+    # 130819: for beta model it is correct - the factor 2 from
+    # changing the integral from (-infinity, infinity) to (0,
+    # infinity) is used up in the shape integral substitution and does
+    # not cancel the remaining factor 2 from the XSPEC normalization
+
+    # FIXME: confirm this for v06 model too
 
     if model_name == 'beta':
         # print 'Using beta model'
@@ -98,17 +106,19 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
         rho2 = (rproj2_ang / rcore)**2
 
         # do the integration
-        # for rmax in (1, 1.0e2, 1.0e5, 1.0e6, Inf):
+        # for rmax in (1, 1.0e1, 5.0e1, 1.0e2, 1e3, Inf):
         for rmax in (Inf,):
-            integ_profile = integrate.dblquad(beta_shape_integral, 0.0, rmax,
+            integ_profile = integrate.dblquad(beta_shape_integral,
+                                              0.0, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
-            # print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
+            print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
+
             integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
 
     elif model_name == 'v06mod':
-        print 'Using modified v06 model'
+        # FIXME: DO NOT USE YET - NEEDS REVIEW!!!!        print 'Using modified v06 model'
 
         # unpack parameters
         alpha   = model_pars[0]
