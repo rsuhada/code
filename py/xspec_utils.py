@@ -154,7 +154,7 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
 
 def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
     """
-    Integrate the 3D density profile.
+    Integrate the density profile to obtain Mgas inside (r1, r2).
 
     Arguments:
     - `model_name`: model identifier: beta, v06

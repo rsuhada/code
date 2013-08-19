@@ -12,6 +12,7 @@ import asciitable
 from xspec_utils import *
 import pickle
 
+
 def output_results():
     ######################################################################
     # output
@@ -22,7 +23,8 @@ def output_results():
     print " da           :: ", da , "Mpc"
     print " ang scale    :: ", angscale, "kpc/arcsec"
     print "-"*60
-    print " rcore        :: ", rcore, "pix"
+    print " rcore        :: ", rcore / angscale, "pix"
+    print " rcore        :: ", rcore, "arcsec"
     print " rcore phy    :: ", rcore_phy, "kpc"
     print " beta         :: ", beta
     print " proj radius  :: ", rproj1_ang, " - ", rproj2_ang, "arcsec"
@@ -32,6 +34,8 @@ def output_results():
     print " ne0 density  :: ", ne0_dat, "cm**-3"
     print "-"*60
     print " r500         :: ", r500, "kpc"
+    print " r1           :: ", r1, "kpc"
+    print " r2           :: ", r2, "kpc"
     print " Mgas         :: ", mgas_dat, "Msol"
     print "-"*60
 
@@ -115,11 +119,11 @@ with open(fitted_pars_file, 'rb') as input:
     fitted_pars = pickle.load(input)
 
 beta = fitted_pars['params']['beta']['value']
-rcore = fitted_pars['params']['rcore']['value'] * pixscale
+rcore = fitted_pars['params']['rcore']['value'] * pixscale      # fit is in pix, here converted to [arcsec]
 beta_norm = fitted_pars['params']['norm']['value']
 
 beta_err = fitted_pars['params']['beta']['stderr']
-rcore_err = fitted_pars['params']['rcore']['stderr'] * pixscale
+rcore_err = fitted_pars['params']['rcore']['stderr'] * pixscale # fit is in pix, here converted to [arcsec]
 beta_norm_err = fitted_pars['params']['norm']['stderr']
 
 ######################################################################
@@ -146,9 +150,9 @@ if TEST_MODEL_NAME == 'beta':
     print '='*50
     print "Beta model parameters "
     print
-    print 'beta  :: ', beta
-    print 'rcore [arcsec]  :: ', rcore
+    print 'beta            :: ', beta
     print 'rcore [pix]     :: ', rcore / pixscale
+    print 'rcore [arcsec]  :: ', rcore
     print 'rcore [kpc]     :: ', rcore_phy
     print '='*50
     print
@@ -199,8 +203,8 @@ for i in xrange(1,):
 
         # gas mass calculation
         r2 = r500                   # [kpc]
-        # r1 = 0.0                    # [kpc]
-        r1 = 0.15 * r500            # [kpc]
+        r1 = 0.0                    # [kpc]
+        # r1 = 0.15 * r500            # [kpc]
 
         mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
 
