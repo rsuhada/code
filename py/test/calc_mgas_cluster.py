@@ -18,7 +18,7 @@ def print_input_info():
     print 'Input Files'
     print
     print 'XSPEC fit result file:'
-    print fname
+    print xspec_fname
     print
     print 'Surface brightness model fitted parameter file:'
     print
@@ -40,7 +40,7 @@ def output_results():
     print " da           :: ", da , "Mpc"
     print " ang scale    :: ", angscale, "kpc/arcsec"
     print "-"*60
-    print " rcore        :: ", rcore / angscale, "pix"
+    print " rcore        :: ", rcore / pixscale, "pix"
     print " rcore        :: ", rcore, "arcsec"
     print " rcore phy    :: ", rcore_phy, "kpc"
     print " beta         :: ", beta
@@ -101,14 +101,14 @@ pixscale = 2.5       # [arcsec/pix]
 # cluster - 0559
 z = double(sys.argv[1])
 r500 = double(sys.argv[2])
-fname= sys.argv[3]
+xspec_fname= sys.argv[3]
 fitted_pars_file= sys.argv[4]
 TEST_MODEL_NAME = sys.argv[5]
 
 # # cluster - 0559
 # z = 0.6112
 # r500 = 1043.0                    # [kpc]
-# fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
+# xspec_fname='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/SPT-CL-J0559-5249-run-009-radial-master.tab'
 # fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.01.pk'
 # TEST_MODEL_NAME = 'beta'    # beta, v06mod
 
@@ -116,7 +116,7 @@ TEST_MODEL_NAME = sys.argv[5]
 ######################################################################
 # load in values
 
-data = asciitable.read(table=fname)
+data = asciitable.read(table=xspec_fname, data_start=1)
 
 rproj2_ang_array = data['r_fit']
 rproj1_ang_array = 0.15 * rproj2_ang_array
@@ -221,6 +221,7 @@ for i in xrange(1,):
         r1 = 0.0                    # [kpc]
         # r1 = 0.15 * r500            # [kpc]
 
+        # continue reviewing this!!! :: the prefactor
         mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
 
         # mgas = mgas_dat[0]

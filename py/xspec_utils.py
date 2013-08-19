@@ -102,14 +102,15 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
         print
 
         # integration bounds
-        rho1 = (rproj1_ang / rcore)**2
-        rho2 = (rproj2_ang / rcore)**2
+        rmin = 0.0   # inner bound for the LOS integration
+        rho1 = (rproj1_ang / rcore)**2     # radial direction
+        rho2 = (rproj2_ang / rcore)**2     # radial direction
 
         # do the integration
         # for rmax in (1, 1.0e1, 5.0e1, 1.0e2, 1e3, Inf):
         for rmax in (Inf,):
             integ_profile = integrate.dblquad(beta_shape_integral,
-                                              0.0, rmax,
+                                              rmin, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
             print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
@@ -178,16 +179,20 @@ def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
     if model_name == 'beta':
         # print 'Using beta model'
 
-        rcore = model_pars[0]
+        rcore = model_pars[0]   # [kpc]
         beta  = model_pars[1]
 
         # integration bounds
         x1 = r1 / rcore
         x2 = r2 / rcore
 
-        # print 'rcore: ', rcore
-        # print 'beta: ', beta
-        # print
+        print '@'*50
+        print 'r1', r1
+        print 'r2', r2
+        print 'rcore: ', rcore
+        print 'beta: ', beta
+        print '@'*50
+        print
 
         integ_profile = 0.0
 
