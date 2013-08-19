@@ -12,6 +12,23 @@ import asciitable
 from xspec_utils import *
 import pickle
 
+def print_input_info():
+    print
+    print '='*60
+    print 'Input Files'
+    print
+    print 'XSPEC fit result file:'
+    print fname
+    print
+    print 'Surface brightness model fitted parameter file:'
+    print
+    print fitted_pars_file
+    print
+    print 'MODEL_NAME :: ', TEST_MODEL_NAME
+    print
+    print '='*60
+    print
+
 
 def output_results():
     ######################################################################
@@ -44,9 +61,13 @@ def output_results():
 
 def print_report(fname=None):
     if fname:
-        print "result goes to file :: ", fname
+        print "result written to file :: "
+        print fname
+        print
+
         with open(fname, 'w') as f:
             sys.stdout = f
+            print_input_info()
             output_results()
             sys.stdout = sys.__stdout__
     else:
@@ -95,8 +116,6 @@ TEST_MODEL_NAME = sys.argv[5]
 ######################################################################
 # load in values
 
-mgas_results_fname=fitted_pars_file+'.mgas'
-
 data = asciitable.read(table=fname)
 
 rproj2_ang_array = data['r_fit']
@@ -111,6 +130,9 @@ norm_err_p_array = data['norm_err_p']
 # beta_norm_err = 0.000145
 # rcore = 14.230824 * pixscale         # [arcsec]
 # rcore_err = 2.877397 * pixscale
+
+# output file
+mgas_results_fname=fitted_pars_file+'.mgas'
 
 ######################################################################
 # load in beta fit results
@@ -146,18 +168,11 @@ if TEST_MODEL_NAME == 'beta':
     # parameters for the Mgas calculation
     # rcore_phy = rcore * pixscale * angscale      # pixscale should not be here ?!
     rcore_phy = rcore * angscale
-
-    print '='*50
-    print "Beta model parameters "
-    print
-    print 'beta            :: ', beta
-    print 'rcore [pix]     :: ', rcore / pixscale
-    print 'rcore [arcsec]  :: ', rcore
-    print 'rcore [kpc]     :: ', rcore_phy
-    print '='*50
-    print
-
     model_pars_phy = (rcore_phy, beta)
+
+    print_input_info()
+
+
 
 elif TEST_MODEL_NAME == 'v06mod':
     # FIXME: need to be fully developed and checked - do not use before!
