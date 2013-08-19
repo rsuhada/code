@@ -180,10 +180,10 @@ def fit_beta_model(r, sb_src, sb_src_err, instrument, theta, energy, results_pic
 
     pars = lm.Parameters()
     pars.add('norm_'+instrument, value=mean(sb_src), vary=True, min=0.0, max=sum(abs(sb_src)))
-    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
+    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)     # [pix]
     pars.add('beta', value=0.8, vary=True, min=0.1, max=10.0)
-    pars.add('xcen', value=xcen_obj, vary=False)
-    pars.add('ycen', value=ycen_obj, vary=False)
+    pars.add('xcen', value=xcen_obj, vary=False)   # fitting not fully suported yet [imcoords]
+    pars.add('ycen', value=ycen_obj, vary=False)   # fitting not fully suported yet [imcoords]
 
     # sb_src = sb_src * r
 
@@ -284,8 +284,8 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     APPLY_PSF = True
     DO_ZERO_PAD = True
     DO_FIT = True
-    FIT_METHOD = 'simplex'
-    # FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
+    # FIT_METHOD = 'simplex'
+    FIT_METHOD = 'leastsq'     # 'leastsq' - Levemberg-Markquardt,
                                  # 'simplex' - simplex
     CALC_1D_CI = False           # in most cases standard error is good
                                 # enough, this is not needed then
@@ -346,10 +346,10 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     # init beta model
 
     pars = lm.Parameters()
-    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0)
+    pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0) # [rcore]
     pars.add('beta', value=0.67, vary=True, min=0.1, max=10.0)
-    pars.add('xcen', value=xcen_obj, vary=False)
-    pars.add('ycen', value=ycen_obj, vary=False)
+    pars.add('xcen', value=xcen_obj, vary=False)   # fitting not fully suported yet [imcoord]
+    pars.add('ycen', value=ycen_obj, vary=False)   # fitting not fully suported yet [imcoord]
 
     for instrument in instruments:
         pars.add('norm_'+instrument, value=mean(sb_src[instrument]),

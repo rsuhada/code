@@ -51,8 +51,6 @@ def print_report(fname=None):
     return 0
 
 
-
-
 ######################################################################
 # main
 ######################################################################
@@ -71,6 +69,9 @@ h_0=70.2
 omega_m_0=0.272
 omega_de_0=0.728
 omega_k_0=0.0
+
+# image/profile pixel scale
+pixscale = 2.5       # [arcsec/pix]
 
 # cluster - 0559
 z = double(sys.argv[1])
@@ -100,9 +101,6 @@ norm_array       = data['norm']
 norm_err_n_array = abs(data['norm_err_n'])
 norm_err_p_array = data['norm_err_p']
 
-# SB best fit parameters
-pixscale = 2.5       # [arcsec]
-
 # beta = 0.974467
 # beta_err =  0.148686
 # beta_norm = 0.001095
@@ -131,7 +129,6 @@ beta_norm_err = fitted_pars['params']['norm']['stderr']
 da = dist_ang(z=z, h_0=h_0, omega_m_0=omega_m_0, omega_de_0=omega_de_0, omega_k_0=omega_k_0) # [Mpc]
 angscale = arcsec_to_radian * da * 1000.0 # [kpc/arcsec]
 
-
 # setup the model parameters for the integration
 VALID_MODEL = False
 
@@ -140,13 +137,26 @@ if TEST_MODEL_NAME == 'beta':
     VALID_MODEL = True
 
     # best fit parameters should go here
-    model_pars = (rcore, beta)
+    model_pars = (rcore, beta)                # rcore in [arcsec]
 
     # parameters for the Mgas calculation
-    rcore_phy = rcore * pixscale * arcsec_to_radian * da * 1000.0 # [kpc]
+    # rcore_phy = rcore * pixscale * angscale      # pixscale should not be here ?!
+    rcore_phy = rcore * angscale
+
+    print '='*50
+    print "Beta model parameters "
+    print
+    print 'beta  :: ', beta
+    print 'rcore [arcsec]  :: ', rcore
+    print 'rcore [pix]     :: ', rcore / pixscale
+    print 'rcore [kpc]     :: ', rcore_phy
+    print '='*50
+    print
+
     model_pars_phy = (rcore_phy, beta)
 
 elif TEST_MODEL_NAME == 'v06mod':
+    # FIXME: need to be fully developed and checked - do not use before!
     model_name = TEST_MODEL_NAME
     VALID_MODEL = True
 

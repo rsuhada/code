@@ -185,7 +185,7 @@ def make_2d_beta(imsize, xcen, ycen, norm, rcore, beta):
     - `imsize`: input 2D array size
     - `xcen`: x coordinate of the function
     - `ycen`: y coordinate of the function
-    - 'core': beta model core radius
+    - 'rcore': beta model core radius [pix]
     - 'beta': beta model slope
     """
     r2 = zeros(imsize, dtype=double)

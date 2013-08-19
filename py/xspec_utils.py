@@ -59,7 +59,7 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
     - `rproj2_ang`: projected outer radius of the fitted spherical
                     region [arcsec]
     - `model_name`: model identifier: beta, v06
-    - 'model_pars': parameter structure - content depends on : on the model
+    - 'model_pars': parameter structure - content depends on the model
 
     Output:
     - `density`: array density in cgs [g cm**-3] and associated errors
@@ -97,9 +97,9 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
         rcore = model_pars[0]
         beta  = model_pars[1]
 
-        # print 'rcore: ', rcore
-        # print 'beta: ', beta
-        # print
+        print 'rcore [arcsec]: ', rcore
+        print 'beta: ', beta
+        print
 
         # integration bounds
         rho1 = (rproj1_ang / rcore)**2
