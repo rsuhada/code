@@ -12,6 +12,10 @@ import asciitable
 from xspec_utils import *
 import pickle
 
+
+def print_debug_info():
+    print rproj1_ang, rproj2_ang, norm_dat[0], rho0_dat[0], ne0_dat[0], r1, r2, norm_int, mgas_dat[0]
+
 def print_input_info():
     print
     print '='*60
@@ -67,14 +71,57 @@ def print_report(fname=None):
 
         with open(fname, 'w') as f:
             sys.stdout = f
+            print_debug_info()
             print_input_info()
             output_results()
             sys.stdout = sys.__stdout__
     else:
+        # print_debug_info()
         output_results()
 
     return 0
 
+def tabulate_gas_mass(model_name, model_pars_phy, rho0, rmin, rmax, rstep, mgas_tab):
+    """
+    Calculate the gas mas between rmin and r_i on grid with stepsize
+    rstep out to rmax for this value of rho0 and gas model.
+
+    Arguments:
+    - `model_name`: name of the gas model (i.e. beta)
+    - `model_pars_phy`: model parameters in physical units (i.e. rcore in [kpc])
+    - `rho_0`: central density of the model [g cm**-3]
+    - `rmin`: innermost radius [kpc]
+    - `rmax`: outermost radius [kpc]
+    - `rstep`: step size in radius [kpc]
+    - `mgas_tab`: file name where to write the mgas table
+
+    Output:
+    Table with:
+    r [kpc]   Mgas [Msol]
+    """
+    # FIXME: add error bars, add full V06 model suport
+
+    rgrid = arange(rmin+rstep, rmax, rstep)
+    mgas = []
+
+    # calculate
+    for r in rgrid:
+        mgas.append(calc_gas_mass(model_name, model_pars_phy, rho0, rmin, r))
+        print r, mgas[-1][0], mgas[-1][1], mgas[-1][2]
+
+    # write output
+    f = open(mgas_tab, 'w')
+
+    f.write('# r [kpc] \n')
+    f.write('# mgas [Msol] \n')
+    f.write('# mgas_err_n [Msol] \n')
+    f.write('# mgas_err_p [Msol] \n')
+    f.write('#\n')
+    f.write('# r mgas mgas_err_n mgas_err_p\n')
+    for i in range(len(rgrid)):
+        f.write('%f %e %f %f\n' % (rgrid[i], mgas[i][0], mgas[i][1], mgas[i][2]))
+
+    f.close()
 
 ######################################################################
 # main
@@ -112,28 +159,6 @@ TEST_MODEL_NAME = sys.argv[5]
 # fitted_pars_file='/Users/rs/w/xspt/data/dev/0559/sb/SPT-CL-J0559-5249/sb-prof-pn-003.dat.01.pk'
 # TEST_MODEL_NAME = 'beta'    # beta, v06mod
 
-
-######################################################################
-# load in values
-
-data = asciitable.read(table=xspec_fname, data_start=1)
-
-rproj2_ang_array = data['r_fit']
-rproj1_ang_array = 0.15 * rproj2_ang_array
-norm_array       = data['norm']
-norm_err_n_array = abs(data['norm_err_n'])
-norm_err_p_array = data['norm_err_p']
-
-# beta = 0.974467
-# beta_err =  0.148686
-# beta_norm = 0.001095
-# beta_norm_err = 0.000145
-# rcore = 14.230824 * pixscale         # [arcsec]
-# rcore_err = 2.877397 * pixscale
-
-# output file
-mgas_results_fname=fitted_pars_file+'.mgas'
-
 ######################################################################
 # load in beta fit results
 
@@ -147,6 +172,29 @@ beta_norm = fitted_pars['params']['norm']['value']
 beta_err = fitted_pars['params']['beta']['stderr']
 rcore_err = fitted_pars['params']['rcore']['stderr'] * pixscale # fit is in pix, here converted to [arcsec]
 beta_norm_err = fitted_pars['params']['norm']['stderr']
+
+######################################################################
+# load in XSPEC norm values
+
+data = asciitable.read(table=xspec_fname, data_start=0)
+
+rproj2_ang_array = data['r_fit']
+rproj1_ang_array = 0.15 * rproj2_ang_array
+# rproj1_ang_array = 0.0 * rproj2_ang_array
+norm_array       = data['norm']
+norm_err_n_array = abs(data['norm_err_n'])
+norm_err_p_array = data['norm_err_p']
+
+# beta = 0.974467
+# beta_err =  0.148686
+# beta_norm = 0.001095
+# beta_norm_err = 0.000145
+# rcore = 14.230824 * pixscale         # [arcsec]
+# rcore_err = 2.877397 * pixscale
+
+# output file
+mgas_results_fname=fitted_pars_file+'.mgas'
+mgas_tab_fname=fitted_pars_file+'.mgas.tab'
 
 ######################################################################
 # do the calculation
@@ -166,12 +214,11 @@ if TEST_MODEL_NAME == 'beta':
     model_pars = (rcore, beta)                # rcore in [arcsec]
 
     # parameters for the Mgas calculation
-    # rcore_phy = rcore * pixscale * angscale      # pixscale should not be here ?!
+    # rcore_phy = rcore * pixscale * angscale      # pixscale should not be here !!
     rcore_phy = rcore * angscale
     model_pars_phy = (rcore_phy, beta)
 
     print_input_info()
-
 
 
 elif TEST_MODEL_NAME == 'v06mod':
@@ -197,6 +244,8 @@ elif TEST_MODEL_NAME == 'v06mod':
 ######################################################################
 #  do the integrations
 
+# print "# xspec_rproj1_ang xspec_rproj2_ang xspec_norm rho0 ne0 mgas_r1 mgas_r2 norm_int mgas" # hdr for debug
+
 # for i in xrange(len(norm_array)):
 for i in xrange(1,):
     rproj2_ang  = rproj2_ang_array[i]
@@ -208,10 +257,8 @@ for i in xrange(1,):
 
     if VALID_MODEL:
 
-        print rproj2_ang, rproj2_ang * angscale
-
         # do the integrations
-        rho0_dat = spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
+        rho0_dat, norm_int = spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, model_pars)
 
         # number density conversion for A=0.3
         ne0_dat = rho0_dat / (mu_e_feldman92 * mp_cgs)
@@ -220,15 +267,26 @@ for i in xrange(1,):
         r2 = r500                   # [kpc]
         r1 = 0.0                    # [kpc]
         # r1 = 0.15 * r500            # [kpc]
+        rstep = 10              # kpc
 
-        # continue reviewing this!!! :: the prefactor
+        ######################################################################
+        #
+        # calculate mgas for given aperture (r1, r2)
+        #
+        ######################################################################
+
         mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
-
-        # mgas = mgas_dat[0]
-
         print_report()
-        print_report(mgas_results_fname)
+        # print_report(mgas_results_fname)
+
         ######################################################################
-        ######################################################################
+        #
+        # calculate mgas for a range of outer radii
+        #
         ######################################################################
 
+        rmin = 0.0
+        rmax = 2.0 * r500
+        rstep = 10.0
+
+        tabulate_gas_mass(model_name, model_pars_phy, rho0_dat, rmin, rmax, rstep, mgas_tab_fname)

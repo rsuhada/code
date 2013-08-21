@@ -347,7 +347,7 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
 
     pars = lm.Parameters()
     pars.add('rcore', value=5.0, vary=True, min=0.05, max=80.0) # [rcore]
-    pars.add('beta', value=0.67, vary=True, min=0.1, max=10.0)
+    pars.add('beta', value=0.67, vary=True, min=0.1, max=2.0)
     pars.add('xcen', value=xcen_obj, vary=False)   # fitting not fully suported yet [imcoord]
     pars.add('ycen', value=ycen_obj, vary=False)   # fitting not fully suported yet [imcoord]
 

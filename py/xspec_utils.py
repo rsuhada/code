@@ -97,9 +97,9 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
         rcore = model_pars[0]
         beta  = model_pars[1]
 
-        print 'rcore [arcsec]: ', rcore
-        print 'beta: ', beta
-        print
+        # print 'rcore [arcsec]: ', rcore
+        # print 'beta: ', beta
+        # print
 
         # integration bounds
         rmin = 0.0   # inner bound for the LOS integration
@@ -113,8 +113,8 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
                                               rmin, rmax,
                                               lambda rho:rho1, lambda rho:rho2,
                                               args=(beta,))[0]
-            print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
 
+            # print "Integration bound :: ", rmax, 'Shape integral :: ', integ_profile
             integ_profile = integ_profile * (rcore * arcsec_to_radian * da)**3
 
 
@@ -150,7 +150,7 @@ def spec_norm_to_density(norm_dat, z, da, rproj1_ang, rproj2_ang, model_name, mo
     except Exception, e:
 	raise e
 
-    return array((density, density_err_n, density_err_p))
+    return array((density, density_err_n, density_err_p)), integ_profile/(rcore * arcsec_to_radian * da)**3
 
 
 def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
@@ -186,13 +186,13 @@ def calc_gas_mass(model_name, model_pars, rho0_dat, r1, r2):
         x1 = r1 / rcore
         x2 = r2 / rcore
 
-        print '@'*50
-        print 'r1', r1
-        print 'r2', r2
-        print 'rcore: ', rcore
-        print 'beta: ', beta
-        print '@'*50
-        print
+        # print '@'*50
+        # print 'r1', r1
+        # print 'r2', r2
+        # print 'rcore: ', rcore
+        # print 'beta: ', beta
+        # print '@'*50
+        # print
 
         integ_profile = 0.0
 
