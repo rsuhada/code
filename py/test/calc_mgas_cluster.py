@@ -71,7 +71,7 @@ def print_report(fname=None):
 
         with open(fname, 'w') as f:
             sys.stdout = f
-            print_debug_info()
+            # print_debug_info()
             print_input_info()
             output_results()
             sys.stdout = sys.__stdout__
@@ -123,6 +123,9 @@ def tabulate_gas_mass(model_name, model_pars_phy, rho0, rmin, rmax, rstep, mgas_
 
     f.close()
 
+    print
+    print 'Mgas table written to: ', mgas_tab
+
 ######################################################################
 # main
 ######################################################################
@@ -148,8 +151,8 @@ pixscale = 2.5       # [arcsec/pix]
 # cluster - 0559
 z = double(sys.argv[1])
 r500 = double(sys.argv[2])
-xspec_fname= sys.argv[3]
-fitted_pars_file= sys.argv[4]
+xspec_fname = sys.argv[3]
+fitted_pars_file = sys.argv[4]
 TEST_MODEL_NAME = sys.argv[5]
 
 # # cluster - 0559
@@ -167,15 +170,16 @@ with open(fitted_pars_file, 'rb') as input:
 
 beta = fitted_pars['params']['beta']['value']
 rcore = fitted_pars['params']['rcore']['value'] * pixscale      # fit is in pix, here converted to [arcsec]
-beta_norm = fitted_pars['params']['norm']['value']
+# beta_norm = fitted_pars['params']['norm']['value']
 
 beta_err = fitted_pars['params']['beta']['stderr']
 rcore_err = fitted_pars['params']['rcore']['stderr'] * pixscale # fit is in pix, here converted to [arcsec]
-beta_norm_err = fitted_pars['params']['norm']['stderr']
+# beta_norm_err = fitted_pars['params']['norm']['stderr']
 
 ######################################################################
 # load in XSPEC norm values
 
+# i put manualyy at he aperture closest to r500 on top of the list
 data = asciitable.read(table=xspec_fname, data_start=0)
 
 rproj2_ang_array = data['r_fit']
@@ -271,22 +275,22 @@ for i in xrange(1,):
 
         ######################################################################
         #
+        # calculate mgas for a range of outer radii
+        #
+        ######################################################################
+
+        rmin = 0.0            # [kpc]
+        rmax = 2.0 * r500     # [kpc]
+        rstep = 10.0          # [kpc]
+
+        tabulate_gas_mass(model_name, model_pars_phy, rho0_dat, rmin, rmax, rstep, mgas_tab_fname)
+
+        ######################################################################
+        #
         # calculate mgas for given aperture (r1, r2)
         #
         ######################################################################
 
         mgas_dat = calc_gas_mass(model_name, model_pars_phy, rho0_dat, r1, r2)
         print_report()
-        # print_report(mgas_results_fname)
-
-        ######################################################################
-        #
-        # calculate mgas for a range of outer radii
-        #
-        ######################################################################
-
-        rmin = 0.0
-        rmax = 2.0 * r500
-        rstep = 10.0
-
-        tabulate_gas_mass(model_name, model_pars_phy, rho0_dat, rmin, rmax, rstep, mgas_tab_fname)
+        print_report(mgas_results_fname)

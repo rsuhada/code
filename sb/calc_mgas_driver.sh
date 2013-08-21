@@ -7,5 +7,5 @@ export codedir="/Users/rs/data1/sw/esaspi"
 
 source /Users/rs/w/xspt/data/dev/0559/sb/calc_mgas.conf
 
-echo $PYTHONEXEC ${codedir}/py/test/calc_mgas_cluster.py $z $r500 $trad_fname $fitted_pars_file $TEST_MODEL_NAME
-$PYTHONEXEC ${codedir}/py/test/calc_mgas_cluster.py $z $r500 $trad_fname $fitted_pars_file $TEST_MODEL_NAME
+echo $PYTHONEXEC ${codedir}/py/test/calc_mgas_cluster.py $z $r500 $xspec_fname $fitted_pars_file $TEST_MODEL_NAME
+$PYTHONEXEC ${codedir}/py/test/calc_mgas_cluster.py $z $r500 $xspec_fname $fitted_pars_file $TEST_MODEL_NAME
