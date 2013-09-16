@@ -36,11 +36,11 @@ then
 fi
 
 echo $NOTESFILE
-sleep 5
 
 if [[ ! -e $NOTESFILE ]]
 then
     echo "adding analysis notes file: $NOTESFILE"
+    echo cp ${codedir}/templates/analysis-template.txt $NOTESFILE
     cp ${codedir}/templates/analysis-template.txt $NOTESFILE
     sed -i.bk "s/CLNAME/CLNAME ${CLNAME}/g" $NOTESFILE ; rm ${NOTESFILE}.bk
     sed -i.bk "s/OBSID/OBSID ${obsid}/g" $NOTESFILE ; rm ${NOTESFILE}.bk
