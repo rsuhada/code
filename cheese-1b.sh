@@ -55,9 +55,9 @@ cp emllist.fits emllist-default.fits
 ######################################################################
 # create a reg file if you can
 
-scriptdir=~/data1/sw/scripts/
+# scriptdir=~/data1/sw/scripts/
 
-if [[ -e ${scriptdir}/fcat2reg.sh  ]]
+if [[ -e ${codedir}/utils/fcat2reg.sh  ]]
 then
     fcat2reg.sh emllist.fits 10.0 ML_ID_SRC
 fi
