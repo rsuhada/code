@@ -90,6 +90,7 @@ else
     export ON_LAPTOP=0
 fi
 
+# CHANGE PATHS HERE DEPENDINGON YOUR INSTALLATIONS
 if [[ $ON_LAPTOP -eq 1 ]]
 then
 
@@ -131,7 +132,9 @@ else
     export SAS_CCF=${startdir}/${ANALYSIS_DIR}/analysis/ccf.cif
 
     export DS9_BINARY="/home/moon/rsuhada/big/sw/ds9/7.0.1/ds9"
-    export CALC_SCRIPT_DIR="/home/moon/rsuhada/big/sw/calc/"
+
+    # this is deprecated now - not needed anymore
+    # export CALC_SCRIPT_DIR="/home/moon/rsuhada/big/sw/calc/"
 
     export PYTHONEXEC=/home/moon/rsuhada/big/sw/Python-2.7.3/python
 
