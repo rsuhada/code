@@ -1,3 +1,10 @@
+2013-09-17
+- this is my initial notes file
+- lots of it is outdated/depracated
+- it is kept for archival puroposes you shouldn't need it for anything
+  unless you are very desperate
+
+
 ######################################################################
 # TODO
 
