@@ -58,7 +58,7 @@ export RENAME_SPEC_PRODUCTS=0      # should be used after
 # MANUAL_STEP: creating the ps region files
 
 MAKE_IMS=0
-MAKE_EXP_MAP=0
+MAKE_EXP_MAP=0                     # requires the point source region file!
 MAKE_MODEL_BG_2COMP=0
 MAKE_MODEL_BG_SPLINE=0
 

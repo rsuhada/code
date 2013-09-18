@@ -1,0 +1,345 @@
+#! /bin/tcsh
+##### NOTE: USER MAY HAVE TO EDIT THIS LINE TO FIND LOCAL tcsh
+# [remember to do 'chmod 755 Fin_over_Fout' in your directory to make it an executable]
+#
+# Andy Read (Leicester University)
+# - developed from an original script from Silvano Molendi, Andrea de Luca & Alberto Leccardi
+# 1.0 20/09/06
+# 1.1 04/10/07 - Warning put in re MOS1 CCD6
+# RS : removed a hot PN column
+
+set version=1.1
+nice +19
+
+cat <<EOF
+
+-------- `echo $0:t | tr '[a-z]' '[A-Z]'` version $version `date +%x` --------
+
+EOF
+
+if ( $#argv != 7 ) then
+ cat <<EOF
+
+Script to perform the Fin/Fout ratio calculation developed by Silvano
+Molendi, Andrea De Luca & Alberto Leccardi (A&A, 419, 837) on any EPIC
+event files (MOS1, MOS2 and/or pn), to estimate the amount of residual
+Soft Proton flare contamination. The script has to be used after
+attempts have been made to clean the event files for Soft Proton
+flares using a GTI filtering. The script compares count rates in the
+in-FOV (beyond 10 arcminutes) and out-of-FOV regions of the detector,
+and hence the event files need to have been processed in such a manner
+as to retain the out-of-FOV events (i.e. the selection expression in
+evselect needs to include the #XMMEA_16 flag - [evselect table=... ...
+expression=(... && #XMMEA_16) ...]. By default, the count rates are
+compared in the energy bands 6-12 keV (for MOS) and 5-7.3 keV plus
+10-14 keV (for pn). A user-input energy band can be used instead if
+required (via the parameters elo and ehi); User-input energy bands
+should be broad (for better statistics) if the source is negligible in
+the outer region of the FOV beyond 10 arcminutes. If however the
+source fills the whole FOV, the band should be reduced at the soft
+end. Output can be set to a file or to the screen (via the parameter
+outfile), and the intermediate files can be kept (via the parameter
+keepfiles).
+
+Use: ./Fin_over_Fout m1ev m2ev pnev elo ehi keepfiles outfile
+
+  m1ev      - MOS1 event file (N = ignore)
+  m2ev      - MOS2 event file (N = ignore)
+  pnev      - pn event file (N = ignore)
+  elo       - low-energy threshold [eV] (N = use recommended default values)
+  ehi       - high-energy threshold [eV] (N = use recommended default values)
+  keepfiles - keep intermediate files (Y/N?)
+  outfile   - ouput file name (N = just output to screen)
+
+e.g. ./Fin_over_Fout myM1ev.fits myM2ev.fits N 7000 12000 Y MyFinFout.dat
+
+EOF
+ exit
+endif
+
+set m1=$1
+set m2=$2
+set pn=$3
+set elo=$4
+set ehi=$5
+set keep=$6
+set out=$7
+
+#-----------------------------------------
+
+if ($m1 != 'N' && ! -e $m1) then
+  echo "MOS1 file does not exist... exiting..."
+  exit
+endif
+if ($m2 != 'N' && ! -e $m2) then
+  echo "MOS2 file does not exist... exiting..."
+  exit
+endif
+if ($pn != 'N' && ! -e $pn) then
+  echo "PN file does not exist... exiting..."
+  exit
+endif
+
+if (-e temp0001) rm -f temp0001
+echo '        COUNTS      EXP TIME    F(IN)/F(OUT)' > temp0001
+echo '       IN    OUT    IN   OUT    RATIO   ERR' >> temp0001
+
+# Creates clean event files and spectra for both regions (INFOV and OUTFOV)
+echo 'Creating clean event files and spectra...'
+
+if ($elo == 'N' && $ehi == 'N') then
+  echo "Using recommended default Energy ranges..."
+  set edef=1
+else
+  echo "You have chosen to use non-recommended Energy ranges..."
+  set edef=0
+  if ($elo ==  'N' || $ehi == 'N') then
+    echo "Input energies incorrectly input... Exiting..."
+    exit
+  endif
+  if ($elo < 0 || $ehi < $elo) then
+    echo "Input energies incorrectly input... Exiting..."
+    exit
+  endif
+endif
+
+#----------
+
+## MOS1
+if ($m1 == 'N') then
+  echo "Ignoring MOS1 file..."
+else
+  echo "Analysing MOS1 file..."
+  set instr=`fkeyprint "${m1}[EVENTS]" INSTRUME | grep "INSTRUME=" | cut -d"'" -f2`
+  if ($instr != EMOS1) then
+    echo "Event file is not MOS1... Check that file is correct... Skipping..."
+  else
+    set rev=`fkeyprint "${m1}[EVENTS]" REVOLUT | grep "REVOLUT =" | awk '{print $3}'`
+    if ($rev >= 961) then
+      echo "Warning: MOS1 obervation made after the Rev 961 MOS1 CCD6 loss..."
+      echo "         MOS1 result may not be entirely accurate (to ~10% in RATIO) ..."
+    endif
+    if ($edef == 1) then
+      set elo = 6000
+      set ehi = 12000
+    endif
+    # Select the energy band and the region INSIDE the FOV
+    # with radius greater than 10 arcmin for MOS
+    evselect -w 0 -V 0 table=$m1 expression='((FLAG & 0x10000) == 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=12)&&(!((DETX,DETY) IN circle(191.5,-345.5,12000)))' filteredset='m1_clean_INfov.evt' destruct=yes keepfilteroutput=true
+
+    # Select the energy band and the region OUTSIDE the FOV
+    # excluding a lot of other regions for different reasons
+    evselect -w 0 -V 0 table=$m1 expression='((FLAG & 0x10000) != 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=12)&&(!((DETX,DETY) IN circle(-50,-180,17540)||(DETX,DETY) IN box(110,-17090,11460,880,0)||(DETX,DETY) IN box(-7418.5,-19485.5,5880,1520,0)||(DETX,DETY) IN box(-118.5,-19805.5,8720,880,0)||(DETX,DETY) IN box(7311.5,-19485.5,6140,1520,0)||(DETX,DETY) IN box(-12488.5,-18315.5,1580,940,0)||(DETX,DETY) IN box(11841.5,-18475.5,2800,780,0)))' filteredset='m1_clean_OUTfov.evt' destruct=yes keepfilteroutput=true
+
+
+    # Produces the spectra for both regions
+    evselect table='m1_clean_INfov.evt' spectrumset='m1_INfov.pi' energycolumn='PI' spectralbinsize=15 specchannelmin=6000 specchannelmax=11999
+    evselect table='m1_clean_OUTfov.evt' spectrumset='m1_OUTfov.pi' energycolumn='PI' spectralbinsize=15 specchannelmin=6000 specchannelmax=11999
+
+    # counts the events in both regions and determines exposure times and areas
+    set count_IN = `fstatistic m1_INfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+    set count_OUT = `fstatistic m1_OUTfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+    set expo_IN = `fkeyprint m1_INfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+    set expo_OUT = `fkeyprint m1_OUTfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+    # The area value is the ratio between the area INFOV and the area OUTFOV,
+    # and is calculated using a lot of closed observations, selecting the
+    # same regions and calculating the ratio of the counts INFOV over OUTFOV.
+    # They can be modified using a larger number of closed observations.
+    set area = '2.261'
+    set err_area = '0.034'
+    set ratio = `echo $count_IN $count_OUT $expo_IN $expo_OUT $area | awk '{print ($1/$2*$4/$3/$5)}'`
+    set err = `echo $count_IN $count_OUT $ratio $area $err_area | awk '{print $3*(sqrt(1/$1+1/$2+($5/$4)^2))}'`
+    echo "M1" $count_IN $count_OUT $expo_IN $expo_OUT $ratio $err | awk '{printf ("%2s   %5i  %4i   %3.1f  %3.1f   %1.3f  %1.3f \n", $1,$2,$3,$4/1000,$5/1000,$6,$7)}' >> temp0001
+
+  endif
+endif
+
+#----------
+
+## MOS2
+if ($m2 == 'N') then
+  echo "Ignoring MOS2 file..."
+else
+  echo "Analysing MOS2 file..."
+  set instr=`fkeyprint "${m2}[EVENTS]" INSTRUME | grep "INSTRUME=" | cut -d"'" -f2`
+  if ($instr != EMOS2) then
+    echo "Event file is not MOS2... Check that file is correct... Skipping..."
+  else
+    if ($edef == 1) then
+      set elo = 6000
+      set ehi = 12000
+    endif
+    # Select the energy band and the region INSIDE the FOV
+    # with radius greater than 10 arcmin for MOS
+    evselect -w 0 -V 0 table=$m2 expression='((FLAG & 0x10000) == 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=12)&&(!((DETX,DETY) IN circle(191.5,-345.5,12000)))' filteredset='m2_clean_INfov.evt' destruct=yes keepfilteroutput=true
+
+    # Select the energy band and the region OUTSIDE the FOV
+    # excluding a lot of other regions for different reasons
+    evselect -w 0 -V 0 table=$m2 expression='((FLAG & 0x10000) != 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=12)&&(!((DETX,DETY) IN circle(-50,-180,17540)||(DETX,DETY) IN box(110,-17090,11460,880,0)||(DETX,DETY) IN box(-7418.5,-19485.5,5880,1520,0)||(DETX,DETY) IN box(-118.5,-19805.5,8720,880,0)||(DETX,DETY) IN box(7311.5,-19485.5,6140,1520,0)||(DETX,DETY) IN box(-12488.5,-18315.5,1580,940,0)||(DETX,DETY) IN box(11841.5,-18475.5,2800,780,0)))' filteredset='m2_clean_OUTfov.evt' destruct=yes keepfilteroutput=true
+
+    # Produces the spectra for both regions
+    evselect table='m2_clean_INfov.evt' spectrumset='m2_INfov.pi' energycolumn='PI' spectralbinsize=15 specchannelmin=6000 specchannelmax=11999
+    evselect table='m2_clean_OUTfov.evt' spectrumset='m2_OUTfov.pi' energycolumn='PI' spectralbinsize=15 specchannelmin=6000 specchannelmax=11999
+
+    # counts the events in both regions and determines exposure times and areas
+    set count_IN = `fstatistic m2_INfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+    set count_OUT = `fstatistic m2_OUTfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+    set expo_IN = `fkeyprint m2_INfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+    set expo_OUT = `fkeyprint m2_OUTfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+    # The area value is the ratio between the area INFOV and the area OUTFOV,
+    # and is calculated using a lot of closed observations, selecting the
+    # same regions and calculating the ratio of the counts INFOV over OUTFOV.
+    # They can be modified using a larger number of closed observations.
+    set area = '2.093'
+    set err_area = '0.031'
+    set ratio = `echo $count_IN $count_OUT $expo_IN $expo_OUT $area | awk '{print ($1/$2*$4/$3/$5)}'`
+    set err = `echo $count_IN $count_OUT $ratio $area $err_area | awk '{print $3*(sqrt(1/$1+1/$2+($5/$4)^2))}'`
+    echo "M2" $count_IN $count_OUT $expo_IN $expo_OUT $ratio $err | awk '{printf ("%2s   %5i  %4i   %3.1f  %3.1f   %1.3f  %1.3f \n", $1,$2,$3,$4/1000,$5/1000,$6,$7)}' >> temp0001
+
+  endif
+endif
+
+#----------
+
+## PN
+if ($pn == 'N') then
+  echo "Ignoring PN file..."
+else
+  echo "Analysing PN file..."
+  set instr=`fkeyprint "${pn}[EVENTS]" INSTRUME | grep "INSTRUME=" | cut -d"'" -f2`
+  if ($instr != EPN) then
+    echo "Event file is not PN... Check that file is correct... Skipping..."
+  else
+    if ($edef == 1) then
+
+      # Select the whole energy band and the region INSIDE the FOV
+      # with radius greater than 10 arcmin
+      evselect table=$pn expression='((FLAG & 0x10000) == 0)&&(PI in [150:14000])&&(PATTERN<=4)&&(!((DETX,DETY) IN circle(-2203.5,-1167.5,12000)))' filteredset='pn_clean_INfov.evt' destruct=yes keepfilteroutput=true
+      # Select the whole energy band and the region OUTSIDE the FOV
+      # excluding a lot of regions for different reasons
+      evselect table=$pn expression='((FLAG & 0x10000) != 0)&&(PI in [150:14000])&&(PATTERN<=4)&&(!((DETX,DETY) IN circle(-2200,-1000,19000)))' filteredset='pn_clean_OUTfov.evt' destruct=yes keepfilteroutput=true
+      #evselect table=$pn expression='((FLAG & 0x10000) != 0)&&(PI in [150:14000])&&(PATTERN<=4)&&(!((DETX,DETY) IN circle(-2200,-1000,19000)))&&(!((DETX,DETY) IN box(-7687.2,-12479.233,320,4400,0)))' filteredset='pn_clean_OUTfov.evt' destruct=yes keepfilteroutput=true
+
+      # produces the spectra for both regions
+      evselect table='pn_clean_INfov.evt' spectrumset='pn_INfov.pi' energycolumn='PI' spectralbinsize=80 specchannelmin=0 specchannelmax=20479 expression='!((DETX,DETY) IN box(-7687.2,-12479.233,320,4400,0))'
+      evselect table='pn_clean_OUTfov.evt' spectrumset='pn_OUTfov.pi' energycolumn='PI' spectralbinsize=80 specchannelmin=0 specchannelmax=20479
+
+      # counts the events in both regions btw (pn) and determines exposure times and areas
+      set count_IN1 = `fstatistic pn_INfov.pi COUNTS rows="62-91" | grep sum | awk '{print int($8)}'`
+      set count_IN2 = `fstatistic pn_INfov.pi COUNTS rows="125-174" | grep sum | awk '{print int($8)}'`
+      set count_IN = `echo $count_IN1 $count_IN2 | awk '{print($1+$2)}'`
+      set count_OUT1 = `fstatistic pn_OUTfov.pi COUNTS rows="62-91" | grep sum | awk '{print int($8)}'`
+      set count_OUT2 = `fstatistic pn_OUTfov.pi COUNTS rows="125-174" | grep sum | awk '{print int($8)}'`
+      set count_OUT = `echo $count_OUT1 $count_OUT2 | awk '{print($1+$2)}'`
+      set expo_IN = `fkeyprint pn_INfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+      set expo_OUT = `fkeyprint pn_OUTfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+      set area = '7.532'
+      set err_area = '0.096'
+      set ratio = `echo $count_IN $count_OUT $expo_IN $expo_OUT $area | awk '{print ($1/$2*$4/$3/$5)}'`
+      set err = `echo $count_IN $count_OUT $ratio $area $err_area | awk '{print $3*(sqrt(1/$1+1/$2+($5/$4)^2))}'`
+      echo PN $count_IN $count_OUT $expo_IN $expo_OUT $ratio $err | awk '{printf ("%2s   %5i  %4i   %3.1f  %3.1f   %1.3f  %1.3f \n", $1,$2,$3,$4/1000,$5/1000,$6,$7)}' >> temp0001
+
+    else
+
+      # Select the energy band and the region INSIDE the FOV
+      # with radius greater than 10 arcmin
+      evselect table=$pn expression='((FLAG & 0x10000) == 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=4)&&(!((DETX,DETY) IN circle(-2203.5,-1167.5,12000)))' filteredset='pn_clean_INfov.evt' destruct=yes keepfilteroutput=true
+      # Select the energy band and the region OUTSIDE the FOV
+      # excluding a lot of regions for different reasons
+      evselect table=$pn expression='((FLAG & 0x10000) != 0)&&(PI in ['$elo':'$ehi'])&&(PATTERN<=4)&&(!((DETX,DETY) IN circle(-2200,-1000,19000)))' filteredset='pn_clean_OUTfov.evt' destruct=yes keepfilteroutput=true
+
+      # produces the spectra for both regions
+      evselect table='pn_clean_INfov.evt' spectrumset='pn_INfov.pi' energycolumn='PI' spectralbinsize=80 specchannelmin=0 specchannelmax=20479
+      evselect table='pn_clean_OUTfov.evt' spectrumset='pn_OUTfov.pi' energycolumn='PI' spectralbinsize=80 specchannelmin=0 specchannelmax=20479
+
+      # counts the events in both regions btw (pn) and determines exposure times and areas
+      set count_IN = `fstatistic pn_INfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+      set count_OUT = `fstatistic pn_OUTfov.pi COUNTS rows="-" | grep sum | awk '{print int($8)}'`
+      set expo_IN = `fkeyprint pn_INfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+      set expo_OUT = `fkeyprint pn_OUTfov.pi+1 EXPOSURE | grep = | awk '{print (int($2))}'`
+      set area = '7.532'
+      set err_area = '0.096'
+      set ratio = `echo $count_IN $count_OUT $expo_IN $expo_OUT $area | awk '{print ($1/$2*$4/$3/$5)}'`
+      set err = `echo $count_IN $count_OUT $ratio $area $err_area | awk '{print $3*(sqrt(1/$1+1/$2+($5/$4)^2))}'`
+      echo PN $count_IN $count_OUT $expo_IN $expo_OUT $ratio $err | awk '{printf ("%2s   %5i  %4i   %3.1f  %3.1f   %1.3f  %1.3f \n", $1,$2,$3,$4/1000,$5/1000,$6,$7)}' >> temp0001
+
+    endif
+
+  endif
+endif
+
+# remove intermediate files?
+if ($keep == Y )then
+  echo "Keeping intermediate files..."
+else
+  echo "Removing intermediate files..."
+  rm -f m1_clean_INfov.evt m1_clean_OUTfov.evt m1_INfov.pi m1_OUTfov.pi
+  rm -f m2_clean_INfov.evt m2_clean_OUTfov.evt m2_INfov.pi m2_OUTfov.pi
+  rm -f pn_clean_INfov.evt pn_clean_OUTfov.evt pn_INfov.pi pn_OUTfov.pi
+endif
+
+# comments to ratios
+
+set nlines=`wc -l temp0001 | awk '{print $1}'`
+set nentries=`echo $nlines 2 | awk '{print $1 - $2}'`
+
+if (-e temp0002) rm -f temp0002
+echo '          COUNTS      EXP TIME    F(IN)/F(OUT)  FLAG' > temp0002
+echo '        IN     OUT    IN   OUT    RATIO   ERR' >> temp0002
+
+set t1 = 1.15 ; set t2 = 1.30 ; set t3 = 1.50
+
+set i=2
+while ($i != $nlines)
+  @ i = $i + 1
+  set line = `cat temp0001 | head -$i | tail -1`
+  set instr = `echo $line | awk '{print $1}'`
+  set cin = `echo $line | awk '{print $2}'`
+  set cout = `echo $line | awk '{print $3}'`
+  set ein = `echo $line | awk '{print $4}'`
+  set eout = `echo $line | awk '{print $5}'`
+  set ratio = `echo $line | awk '{print $6}'`
+  set err = `echo $line | awk '{print $7}'`
+
+  set r1 = `echo $ratio $t1 | awk '{print int($1/$2)}'`
+  set r2 = `echo $ratio $t2 | awk '{print int($1/$2)}'`
+  set r3 = `echo $ratio $t3 | awk '{print int($1/$2)}'`
+
+  set comm="extremely"
+  set comm2="3"
+
+  if ($r1 == 0) then
+    set comm="not"
+    set comm2="0"
+  endif
+  if ($r1 == 1 && $r2 == 0) then
+    set comm="slightly"
+    set comm2="1"
+  endif
+  if ($r2 == 1 && $r3 == 0) then
+    set comm="very"
+    set comm2="2"
+  endif
+  if ($r3 == 1) then
+    set comm="extremely"
+    set comm2="3"
+  endif
+
+
+  echo $instr $cin $cout $ein $eout $ratio $err $comm2 "File" "is" $comm "contaminated" | awk '{printf ("%2s   %6i  %5i   %3.1f  %3.1f   %1.3f  %1.3f %6s %2s %2s %2s %2s %2s %2s \n", $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)}' >> temp0002
+end
+
+echo ""
+cat temp0002
+echo ""
+
+if ($out != 'N') then
+  if (-e $out) rm -f $out
+  cp temp0002 $out
+endif
+
+rm -f temp0001 temp0002
+
+#----------
+
+exit
