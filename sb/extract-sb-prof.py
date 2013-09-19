@@ -236,8 +236,12 @@ if __name__ == '__main__':
         # r = arange(1.0, aper+1.0, 1.0)
 
         for i in xrange(len(r)-1):
-            ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))[0]
-            geometric_area = len(ids)      # [pix], total number of pix
+            # ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))[0]
+            # geometric_area = len(ids)      # [pix], total number of pix
+
+            ids = where((distmatrix < r[i+1]**2.0) & (distmatrix >= (r[i])**2.0))
+            geometric_area = len(ids[0])      # [pix], total number of pix
+
 
             ######################################################################
             # with ps (wps), area corrected
