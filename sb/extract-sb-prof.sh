@@ -34,14 +34,14 @@ dir=$1
 here=`pwd`
 cd $dir
 
-reduction_id="001"              # FIXME: add autonaming - see below
-elo="500"
-ehi="2000"
+reduction_id="001"          # analysis ID (if you have more versions)
+elo="500"                   # enrgy low band limit [eV]
+ehi="2000"                  # enrgy low band limit [eV]
 rmin=0.0                    # [pix]
 rmax=200.0                  # [pix]
-binning=1.0                 # either fixed-width bin, or "a11", "m13"
-# bg_type_id=".spl"               # "" - 2comp, ".spl" - spline
-bg_type_id=""               # "" - 2comp, ".spl" - spline
+binning=1.0                 # either fixed-width bin, or "a11", "m13" or implement your own
+  # bg_type_id=".spl"               # "" - 2comp, ".spl" - spline
+bg_type_id=""                # "" - 2comp, ".spl" - spline
 sb_dir=../sb                    # directory for the sb analysis relative to the analysis dir
 PLOT_CUMUL_PROF=1               # make a quick view plot?
 
