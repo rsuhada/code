@@ -8,7 +8,7 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LogLocator
 from scipy import optimize
 # from sb_utils import beta_model, beta_model_likelihood
 from sb_utils import arrays2minuit
-import minuit
+# import minuit  # this is deprecated
 import sb_plotting_utils
 
 

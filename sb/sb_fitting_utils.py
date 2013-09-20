@@ -62,7 +62,9 @@ def print_fit_diagnostics(result, delta_t=-1.0, ndata=None, leastsq_kws=None):
     print 'Diagnostics'
     print '='*70
 
-    print 'fit method    :: ', result.fitmethod
+    if hasattr(result, 'fitmethod'):
+        print 'fit method    :: ', result.fitmethod
+
     print 'nfev          :: ', result.nfev
     print 'message       :: ', result.message
 
@@ -365,13 +367,13 @@ def fit_beta_model_joint(r, sb_src, sb_src_err, instruments, theta, energy, resu
     if FIT_METHOD == 'leastsq':
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfev': int(1.0e+7)}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfev': 1.0e+9}
 
     if FIT_METHOD == 'simplex':
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+0} # debug set; quickest
         # leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+4} # debug set; some evol
-        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': 1.0e+7}
+        leastsq_kws={'xtol': 1.0e-7, 'ftol': 1.0e-7, 'maxfun': int(1.0e+7)}
         # leastsq_kws={'xtol': 1.0e-8, 'ftol': 1.0e-8, 'maxfun': 1.0e+9}
 
     ######################################################################

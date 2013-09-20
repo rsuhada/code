@@ -14,7 +14,7 @@ from scipy.signal import fftconvolve
 from scipy import delete
 from scipy import integrate
 from scipy.stats import poisson
-import minuit
+# import minuit       # its use has been deprecated
 import time
 
 def get_instrument_id(instrument):
